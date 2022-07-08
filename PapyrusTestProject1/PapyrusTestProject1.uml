@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_Ia8_gC_8EeycYKWgX5Thiw" name="PapyrusTestProject1">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_IoH40C_8EeycYKWgX5Thiw">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Interaction" xmi:id="_IePkEC_8EeycYKWgX5Thiw" name="Interaction1">
+    <lifeline xmi:type="uml:Lifeline" xmi:id="_MbQMMC_8EeycYKWgX5Thiw" name="Lifeline1"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Activity" xmi:id="_IjB9cC_8EeycYKWgX5Thiw" name="Activity2" specification="_BmaUIC_9EeycYKWgX5Thiw"/>
+  <packagedElement xmi:type="uml:Class" xmi:id="_YX49UC_8EeycYKWgX5Thiw" name="ACls">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_v_0Q4C_8EeycYKWgX5Thiw" name="bcls" type="_ZcBT0C_8EeycYKWgX5Thiw" association="_v_gH0C_8EeycYKWgX5Thiw">
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_v_2tIC_8EeycYKWgX5Thiw"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_v_3UMC_8EeycYKWgX5Thiw" value="1"/>
+    </ownedAttribute>
+    <ownedOperation xmi:type="uml:Operation" xmi:id="_BmaUIC_9EeycYKWgX5Thiw" name="FooOperation" method="_IjB9cC_8EeycYKWgX5Thiw"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Class" xmi:id="_ZcBT0C_8EeycYKWgX5Thiw" name="BCls"/>
+  <packagedElement xmi:type="uml:Association" xmi:id="_v_gH0C_8EeycYKWgX5Thiw" memberEnd="_v_0Q4C_8EeycYKWgX5Thiw _v_3UMS_8EeycYKWgX5Thiw">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_v_jyMC_8EeycYKWgX5Thiw" source="org.eclipse.papyrus">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_v_kZQC_8EeycYKWgX5Thiw" key="nature" value="UML_Nature"/>
+    </eAnnotations>
+    <ownedEnd xmi:type="uml:Property" xmi:id="_v_3UMS_8EeycYKWgX5Thiw" name="acls" type="_YX49UC_8EeycYKWgX5Thiw" association="_v_gH0C_8EeycYKWgX5Thiw"/>
+  </packagedElement>
+</uml:Model>

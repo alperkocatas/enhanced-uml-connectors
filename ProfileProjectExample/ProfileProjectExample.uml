@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SRMLNodes="http://ProfileProjectExample2.SimplifiedReqML/schemas/SRMLNodes/_Hxu1Fju9EeyDTJVUaq5cGg/2" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http://ProfileProjectExample2.SimplifiedReqML/schemas/SRMLNodes/_Hxu1Fju9EeyDTJVUaq5cGg/2 /ProfileProjectExample/ProfileProjectExample2.profile.uml#_Hxu1Fzu9EeyDTJVUaq5cGg">
+  <uml:Model xmi:id="_H-mW8Du-EeyDTJVUaq5cGg" name="ProfileProjectExample">
+    <packageImport xmi:type="uml:PackageImport" xmi:id="_IALEQDu-EeyDTJVUaq5cGg">
+      <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+    </packageImport>
+    <packagedElement xmi:type="uml:Class" xmi:id="_kJhUkDu-EeyDTJVUaq5cGg" name="Class6"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="_x4XDIDu-EeyDTJVUaq5cGg" name="Class7"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_8qAn0Du-EeyDTJVUaq5cGg" client="_kJhUkDu-EeyDTJVUaq5cGg" supplier="_x4XDIDu-EeyDTJVUaq5cGg"/>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_YJ0oYDu-EeyDTJVUaq5cGg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YJ0oYTu-EeyDTJVUaq5cGg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_Hxu1ETu9EeyDTJVUaq5cGg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_SxExIDu1EeyDTJVUaq5cGg"/>
+    </profileApplication>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_YJ1PcDu-EeyDTJVUaq5cGg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YJ1PcTu-EeyDTJVUaq5cGg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_Hxu1FDu9EeyDTJVUaq5cGg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_wTBWoDu2EeyDTJVUaq5cGg"/>
+    </profileApplication>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_YJ1Pcju-EeyDTJVUaq5cGg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YJ12gDu-EeyDTJVUaq5cGg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_Hxu1Fzu9EeyDTJVUaq5cGg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_bVvrcDu2EeyDTJVUaq5cGg"/>
+    </profileApplication>
+    <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_YJ12gTu-EeyDTJVUaq5cGg">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_YJ12gju-EeyDTJVUaq5cGg" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_Hx4mETu9EeyDTJVUaq5cGg"/>
+      </eAnnotations>
+      <appliedProfile xmi:type="uml:Profile" href="/ProfileProjectExample/ProfileProjectExample2.profile.uml#_smFK0Du2EeyDTJVUaq5cGg"/>
+    </profileApplication>
+  </uml:Model>
+  <SRMLNodes:Requirement xmi:id="_rC8qgDu-EeyDTJVUaq5cGg" base_Class="_kJhUkDu-EeyDTJVUaq5cGg"/>
+  <SRMLNodes:Requirement xmi:id="_ynPiYDu-EeyDTJVUaq5cGg" base_Class="_x4XDIDu-EeyDTJVUaq5cGg"/>
+</xmi:XMI>

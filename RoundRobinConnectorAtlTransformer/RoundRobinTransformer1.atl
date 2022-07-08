@@ -1,0 +1,30 @@
+-- @atlcompiler atl2006
+-- @nsURI UML=http://www.eclipse.org/uml2/2.1.0/UML
+module RoundRobinTransformer1;
+create OUT : UML refining IN : UML;
+
+rule Model {
+	from s: UML!Model 
+	to t:UML!Model
+}
+
+rule Class {
+	from s: UML!Class
+	to 
+	t: UML!Class ( 
+			name <- s.name
+	)	 
+}
+
+rule Port {
+	from s: UML!Port
+	to
+	t: UML!Port (
+		name <- s.name + 'M1Level'	
+	)
+}
+
+
+-- challenge: how do we identify a group of binary connectors which make up an n-ary connector?
+	-- alternative 1: use the dependency method
+	-- alternative 2: looking at connected group of ports, try to make an inference. Can it be done? 

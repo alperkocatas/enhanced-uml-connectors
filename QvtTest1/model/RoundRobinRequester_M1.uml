@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_PReF0JPdEeylaYbT_zyPXg" name="EnhancedConnectorsTest1">
+  <packageImport xmi:id="_PVC-QJPdEeylaYbT_zyPXg">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Class" xmi:id="_RWVgkJPdEeylaYbT_zyPXg" name="ECls">
+    <ownedAttribute xmi:id="_Dfl9wJPeEeylaYbT_zyPXg" name="a" type="_TTKZoJPdEeylaYbT_zyPXg">
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_FCcQkJPeEeylaYbT_zyPXg"/>
+      <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_E__ZgJPeEeylaYbT_zyPXg" value="*"/>
+    </ownedAttribute>
+    <ownedAttribute xmi:id="_SjHAQJPeEeylaYbT_zyPXg" name="b" type="_nLpnAJPdEeylaYbT_zyPXg"/>
+    <ownedAttribute xmi:id="_kFFpQJPeEeylaYbT_zyPXg" name="c" type="_pbVKoJPdEeylaYbT_zyPXg"/>
+    <ownedConnector xmi:id="_qDsVsJPeEeylaYbT_zyPXg" name="Connector7" contract="_310xEMYsEeyq_sNlgGY9og">
+      <end xmi:id="_qDsVsZPeEeylaYbT_zyPXg" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
+      <end xmi:id="_qDsVspPeEeylaYbT_zyPXg" partWithPort="_SjHAQJPeEeylaYbT_zyPXg" role="_dM9T0JPeEeylaYbT_zyPXg"/>
+    </ownedConnector>
+    <ownedConnector xmi:id="_qrwbQJPeEeylaYbT_zyPXg" name="Connector8">
+      <end xmi:id="_qrwbQZPeEeylaYbT_zyPXg" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
+      <end xmi:id="_qrwbQpPeEeylaYbT_zyPXg" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
+    </ownedConnector>
+    <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_SJJckJPoEeylaYbT_zyPXg" name="SelectProvider">
+      <language>JAVA</language>
+      <body>index = Random.NextInteger() % PRV_CNT</body>
+    </ownedBehavior>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="_TTKZoJPdEeylaYbT_zyPXg" name="ACls">
+      <ownedAttribute xmi:type="uml:Port" xmi:id="_THFQAJPeEeylaYbT_zyPXg" name="pA" type="_cJJbgJPgEeylaYbT_zyPXg" aggregation="composite"/>
+    </nestedClassifier>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="_nLpnAJPdEeylaYbT_zyPXg" name="BCls">
+      <ownedAttribute xmi:type="uml:Port" xmi:id="_dM9T0JPeEeylaYbT_zyPXg" name="pB" type="_f86dgJPfEeylaYbT_zyPXg" aggregation="composite"/>
+    </nestedClassifier>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="_pbVKoJPdEeylaYbT_zyPXg" name="CCls">
+      <ownedAttribute xmi:type="uml:Port" xmi:id="_mahPkJPeEeylaYbT_zyPXg" name="pC" type="_f86dgJPfEeylaYbT_zyPXg" aggregation="composite"/>
+    </nestedClassifier>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="_f86dgJPfEeylaYbT_zyPXg" name="ProviderPortType">
+      <interfaceRealization xmi:id="_p55EAJPfEeylaYbT_zyPXg" client="_f86dgJPfEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg" contract="_y7DX8JPeEeylaYbT_zyPXg"/>
+    </nestedClassifier>
+    <nestedClassifier xmi:type="uml:Class" xmi:id="_cJJbgJPgEeylaYbT_zyPXg" name="RequesterPortType"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Interface" xmi:id="_y7DX8JPeEeylaYbT_zyPXg" name="XIfc">
+    <ownedOperation xmi:id="_0ufrgJPeEeylaYbT_zyPXg" name="XOp" isAbstract="true">
+      <ownedParameter xmi:id="_8y9RMJPeEeylaYbT_zyPXg" name="arg">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      </ownedParameter>
+      <ownedParameter xmi:id="_X36FQJPfEeylaYbT_zyPXg" name="returnVal" direction="return">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+      </ownedParameter>
+    </ownedOperation>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Usage" xmi:id="_iEKBYJPgEeylaYbT_zyPXg" client="_cJJbgJPgEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg"/>
+  <packagedElement xmi:type="uml:Activity" xmi:id="_310xEMYsEeyq_sNlgGY9og" name="Activity6" node="_8c5p4MYsEeyq_sNlgGY9og _8_BfgMYsEeyq_sNlgGY9og _926w0MYsEeyq_sNlgGY9og">
+    <edge xmi:type="uml:ControlFlow" xmi:id="__OaIMMYsEeyq_sNlgGY9og" target="_8c5p4MYsEeyq_sNlgGY9og" source="_8_BfgMYsEeyq_sNlgGY9og"/>
+    <edge xmi:type="uml:ControlFlow" xmi:id="__32GwMYsEeyq_sNlgGY9og" target="_926w0MYsEeyq_sNlgGY9og" source="_8c5p4MYsEeyq_sNlgGY9og"/>
+    <node xmi:type="uml:OpaqueAction" xmi:id="_8c5p4MYsEeyq_sNlgGY9og" name="OpaqueAction1" incoming="__OaIMMYsEeyq_sNlgGY9og" outgoing="__32GwMYsEeyq_sNlgGY9og">
+      <language>Alf</language>
+      <body>// This will be the alf definition of an operation. We can have something like this:&#xD;
+&#xD;
+onRequest(args)&#xD;
+{&#xD;
+   Request(args, Index);&#xD;
+   Index = Index + 1;&#xD;
+   Index = Index % PRV_CNT;&#xD;
+   &#xD;
+}</body>
+    </node>
+    <node xmi:type="uml:InitialNode" xmi:id="_8_BfgMYsEeyq_sNlgGY9og" name="InitialNode2" outgoing="__OaIMMYsEeyq_sNlgGY9og"/>
+    <node xmi:type="uml:ActivityFinalNode" xmi:id="_926w0MYsEeyq_sNlgGY9og" name="ActivityFinalNode3" incoming="__32GwMYsEeyq_sNlgGY9og"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Dependency" xmi:id="_UuRjoP7DEeyQGOf8WZ7a2Q" client="_qDsVsJPeEeylaYbT_zyPXg" supplier="_qrwbQJPeEeylaYbT_zyPXg"/>
+</uml:Model>
