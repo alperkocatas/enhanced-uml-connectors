@@ -81,6 +81,17 @@ mapping Class :: Class2Class() : Class  when {not self.oclIsKindOf(Behavior) and
 	}
 }
 
+
+
+// Map the activity which defines the connector behavior into a method 
+// of the connector class. 
+
+//mapping Activity::ConnectorBehaviorActivity2LowerLevelMode():Activity
+//{
+//		
+//}
+//
+
 mapping Class :: PlainClass2Class() : Class  when {not self.oclIsKindOf(Behavior) and self.IsPlainClass()} {
 
 	init {
@@ -95,6 +106,7 @@ mapping Class :: PlainClass2Class() : Class  when {not self.oclIsKindOf(Behavior
 		endLog(self.name);
 	}
 }
+
 
 query Class::IsPlainClass() : Boolean =
 	self.nestedClassifier->size() = 0 and self.ownedPort->size() = 0;
@@ -188,6 +200,24 @@ constructor Connector::Connector(nameArg: String, port1: Port, partWithPort1: Pr
 	_end += new ConnectorEnd(port2, partWithPort2);	
 }
 
+constructor Operation::Operation(otherOperation: Operation) {
+	name := otherOperation.name;
+	
+	otherOperation.ownedParameter->forEach(otherParam) {
+		var newParam = new Parameter(otherParam);
+		ownedParameter += newParam; 
+	}
+}
+
+constructor Parameter::Parameter(otherParam: Parameter) {
+	name := otherParam.name;
+	
+	// TODO:  If type is not a primitive type, 
+	// this might require a deeper resolve operation. 
+	type := otherParam.type;
+}
+
+
 // Map primary connector to connector class and its object? 
 mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : Class) : Class 
 	when {self.isPrimaryEnhancedConnector()} {
@@ -269,6 +299,18 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 												providingPortTarget, providingPartTarget); 
 	ownerClass.ownedConnector += prvEndCon;
 	
+	// Implement interface operation
+	// TODO: This is also specific: assumes that there are only one operation defined in the 
+	// interface. 
+	var theInterface : Interface = providingPort.provided->asSequence()->at(1);
+	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
+	
+	var newOperation : Operation = new Operation(theOperation);
+	ownedOperation += newOperation;
+	
+	
+	
+	
 	// Now, let's check if there are any dependencies from this primary enhanced connector to 
 	// a secondary enhanced connector. 
 	
@@ -321,12 +363,103 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 				
 			}
 		}
-	}
+	};
+	
+	
+	// Map the activity which defines the connector behavior into a method 
+	// of the connector class and its attributes, to attributes of the connector class. 
+	
+	// Let's locate the "contract" of the primarh enhanced connector first: 
+	var connectorBehaviorActivity : Activity = self.contract->oclAsType(Activity)->asSequence()->at(1);
+	
+	// Foreach property of the activity, create an attribute in the connector class
+	connectorBehaviorActivity.ownedAttribute->forEach(p) {
+	
+		var newProperty : Property = new Property(p.name);
+		// TODO: make sure type of the property is a primitive type, 
+		// otherwise, this will require a deeper copy.
+		newProperty.type := p.type;
+		ownedAttribute += newProperty;
+	};
+	
+	
+	// transfer rest of the activity as is, which is supposed to include:
+	// - Initial node 
+	// - Opaque action
+	// - Final node
+	// - Transitions in between
+	//  
+	
+	// now, what is the proper way to copy these model elements? 
+	// first, let's create the initial node, opaque action and the activity final. 
+	// then, let's provide these as input and create control flows in between. 
+	// but.. that will also be a bit specific.. But.. that specificity is not expected
+	// to hurt theory, since this activity structure is the way we define connector
+	// behavior activities.. so.. let's just do it the specific way. Indeed, we can create
+	// the elements even without looking at the source model, maybe? 
+	
+	var newConnectorBehaviorActivity : Activity = new Activity(connectorBehaviorActivity.name);
+	newConnectorBehaviorActivity.visibility := VisibilityKind::package;
+	
+	
+	// Find the opaque action inside the activity and create a copy of it 
+	var opaqueAction : OpaqueAction := 
+		connectorBehaviorActivity.ownedElement->select(oa | oa.oclIsKindOf(OpaqueAction))
+			->oclAsType(OpaqueAction)->asSequence()->at(1);
+	assert fatal(opaqueAction <> null) with log("No OpaqueAction was found under connector behavior");
+	var newOpaqueAction : OpaqueAction = new OpaqueAction(opaqueAction);
+	newConnectorBehaviorActivity.ownedNode += newOpaqueAction;
+	
+	
+	// create initial node and final nodes
+	var newInitialNode : InitialNode = new InitialNode("initialNode");
+	newConnectorBehaviorActivity.ownedNode += newInitialNode;
+	
+	var newActivityFinalNode : ActivityFinalNode = new ActivityFinalNode("finalNode");
+	newConnectorBehaviorActivity.ownedNode += newActivityFinalNode;
+	
+	// create control flows between initial node, opaque action and activity final nodes:
+	var controlFlow1 : ControlFlow = new ControlFlow(newInitialNode, newOpaqueAction);
+	newConnectorBehaviorActivity.edge += controlFlow1;
+	var controlFlow2 : ControlFlow = new ControlFlow(newOpaqueAction, newActivityFinalNode);
+	newConnectorBehaviorActivity.edge += controlFlow2;
+	
+	ownedBehavior += newConnectorBehaviorActivity;
+	
+	newOperation.method += newConnectorBehaviorActivity;
 	
 	end {
 		endLog(self.name);
 	}
 }
+
+
+// Create a new activity using the connector behavior activity
+constructor Activity::Activity(nameArg: String) {
+	name := nameArg;
+	
+}
+
+constructor OpaqueAction ::OpaqueAction(otherOpaqueAction: OpaqueAction) {
+	name := otherOpaqueAction.name;
+	body := otherOpaqueAction.body;
+}
+
+constructor InitialNode:: InitialNode(argName : String) {
+	name := argName;
+}
+
+constructor ActivityFinalNode :: ActivityFinalNode(argName : String) {
+	name := argName;
+}
+
+constructor ControlFlow :: ControlFlow(sourceArg : ActivityNode, targetArg : ActivityNode) {
+	source := sourceArg;
+	target := targetArg; 
+}
+
+
+
 
 // check if connector has two ends, 
 // and both ends are connected to ports 

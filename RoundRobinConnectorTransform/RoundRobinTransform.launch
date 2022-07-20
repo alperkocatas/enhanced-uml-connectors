@@ -12,11 +12,11 @@
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.featureName1" value=""/>
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.featureName2" value=""/>
     <booleanAttribute key="org.eclipse.m2m.qvt.oml.interpreter.isInrementalUpdate" value="false"/>
-    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.module" value="platform:/resource/QvtTest1/transforms/RoundRobinTransform.qvto"/>
-    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetModel1" value="platform:/resource/RoundRobinConnectorTransform/model/RoundRobinRequester_M1.uml"/>
-    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetModel2" value="platform:/resource/RoundRobinConnectorTransform/model/RoundRobinRequester_M1_Target_01.uml"/>
+    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.module" value="platform:/resource/org.ec.transform.qvto/transforms/RoundRobinTransform.qvto"/>
+    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetModel1" value="platform:/resource/org.ec.connectors/RoundRobinRequesterQvto/RoundRobinRequester_M1.uml"/>
+    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetModel2" value="platform:/resource/org.ec.connectors/RoundRobinRequesterQvto/RoundRobinRequester_M2.uml"/>
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetType1" value="NEW_MODEL"/>
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetType2" value="NEW_MODEL"/>
-    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.traceFile" value="platform:/resource/RoundRobinConnectorTransform/model/RoundRobinRequester_M1_Target_01.RoundRobinTransform.qvtotrace"/>
+    <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.traceFile" value="platform:/resource/org.ec.connectors/RoundRobinRequesterQvto/RoundRobinRequester_M2.RoundRobinTransform.qvtotrace"/>
     <booleanAttribute key="org.eclipse.m2m.qvt.oml.interpreter.useTraceFile" value="false"/>
 </launchConfiguration>

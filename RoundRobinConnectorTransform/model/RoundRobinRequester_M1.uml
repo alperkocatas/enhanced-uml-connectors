@@ -18,9 +18,26 @@
       <end xmi:id="_qrwbQZPeEeylaYbT_zyPXg" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
       <end xmi:id="_qrwbQpPeEeylaYbT_zyPXg" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
     </ownedConnector>
-    <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_SJJckJPoEeylaYbT_zyPXg" name="SelectProvider">
-      <language>JAVA</language>
-      <body>index = Random.NextInteger() % PRV_CNT</body>
+    <ownedBehavior xmi:type="uml:Activity" xmi:id="_310xEMYsEeyq_sNlgGY9og" name="RoundRobinConnectorBehavior" node="_8c5p4MYsEeyq_sNlgGY9og _8_BfgMYsEeyq_sNlgGY9og _926w0MYsEeyq_sNlgGY9og">
+      <ownedAttribute xmi:id="_X9X5cAaxEe2NE5tIKcyisg" name="Index">
+        <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EInt"/>
+      </ownedAttribute>
+      <edge xmi:type="uml:ControlFlow" xmi:id="__OaIMMYsEeyq_sNlgGY9og" target="_8c5p4MYsEeyq_sNlgGY9og" source="_8_BfgMYsEeyq_sNlgGY9og"/>
+      <edge xmi:type="uml:ControlFlow" xmi:id="__32GwMYsEeyq_sNlgGY9og" target="_926w0MYsEeyq_sNlgGY9og" source="_8c5p4MYsEeyq_sNlgGY9og"/>
+      <node xmi:type="uml:OpaqueAction" xmi:id="_8c5p4MYsEeyq_sNlgGY9og" name="ConnectorBehaviorOpaqueAction" incoming="__OaIMMYsEeyq_sNlgGY9og" outgoing="__32GwMYsEeyq_sNlgGY9og">
+        <language>Alf</language>
+        <body>// This will be the alf definition of an operation. We can have something like this:&#xD;
+&#xD;
+onRequest(args)&#xD;
+{&#xD;
+   Request(args, Index);&#xD;
+   Index = Index + 1;&#xD;
+   Index = Index % PRV_CNT;&#xD;
+   &#xD;
+}</body>
+      </node>
+      <node xmi:type="uml:InitialNode" xmi:id="_8_BfgMYsEeyq_sNlgGY9og" name="InitialNode2" outgoing="__OaIMMYsEeyq_sNlgGY9og"/>
+      <node xmi:type="uml:ActivityFinalNode" xmi:id="_926w0MYsEeyq_sNlgGY9og" name="ActivityFinalNode3" incoming="__32GwMYsEeyq_sNlgGY9og"/>
     </ownedBehavior>
     <nestedClassifier xmi:type="uml:Class" xmi:id="_TTKZoJPdEeylaYbT_zyPXg" name="ACls">
       <ownedAttribute xmi:type="uml:Port" xmi:id="_THFQAJPeEeylaYbT_zyPXg" name="pA" type="_cJJbgJPgEeylaYbT_zyPXg" aggregation="composite"/>
@@ -47,23 +64,5 @@
     </ownedOperation>
   </packagedElement>
   <packagedElement xmi:type="uml:Usage" xmi:id="_iEKBYJPgEeylaYbT_zyPXg" client="_cJJbgJPgEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg"/>
-  <packagedElement xmi:type="uml:Activity" xmi:id="_310xEMYsEeyq_sNlgGY9og" name="Activity6" node="_8c5p4MYsEeyq_sNlgGY9og _8_BfgMYsEeyq_sNlgGY9og _926w0MYsEeyq_sNlgGY9og">
-    <edge xmi:type="uml:ControlFlow" xmi:id="__OaIMMYsEeyq_sNlgGY9og" target="_8c5p4MYsEeyq_sNlgGY9og" source="_8_BfgMYsEeyq_sNlgGY9og"/>
-    <edge xmi:type="uml:ControlFlow" xmi:id="__32GwMYsEeyq_sNlgGY9og" target="_926w0MYsEeyq_sNlgGY9og" source="_8c5p4MYsEeyq_sNlgGY9og"/>
-    <node xmi:type="uml:OpaqueAction" xmi:id="_8c5p4MYsEeyq_sNlgGY9og" name="OpaqueAction1" incoming="__OaIMMYsEeyq_sNlgGY9og" outgoing="__32GwMYsEeyq_sNlgGY9og">
-      <language>Alf</language>
-      <body>// This will be the alf definition of an operation. We can have something like this:&#xD;
-&#xD;
-onRequest(args)&#xD;
-{&#xD;
-   Request(args, Index);&#xD;
-   Index = Index + 1;&#xD;
-   Index = Index % PRV_CNT;&#xD;
-   &#xD;
-}</body>
-    </node>
-    <node xmi:type="uml:InitialNode" xmi:id="_8_BfgMYsEeyq_sNlgGY9og" name="InitialNode2" outgoing="__OaIMMYsEeyq_sNlgGY9og"/>
-    <node xmi:type="uml:ActivityFinalNode" xmi:id="_926w0MYsEeyq_sNlgGY9og" name="ActivityFinalNode3" incoming="__32GwMYsEeyq_sNlgGY9og"/>
-  </packagedElement>
   <packagedElement xmi:type="uml:Dependency" xmi:id="_UuRjoP7DEeyQGOf8WZ7a2Q" client="_qDsVsJPeEeylaYbT_zyPXg" supplier="_qrwbQJPeEeylaYbT_zyPXg"/>
 </uml:Model>

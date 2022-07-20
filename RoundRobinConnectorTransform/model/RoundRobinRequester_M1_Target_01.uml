@@ -1,68 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML">
-  <uml:Model xmi:id="_tiXacP7mEeykX_W686Zsdw" name="EnhancedConnectorsTest1">
-    <packageImport xmi:id="_tiYBgP7mEeykX_W686Zsdw">
+  <uml:Model xmi:id="_IpAMIP-NEeyYN9T4mQKmwQ" name="EnhancedConnectorsTest1">
+    <packageImport xmi:id="_IpAMIf-NEeyYN9T4mQKmwQ">
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
     </packageImport>
-    <packagedElement xmi:type="uml:Interface" xmi:id="_tiYBgf7mEeykX_W686Zsdw" name="XIfc">
-      <ownedOperation xmi:id="_tiYBgv7mEeykX_W686Zsdw" name="XOp" isAbstract="true">
-        <ownedParameter xmi:id="_tiYBg_7mEeykX_W686Zsdw" name="arg">
+    <packagedElement xmi:type="uml:Interface" xmi:id="_IpAMIv-NEeyYN9T4mQKmwQ" name="XIfc">
+      <ownedOperation xmi:id="_IpAMI_-NEeyYN9T4mQKmwQ" name="XOp" isAbstract="true">
+        <ownedParameter xmi:id="_IpAMJP-NEeyYN9T4mQKmwQ" name="arg">
           <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
         </ownedParameter>
-        <ownedParameter xmi:id="_tiYBhP7mEeykX_W686Zsdw" name="returnVal" direction="return">
+        <ownedParameter xmi:id="_IpAMJf-NEeyYN9T4mQKmwQ" name="returnVal" direction="return">
           <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
         </ownedParameter>
       </ownedOperation>
     </packagedElement>
-    <packagedElement xmi:type="uml:Class" xmi:id="_tiYBhf7mEeykX_W686Zsdw" name="ECls">
-      <ownedAttribute xmi:id="_tiYBhv7mEeykX_W686Zsdw" name="a" type="_tiYBnf7mEeykX_W686Zsdw">
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_tiYBh_7mEeykX_W686Zsdw"/>
-        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_tiYBiP7mEeykX_W686Zsdw" value="*"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="_IpAMJv-NEeyYN9T4mQKmwQ" name="ECls">
+      <ownedAttribute xmi:id="_IpAMJ_-NEeyYN9T4mQKmwQ" name="a" type="_IpAMPv-NEeyYN9T4mQKmwQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IpAMKP-NEeyYN9T4mQKmwQ"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_IpAMKf-NEeyYN9T4mQKmwQ" value="*"/>
       </ownedAttribute>
-      <ownedAttribute xmi:id="_tiYBif7mEeykX_W686Zsdw" name="b" type="_tiYBn_7mEeykX_W686Zsdw">
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_tiYBiv7mEeykX_W686Zsdw" value="1"/>
-        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_tiYBi_7mEeykX_W686Zsdw" value="1"/>
+      <ownedAttribute xmi:id="_IpAMKv-NEeyYN9T4mQKmwQ" name="b" type="_IpAMQP-NEeyYN9T4mQKmwQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IpAMK_-NEeyYN9T4mQKmwQ" value="1"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_IpAMLP-NEeyYN9T4mQKmwQ" value="1"/>
       </ownedAttribute>
-      <ownedAttribute xmi:id="_tiYBjP7mEeykX_W686Zsdw" name="c" type="_tiYBof7mEeykX_W686Zsdw">
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_tiYBjf7mEeykX_W686Zsdw" value="1"/>
-        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_tiYBjv7mEeykX_W686Zsdw" value="1"/>
+      <ownedAttribute xmi:id="_IpAMLf-NEeyYN9T4mQKmwQ" name="c" type="_IpAMQv-NEeyYN9T4mQKmwQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IpAMLv-NEeyYN9T4mQKmwQ" value="1"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_IpAML_-NEeyYN9T4mQKmwQ" value="1"/>
       </ownedAttribute>
-      <ownedAttribute xmi:id="_tiYBj_7mEeykX_W686Zsdw" name="ConnectorObj" type="_tiYBo_7mEeykX_W686Zsdw">
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_tiYBkP7mEeykX_W686Zsdw" value="1"/>
-        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_tiYBkf7mEeykX_W686Zsdw" value="1"/>
+      <ownedAttribute xmi:id="_IpAMMP-NEeyYN9T4mQKmwQ" name="ConnectorObj" type="_IpAMRP-NEeyYN9T4mQKmwQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IpAMMf-NEeyYN9T4mQKmwQ" value="1"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_IpAMMv-NEeyYN9T4mQKmwQ" value="1"/>
       </ownedAttribute>
-      <ownedConnector xmi:id="_tiYBkv7mEeykX_W686Zsdw" name="Connector7_reqEndCon">
-        <end xmi:id="_tiYBk_7mEeykX_W686Zsdw" partWithPort="_tiYBhv7mEeykX_W686Zsdw" role="_tiYBnv7mEeykX_W686Zsdw"/>
-        <end xmi:id="_tiYBlP7mEeykX_W686Zsdw" partWithPort="_tiYBj_7mEeykX_W686Zsdw" role="_tiYBpP7mEeykX_W686Zsdw"/>
+      <ownedConnector xmi:id="_IpAMM_-NEeyYN9T4mQKmwQ" name="Connector7_reqEndCon">
+        <end xmi:id="_IpAMNP-NEeyYN9T4mQKmwQ" partWithPort="_IpAMJ_-NEeyYN9T4mQKmwQ" role="_IpAMP_-NEeyYN9T4mQKmwQ"/>
+        <end xmi:id="_IpAMNf-NEeyYN9T4mQKmwQ" partWithPort="_IpAMMP-NEeyYN9T4mQKmwQ" role="_IpAMRf-NEeyYN9T4mQKmwQ"/>
       </ownedConnector>
-      <ownedConnector xmi:id="_tiYBlf7mEeykX_W686Zsdw" name="Connector7_prvEndCon">
-        <end xmi:id="_tiYBlv7mEeykX_W686Zsdw" partWithPort="_tiYBj_7mEeykX_W686Zsdw" role="_tiYBpf7mEeykX_W686Zsdw"/>
-        <end xmi:id="_tiYBl_7mEeykX_W686Zsdw" partWithPort="_tiYBif7mEeykX_W686Zsdw" role="_tiYBoP7mEeykX_W686Zsdw"/>
+      <ownedConnector xmi:id="_IpAMNv-NEeyYN9T4mQKmwQ" name="Connector7_prvEndCon">
+        <end xmi:id="_IpAMN_-NEeyYN9T4mQKmwQ" partWithPort="_IpAMMP-NEeyYN9T4mQKmwQ" role="_IpAMRv-NEeyYN9T4mQKmwQ"/>
+        <end xmi:id="_IpAMOP-NEeyYN9T4mQKmwQ" partWithPort="_IpAMKv-NEeyYN9T4mQKmwQ" role="_IpAMQf-NEeyYN9T4mQKmwQ"/>
       </ownedConnector>
-      <ownedConnector xmi:id="_tiYBmP7mEeykX_W686Zsdw" name="Connector8_prvEndCon">
-        <end xmi:id="_tiYBmf7mEeykX_W686Zsdw" partWithPort="_tiYBj_7mEeykX_W686Zsdw" role="_tiYBpf7mEeykX_W686Zsdw"/>
-        <end xmi:id="_tiYBmv7mEeykX_W686Zsdw" partWithPort="_tiYBjP7mEeykX_W686Zsdw" role="_tiYBov7mEeykX_W686Zsdw"/>
+      <ownedConnector xmi:id="_IpAMOf-NEeyYN9T4mQKmwQ" name="Connector8_prvEndCon">
+        <end xmi:id="_IpAMOv-NEeyYN9T4mQKmwQ" partWithPort="_IpAMMP-NEeyYN9T4mQKmwQ" role="_IpAMRv-NEeyYN9T4mQKmwQ"/>
+        <end xmi:id="_IpAMO_-NEeyYN9T4mQKmwQ" partWithPort="_IpAMLf-NEeyYN9T4mQKmwQ" role="_IpAMQ_-NEeyYN9T4mQKmwQ"/>
       </ownedConnector>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBm_7mEeykX_W686Zsdw" name="ProviderPortType"/>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBnP7mEeykX_W686Zsdw" name="RequesterPortType"/>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBnf7mEeykX_W686Zsdw" name="ACls">
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_tiYBnv7mEeykX_W686Zsdw" name="pA" type="_tiYBnP7mEeykX_W686Zsdw" aggregation="composite"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMPP-NEeyYN9T4mQKmwQ" name="ProviderPortType"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMPf-NEeyYN9T4mQKmwQ" name="RequesterPortType"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMPv-NEeyYN9T4mQKmwQ" name="ACls">
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_IpAMP_-NEeyYN9T4mQKmwQ" name="pA" type="_IpAMPf-NEeyYN9T4mQKmwQ" aggregation="composite"/>
       </nestedClassifier>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBn_7mEeykX_W686Zsdw" name="BCls">
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_tiYBoP7mEeykX_W686Zsdw" name="pB" type="_tiYBm_7mEeykX_W686Zsdw" aggregation="composite"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMQP-NEeyYN9T4mQKmwQ" name="BCls">
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_IpAMQf-NEeyYN9T4mQKmwQ" name="pB" type="_IpAMPP-NEeyYN9T4mQKmwQ" aggregation="composite"/>
       </nestedClassifier>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBof7mEeykX_W686Zsdw" name="CCls">
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_tiYBov7mEeykX_W686Zsdw" name="pC" type="_tiYBm_7mEeykX_W686Zsdw" aggregation="composite"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMQv-NEeyYN9T4mQKmwQ" name="CCls">
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_IpAMQ_-NEeyYN9T4mQKmwQ" name="pC" type="_IpAMPP-NEeyYN9T4mQKmwQ" aggregation="composite"/>
       </nestedClassifier>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_tiYBo_7mEeykX_W686Zsdw" name="ConnectorCls">
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_tiYBpP7mEeykX_W686Zsdw" name="prvPort" type="_tiYBm_7mEeykX_W686Zsdw"/>
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_tiYBpf7mEeykX_W686Zsdw" name="reqPort" type="_tiYBnP7mEeykX_W686Zsdw">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_tiYBpv7mEeykX_W686Zsdw" value="2"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_tiYBp_7mEeykX_W686Zsdw" value="2"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_IpAMRP-NEeyYN9T4mQKmwQ" name="ConnectorCls">
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_IpAMRf-NEeyYN9T4mQKmwQ" name="prvPort" type="_IpAMPP-NEeyYN9T4mQKmwQ"/>
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_IpAMRv-NEeyYN9T4mQKmwQ" name="reqPort" type="_IpAMPf-NEeyYN9T4mQKmwQ">
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_IpAMR_-NEeyYN9T4mQKmwQ" value="2"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_IpAMSP-NEeyYN9T4mQKmwQ" value="2"/>
         </ownedAttribute>
+        <ownedOperation xmi:id="_IpAMSf-NEeyYN9T4mQKmwQ" name="XOp">
+          <ownedParameter xmi:id="_IpAMSv-NEeyYN9T4mQKmwQ" name="arg">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+          </ownedParameter>
+          <ownedParameter xmi:id="_IpAMS_-NEeyYN9T4mQKmwQ" name="returnVal">
+            <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
+          </ownedParameter>
+        </ownedOperation>
       </nestedClassifier>
     </packagedElement>
-    <packagedElement xmi:type="uml:Usage" xmi:id="_tiYBqP7mEeykX_W686Zsdw" supplier="_tiYBgf7mEeykX_W686Zsdw"/>
+    <packagedElement xmi:type="uml:Usage" xmi:id="_IpAMTP-NEeyYN9T4mQKmwQ" supplier="_IpAMIv-NEeyYN9T4mQKmwQ"/>
   </uml:Model>
-  <uml:InterfaceRealization xmi:id="_tiYBqf7mEeykX_W686Zsdw" supplier="_tiYBgf7mEeykX_W686Zsdw" contract="_tiYBgf7mEeykX_W686Zsdw"/>
+  <uml:InterfaceRealization xmi:id="_IpAzMP-NEeyYN9T4mQKmwQ" supplier="_IpAMIv-NEeyYN9T4mQKmwQ" contract="_IpAMIv-NEeyYN9T4mQKmwQ"/>
 </xmi:XMI>
