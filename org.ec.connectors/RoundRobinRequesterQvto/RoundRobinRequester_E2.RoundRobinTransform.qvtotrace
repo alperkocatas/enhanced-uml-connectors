@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trace:Trace xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:trace="http:///www.eclipse.org/m2m/qvt/operational/trace.ecore">
+  <traceRecords>
+    <mappingOperation name="Model2Model" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Model">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_PReF0JPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Model">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdQAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="PkgImport2PkgImport" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="PackageImport">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_PVC-QJPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="PackageImport">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdQQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Interface2Interface" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Interface">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_y7DX8JPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Interface">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdQgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Operation2Operation" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Operation">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_0ufrgJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Operation">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdQwm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="OwnedParameter2OwnedParameter" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Parameter">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_8y9RMJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Parameter">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdRAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="OwnedParameter2OwnedParameter" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Parameter">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_X36FQJPfEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Parameter">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdRQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Class2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_RWVgkJPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdRgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="PlainClass2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_f86dgJPfEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdXAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="InterfaceRealization2InterfaceRealization" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="InterfaceRealization">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_p55EAJPfEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="InterfaceRealization">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgddQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="PlainClass2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_cJJbgJPgEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdXQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Class2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_TTKZoJPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdXgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Port2Port" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_THFQAJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdXwm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Class2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_nLpnAJPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdYAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Port2Port" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_dM9T0JPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdYQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Class2Class" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_pbVKoJPdEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdYgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Port2Port" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_mahPkJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Port">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdYwm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Property2Property" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_Dfl9wJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdRwm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Property2Property" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_SjHAQJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdSgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Property2Property" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_kFFpQJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Property">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdTQm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="EnhancedPrimaryConnector2ConnectorClass" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Connector">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_qDsVsJPeEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters>
+      <parameters kind="INOUT" name="ownerClass" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdRgm8Ee2CnKZQJxFebw"/>
+        </value>
+      </parameters>
+    </parameters>
+    <result>
+      <result kind="OUT" name="result" type="Class">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgdZAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+  <traceRecords>
+    <mappingOperation name="Usage2Usage" package="RoundRobinTransform" module="RoundRobinTransform"/>
+    <context>
+      <context name="self" type="Usage">
+        <value>
+          <modelElement href="RoundRobinRequester_E1.uml#_iEKBYJPgEeylaYbT_zyPXg"/>
+        </value>
+      </context>
+    </context>
+    <parameters/>
+    <result>
+      <result kind="OUT" name="result" type="Usage">
+        <value>
+          <modelElement href="RoundRobinRequester_E2.uml#_jTgddAm8Ee2CnKZQJxFebw"/>
+        </value>
+      </result>
+    </result>
+  </traceRecords>
+</trace:Trace>

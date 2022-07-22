@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.ec.transform.java
+Bundle-SymbolicName: org.ec.transform.java
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: Require.Bundle.org.eclipse.uml2.uml.bundle.version.5.5.0.6.0.0.org.eclipse.uml2.uml.resources.bundle.version.5.5.0.6.0.0.Automatic.Module.Name.org.ec.transform.java
+Bundle-RequiredExecutionEnvironment: JavaSE-16
+Require-Bundle: org.eclipse.uml2.uml;bundle-version="[5.5.0,6.0.0)",
+ org.eclipse.uml2.uml.resources;bundle-version="[5.5.0,6.0.0)"

@@ -1,0 +1,388 @@
+modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
+
+
+// The plan is to take as input two uml models, and output another uml model 
+transformation E2toE3TransformationTest1(inout e2Model:uml, in fUmlModel:uml);
+
+configuration property LogIndentLevel : Integer;
+
+main() {
+	LogIndentLevel := 0;
+	log('In Main ');
+
+	
+	// can we just write a huge helper function which will do all the manipulation? 
+	doTheThing();	
+}
+
+
+helper doTheThing()  {
+
+	var arg : String := e2Model.rootObjects()[Model].name->asSequence()->at(1);
+	
+	log("got this in the e2Model: " + arg);
+	
+	var arg2 : String := fUmlModel.rootObjects()[Model].name->asSequence()->at(1);
+	log("got this in the fUmlModel: " + arg2);
+
+	// ok now, can we just iterate over the fUML model to find our method? 
+	// pseudo code could be something like this:
+	
+	
+	// find the parent model element in fUML model, 
+	// find the package with a specific name (PortModel6_RoundRobinConnector), 
+	// find the ConnectorCls, and under that, find the activity which does not have the 
+	//    name ConnectorCls, destroy etc. but with a real name, like xOp. 
+	//    
+	
+	// find the parent model element, then package, then ECls.. and connectorcls, 
+	// and everything.. I mean, specific... then try to move the activity inside 
+	// the connectorcls. 
+	
+	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
+	
+	var fUmlPkg : Package := fUmlModel.packagedElement
+		->select(name = "PortModel6_RoundRobinConnector")
+		->oclAsType(Package)->asSequence()->at(1);
+						      
+	var fUmlConCls : Class := fUmlPkg.packagedElement
+		->select(name = "ConnectorCls")
+		->oclAsType(Class)->asSequence()->at(1);
+								
+	var fUmlConnectorBehaviorActivity : Activity := fUmlConCls.ownedBehavior
+		->select(name = "xOp$method$1")
+		->oclAsType(Activity)->asSequence()->at(1);
+													
+	var fUmlIndexProperty : Property := fUmlConCls.ownedAttribute
+		->select(name = "Index")
+		->oclAsType(Property)->asSequence()->at(1);
+	
+	// now, let's locate the connector class inside the e2 model: 
+	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
+	
+	var e2ContainerCls : Class := e2ModelElt.packagedElement
+		->select(name = "ECls")
+		->oclAsType(Class)->asSequence()->at(1);
+		
+		
+	var e2ConCls : Class := e2ContainerCls.nestedClassifier
+		->select(name = "ConnectorCls")->oclAsType(Class)->asSequence()->at(1);
+	
+	var e2xOp : Operation := e2ConCls.ownedOperation->select(name = "xOp")
+		->oclAsType(Operation)->asSequence()->at(1);
+	
+	var e2xIfc : Interface := e2ModelElt.packagedElement
+		->select(name = "XIfc")->oclAsType(Interface)->asSequence()->at(1);
+		
+	// ok, now, we have references to the activity in the fUML and the ConnectorCls 
+	// in the e2Model. 
+	
+	var newActivity: Activity = fUmlConnectorBehaviorActivity[Activity]
+		->deepclone()->asSequence()->at(1);
+	
+	
+	// How do we change the references to the Index attribute for example? 
+	// can we just grab a reference of it and query its relations/references?
+	var s : Set(Relationship) := fUmlIndexProperty.getRelationships();
+	// above reveals to an empty set...
+	// what were we expecting really? Well.. maybe some other model element 
+	// which refers to this, right? 
+	// but those kind of relations, if they are unidirectional, this object 
+	// will not be aware of the relation. 
+	
+	
+	// there could be different approaches: 
+	// 1 - we could just know what to look for. For example, if we find any 
+	// reference to the Index variable within the activity, we could record it, 
+	// we could compare the fUML activity and the copied activity, and for 
+	// the mismatches, try to resolve things. 
+	// But... indeed there are only some "kind" of things to look for:
+	// - The ConnectorCls, 
+	// - The XOp operation, 
+	// - Attributes used by the activity (Index, buffers etc)
+	// - The interface pointer array (ItsXIfc)
+	// The attributes should really be easy to spot. But the problem is: 
+	// how do we know where these attributes are referenced
+	// from inside the activity? 
+	// For example: Index is the structuralFeature of many elements. It 
+	// is not used else where. Elements are like ReadStructuralFeature, 
+	//     ClearStructuralFeature and such. 
+	// ItsXIfc? it is also referred only from a single structuralFeature of 
+	// a ReadStructuralFeatureAction, 
+	// ConnectorCls? Only acts as "type" of elements inside the activity, 
+	// XOp operation? In the "specification" of the activity, and operation 
+	// field of a CallOperationAction.  
+	// 
+	// Ok, now, does that mean anything? can we iterate through whole activity 
+	// and fill these fields? 
+	// Or.. if we don't fill them, what happens? (answer: model opens fine, but 
+	// those fields are empty)
+	
+	// Now, it is very strange that the CallOperationAction retains the "operation 
+	// field as a reference to the alf output model, 
+	// but specification field of the activity has not been retained.
+	// looking at more detail. looks like XIfc type references are also retained. 
+	// 
+	// Ok, we can see what has been retained by looking at the xml file. let's think
+	// of ways for localizing these references tomorrow. 
+	// So, here, it looks like Qvto is doing something clever to retain the references
+	// to the original model. 
+	
+	e2ConCls.ownedBehavior += newActivity;
+	
+	
+	// Delete existing method of e2xOp;
+	if (e2xOp.method != null)
+	{
+		e2Model.removeElement(e2xOp.method.oclAsType(Element)->asSequence()->at(1));
+	};
+	
+	// Set specification of the newActivity to xOp in the e2 model. 
+	newActivity.specification := e2xOp;
+	
+	var allStuff : Set(Element) := newActivity[Activity]->allOwnedElements()
+		->asSequence()->at(1);
+	
+	var count : Integer := 0; 
+	allStuff->forEach(e) {
+		
+		if (e.oclIsKindOf(StructuralFeatureAction))
+		{
+			var sfa : StructuralFeatureAction = e.oclAsType(StructuralFeatureAction);
+			
+			var sfname : String := sfa.structuralFeature.name;
+			var sfqualifiedName : String := sfa.structuralFeature.qualifiedName;
+			
+			var idx : Integer := sfqualifiedName.indexOf("PortModel6_RoundRobinConnector");  
+			if (idx > 0)
+			{
+				log("Found: StructuralFeatureAction: " + sfqualifiedName);
+				count := count + 1; 	
+				
+				// Now, we should do a name resolution here. 
+				// Try to find the structuralFeature in the connectorClass. 
+				var foundCount : Integer := e2ConCls[Class].allAttributes()
+					->collect(name = sfname)->count(true);
+				
+				
+				assert (foundCount = 1) with 
+					log("Expected to find exactly 1 attribute with name " + sfname + 
+						" under class " + e2ConCls.qualifiedName  + " but found " + 
+						foundCount.toString());
+						
+				var e2Property : Property := e2ConCls[Class].allAttributes()
+					->select(name = sfname)->oclAsType(Property)->asSequence()->at(1);
+											 	
+				// Now, let's alter the structural feature to this one. 
+				sfa.structuralFeature := e2Property;
+				log("Updated structuralFeature field of StructuralFeatureAction " + 
+					sfqualifiedName);
+			};   
+			
+			sfa.input->forEach(inputPin) {
+				
+				if (inputPin.type.qualifiedName.indexOf("PortModel6_RoundRobinConnector") > 0)
+				{
+					if (inputPin.type.name = e2ConCls.name) 
+					{
+						inputPin.type := e2ConCls;
+						log("Updated inputPin.type field of StructuralFeatureAction " + 
+							sfqualifiedName + " as " + e2ConCls.name);
+					}
+				}
+				else if (inputPin.type.name = e2xIfc.name)
+				{
+					inputPin.type := e2xIfc;
+					log("Updated inputPin.type field of StructuralFeatureAction " + 
+						sfqualifiedName + " as " + e2xIfc.name);	
+				}
+			};
+			
+			sfa.output->forEach(outputPin) {
+				
+				if (outputPin.type.qualifiedName.indexOf("PortModel6_RoundRobinConnector") > 0) 
+				{
+					if (outputPin.type.name = e2ConCls.name)
+					{
+						outputPin.type := e2ConCls;
+						log("Updated outputPin.type field of StructuralFeatureAction " + 
+							sfqualifiedName + " as " + e2ConCls.name);
+					}
+					else if (outputPin.type.name = e2xIfc.name)
+					{
+						outputPin.type := e2xIfc;
+						log("Updated outputPin.type field of StructuralFeatureAction " + 
+							sfqualifiedName + " as " + e2xIfc.name);	
+					}
+				}	
+			};
+			
+			
+		}
+		else if (e.oclIsKindOf(ReadSelfAction)) 
+		{
+			var rsa : ReadSelfAction := e.oclAsType(ReadSelfAction);
+			var rsaResultTypeQualifiedName : String := rsa.result.type.qualifiedName;
+			
+			if (rsaResultTypeQualifiedName.indexOf("PortModel6_RoundRobinConnector") > 0)
+			{
+				log("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
+				count := count + 1; 
+				
+				var rsaResultTypeName : String := rsa.result.type.name;
+				
+				// Now, should we be specific about it and assume that the type is 
+				// of ConnectorCls? 
+				// TODO: may require revising
+				if (rsaResultTypeName = e2ConCls.name)
+				{
+					rsa.result.type := e2ConCls;
+					log("Updated result.type field of ReadSelfAction: " + rsa.name);
+				}
+			}
+		}
+		else if (e.oclIsKindOf(CallOperationAction))
+		{
+			var coa : CallOperationAction := e.oclAsType(CallOperationAction);
+			var coaOpQualifiedName = coa.operation.qualifiedName;
+			
+			if (coaOpQualifiedName.indexOf("PortModel6_RoundRobinConnector") > 0)
+			{
+				log("Found: CallOperation operation: " + coaOpQualifiedName);
+				
+				var coaOpName := coa.operation.name;
+				
+				if (coaOpName = e2xOp.name)
+				{
+					log("Updating operation field of CallOperationAction: " + coa.name);
+					coa.operation := e2xOp;
+					count := count + 1;
+				}
+				
+			};
+			
+			var coaTargetTypeQName : String := coa.target.type.qualifiedName;
+			 
+			if (coaTargetTypeQName.indexOf("PortModel6_RoundRobinConnector") > 0)
+			{
+				log("Found: CallOperation target type: " + coaTargetTypeQName);
+				
+				var coaTargetTypeName : String := coa.target.type.name;
+				if (coaTargetTypeName = e2ConCls.name)
+				{
+					log("Updating target.type field of CallOperationAction: " + coa.name +
+						" as " + e2xIfc.name);
+					coa.target.type := e2ConCls;
+					count := count + 1;
+				}
+				else if (coaTargetTypeName = e2xIfc.name)
+				{
+					log("Updating target.type field of CallOperationAction: " + coa.name + 
+						" as " + e2xIfc.name);
+					coa.target.type := e2xIfc;
+					count := count + 1;
+				}
+			}
+		}
+	};
+	
+	log("Replaced " + count.toString() + " references");
+	
+		
+}
+
+
+
+mapping Model :: Model2Model () : Model {
+	inlog('Model2Model Class ' + self.name);
+	name := self.name;
+
+	// TODO
+	
+	// What now? can we just watch for the activity which has "connector behavior" stereotype, and 
+	// when we find it, can we find the corresponding activity in the fUML model and bring it here? 
+	
+	// So, is it like we need to do all the copying things? Or could we just take the e2Model as 
+	// inout parameter? In that case, could we just iterate on the input model, and write mapping 
+	// only for the modified parts? Let's try this first. 
+	
+	// Ok, it just did not do anything.. but.. could 
+
+	inlog('Model2Model Class ' + self.name);
+	
+	//self.packagedElement[Class]->map PlainClass2Class();
+	//self.packagedElement[Class]->map Class2Class();
+
+	end {
+		
+		// follwing is not legit... 
+		// result := null;
+	}
+}
+
+query Class::IsPlainClass() : Boolean =
+	self.nestedClassifier->size() = 0 and self.ownedPort->size() = 0;
+	
+
+mapping Class :: Class2Class() : Class  
+	when {not self.oclIsKindOf(Behavior) and not self.IsPlainClass()} {
+
+	init {
+		beginLog(self.name);
+	}
+
+	self.nestedClassifier[Class]->map PlainClass2Class();
+	self.nestedClassifier[Class]->map Class2Class();
+	
+	end {
+		endLog(self.name);
+	}
+}
+
+
+	
+mapping Class :: PlainClass2Class() : Class  
+	when {not self.oclIsKindOf(Behavior) and self.IsPlainClass()} {
+
+	init {
+		beginLog(self.name);
+	}
+
+	
+	end {
+		endLog(self.name);
+	}
+}
+
+
+	
+
+
+helper getLogIndent() : String {
+	var indentStr : String := '';
+	var i : Integer := 0;
+	
+	while (i < LogIndentLevel) {
+		indentStr := indentStr + ' ';
+		i := i + 1;
+	};
+	
+	return indentStr;
+}
+
+helper beginLog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + '>> Begin transforming ' + arg);
+	LogIndentLevel := LogIndentLevel + 2;
+}
+
+helper inlog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + " " + arg);
+}
+
+helper endLog(arg: String) {
+	LogIndentLevel := LogIndentLevel - 2;
+	var indentStr = getLogIndent();
+	log(indentStr + '<< End transforming ' + arg);
+}
