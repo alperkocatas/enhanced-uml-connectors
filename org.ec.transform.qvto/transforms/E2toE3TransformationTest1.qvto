@@ -15,6 +15,14 @@ main() {
 	doTheThing();	
 }
 
+constructor Property::Property(nameArg:String, typeArg : Interface, 
+							  lowerArg: Integer, upperArg: Integer) {
+	name := nameArg;
+	type := typeArg;
+	lower := lowerArg;
+	upper := upperArg;
+	
+}
 
 helper doTheThing()  {
 
@@ -73,6 +81,11 @@ helper doTheThing()  {
 	
 	var e2xIfc : Interface := e2ModelElt.packagedElement
 		->select(name = "XIfc")->oclAsType(Interface)->asSequence()->at(1);
+	
+	// Create the ItsXIfc reference array: 
+	// TODO: The lower, upper, name and type should probably be parametric.
+	var e2ItsXIfc : Property := new Property("ItsXIfc", e2xIfc, 2, 2);
+	e2ConCls.ownedAttribute += e2ItsXIfc;
 		
 	// ok, now, we have references to the activity in the fUML and the ConnectorCls 
 	// in the e2Model. 
@@ -164,19 +177,22 @@ helper doTheThing()  {
 				var foundCount : Integer := e2ConCls[Class].allAttributes()
 					->collect(name = sfname)->count(true);
 				
-				
-				assert (foundCount = 1) with 
-					log("Expected to find exactly 1 attribute with name " + sfname + 
+				if (foundCount != 1)
+				{ 
+					log("WARNING: Expected to find exactly 1 attribute with name " + sfname + 
 						" under class " + e2ConCls.qualifiedName  + " but found " + 
 						foundCount.toString());
-						
-				var e2Property : Property := e2ConCls[Class].allAttributes()
-					->select(name = sfname)->oclAsType(Property)->asSequence()->at(1);
-											 	
-				// Now, let's alter the structural feature to this one. 
-				sfa.structuralFeature := e2Property;
-				log("Updated structuralFeature field of StructuralFeatureAction " + 
-					sfqualifiedName);
+				}
+				else
+				{
+					var e2Property : Property := e2ConCls[Class].allAttributes()
+						->select(name = sfname)->oclAsType(Property)->asSequence()->at(1);
+												 	
+					// Now, let's alter the structural feature to this one. 
+					sfa.structuralFeature := e2Property;
+					log("Updated structuralFeature field of StructuralFeatureAction " + 
+						sfqualifiedName);
+				}
 			};   
 			
 			sfa.input->forEach(inputPin) {
