@@ -1,0 +1,297 @@
+modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
+
+//modeltype Alf "strict" uses alf("http://www.omg.org/spec/ALF/20120827");
+
+transformation E2ToAlfTransformationTest1(in e2Model:uml);
+
+configuration property IFC_NAME : String;
+configuration property OP_NAME : String;
+configuration property CONNECTOR_CLS_NAME : String;
+configuration property IFC_ASSOC_NAME : String;
+configuration property IFC_ASSOC_MULTIPLICITY : Integer;
+configuration property CONTAINER_CLS_NAME : String;
+configuration property ALF_PKG_NAME : String;
+
+configuration property LogIndentLevel : Integer;
+
+configuration property alfCode : String;
+configuration property AlfIndentLevel : Integer;
+
+helper setDefaultConfigurationPropertyValues() {
+	
+	if (IFC_NAME = null)
+		IFC_NAME := "XIfc";
+	
+	if (OP_NAME = null)
+		OP_NAME := "xOp";
+	
+	if (CONNECTOR_CLS_NAME = null)
+		CONNECTOR_CLS_NAME := "ConnectorCls";
+			
+	if (IFC_ASSOC_NAME = null)
+		IFC_ASSOC_NAME := "OutPort";
+
+	if (IFC_ASSOC_MULTIPLICITY = null)
+		IFC_ASSOC_MULTIPLICITY := 2;
+		
+	if (CONTAINER_CLS_NAME = null)
+		CONTAINER_CLS_NAME := "ECls";
+		
+	if (ALF_PKG_NAME = null)
+		ALF_PKG_NAME := "PortModel6_RoundRobinConnector";
+		
+	AlfIndentLevel := 0;
+}
+
+main() {
+	LogIndentLevel := 0;
+	log('In Main ');
+
+	// can we just write a huge helper function which will do all the manipulation? 
+	generateAlfCodeFromE2Model();
+}
+
+helper generateAlfCodeFromE2Model() {
+	setDefaultConfigurationPropertyValues();
+	
+	var arg : String := e2Model.rootObjects()[Model].name->asSequence()->at(1);
+
+	// TODO: Indeed, we should ideally iterate through all classes, find the enhanced connectors, 
+	// and run the same operations for each of them. But... for the sake of simplicity, we will
+	// assume that the only single enhanced connector will be inside a container class (i.e. ECls)
+
+	// now, let's locate the connector class inside the e2 model: 
+	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
+	
+	var e2ContainerCls : Class := e2ModelElt.packagedElement
+		->select(name = CONTAINER_CLS_NAME)
+		->oclAsType(Class)->asSequence()->at(1);
+		
+	var e2ConCls : Class := e2ContainerCls.nestedClassifier
+		->select(name = CONNECTOR_CLS_NAME)->oclAsType(Class)->asSequence()->at(1);
+	
+	var e2xOp : Operation := e2ConCls.ownedOperation->select(name = OP_NAME)
+		->oclAsType(Operation)->asSequence()->at(1);
+	
+	var e2xIfc : Interface := e2ModelElt.packagedElement
+		->select(name = IFC_NAME)->oclAsType(Interface)->asSequence()->at(1);
+	
+	assert fatal (e2xOp.method != null and 
+		e2xOp.method.oclIsKindOf(Activity)->asSequence()->at(1)) 
+		with log("Operation " + e2xOp.name + " has no connector behavior attached"); 
+	
+	var connectorBehavior : Activity := e2xOp.method->oclAsType(Activity)->asSequence()->at(1);
+	
+	alfCode := "";
+	generateAlfCodeImports();
+	beginAlfPackage(ALF_PKG_NAME);
+	generateInterfaceCode(e2xIfc);	
+	beginConnectorClass(e2ConCls, e2xIfc);
+	generateConnectorClassAttributes(e2ConCls);	
+	generateConnectorBehaviorOperation(e2xOp, connectorBehavior);	
+	endConnectorClass();	
+	endAlfPackage();
+	
+	log("<begin> Alf Code: ");
+	log(alfCode);
+	log("<end> Alf Code");
+} 
+
+helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: Activity) {
+		
+	var operationSignatureStr : String := "public " + e2xOp.name + "("; 
+	
+	var count : Integer := 0;
+	
+	var params : OrderedSet(Parameter) := e2xOp->ownedParameter->asSequence()->at(1);
+	var paramCount : Integer := params->select(name != "returnVal")
+		->asSequence()->size();
+				
+	e2xOp->ownedParameter->forEach(param) {
+	
+		var paramName : String := param.name->asSequence()->at(1);
+	
+		if (paramName != "returnVal")
+		{
+			var paramStr : String := "";
+			var paramTypeStr : String := param.type.name->asSequence()->at(1);
+			
+			paramStr := paramStr + paramName + ": " + paramTypeStr;
+			count := count + 1;
+			
+			if (count < paramCount)
+				paramStr := paramStr + ", ";
+			
+			operationSignatureStr := operationSignatureStr + paramStr;
+		}
+	};
+	
+	operationSignatureStr := operationSignatureStr + ") {";
+	appendAlfCodeLine(operationSignatureStr);
+	AlfIndentLevel := AlfIndentLevel + 1;
+	
+	// TODO: Transform request(args, Index) definition to
+	// ItsIfcPtr[Index]->xOp(args)
+	// or.. just use the actual notation there. 
+	// For now, lets just use a common notation:
+	// OutPort->xOp(request...)
+	var opaqueAction := connectorBehavior.ownedElement
+		->selectByKind(OpaqueAction)->asSequence()->at(1);
+	
+	// TODO: get the real IFC_ASSOC_MULTIPLICITY value as a parameter 
+	// from the E1 to E2 transformation. 
+	var opaqueActionBody : String := opaqueAction.body->asSequence()->at(1);
+	var transformedOpaqueActionBody : String:= opaqueActionBody
+		->replaceAll("PRV_CNT", IFC_ASSOC_MULTIPLICITY.toString())
+		->asSequence()->at(1);
+	
+	appendAlfCodeLine(transformedOpaqueActionBody);
+	
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}");  
+	
+}
+
+helper generateConnectorClassAttributes(e2ConCls: Class) {
+	
+	// Create the interface array
+	var interfacePtrArrayStr : String := "public " + IFC_ASSOC_NAME + " : " + IFC_NAME + 
+		"[" + IFC_ASSOC_MULTIPLICITY.toString() + "] ordered nonunique;";
+	
+	appendAlfCodeLine(interfacePtrArrayStr);
+	
+	e2ConCls.ownedAttribute->forEach(attr) {
+		
+		if (attr.type != null)
+		{
+			if (attr->oclIsKindOf(Port)->asSequence()->at(1) = false)
+			{
+				var attrCode : String := "private ";
+				var attrName : String := attr.name;
+				var attrType : String := attr.type.name;
+				attrCode := attrCode + attrName + " : " + attrType;
+				
+				if (attr.defaultValue != null)
+				{
+					if (attr.defaultValue->oclIsKindOf(LiteralInteger)->asSequence()->at(1))
+					{
+						var defVal : LiteralInteger :=
+							attr.defaultValue->oclAsType(LiteralInteger)->asSequence()->at(1);  
+					
+						attrCode := attrCode + " = " + 
+							defVal.value.toString();
+					}
+					else if (attr.defaultValue->oclIsKindOf(LiteralString)->asSequence()->at(1))
+					{
+						var defVal : LiteralString :=
+							attr.defaultValue->oclAsType(LiteralString)->asSequence()->at(1);  
+					
+						attrCode := attrCode + " = " + 
+							defVal.value.toString();
+					}
+					else
+					{
+						log("WARNING: Default value of attribute " + attrName + " is unrecognized");
+					} 
+				};
+				
+				attrCode := attrCode + ";";
+								
+				appendAlfCodeLine(attrCode);
+			}
+		}
+		else
+		{
+			log("WARNING: Type of attribute " + attr.name + " is null")
+		}
+	}; //end: forEach
+	
+	appendAlfCodeLine("");
+} 
+
+helper beginConnectorClass(e2ConCls: Class, e2xIfc: Interface)
+{
+	appendAlfCodeLine(
+		 "public class " + e2ConCls.name + 
+		" specializes " + e2xIfc.name + " {");
+		
+	AlfIndentLevel := AlfIndentLevel + 1;	
+}
+
+helper endConnectorClass()
+{
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}");
+}
+
+helper generateInterfaceCode(ifc : Interface)
+{
+	// TODO	
+}
+
+helper generateAlfCodeImports()
+{
+	appendAlfCodeLine( 
+		"private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::ToString;");
+	appendAlfCodeLine(  
+		"private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::*;");
+	appendAlfCodeLine("");
+}
+
+helper beginAlfPackage(packageName : String)
+{
+	appendAlfCodeLine("package " + packageName + " {");
+	AlfIndentLevel := AlfIndentLevel + 1;
+}
+
+helper endAlfPackage()
+{
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}");
+}
+
+helper appendAlfCodeLine(line : String)
+{
+	alfCode := alfCode + getAlfIndent() + line + "\n";
+}
+
+helper getAlfIndent() : String {
+	var indentStr : String := '';
+	var i : Integer := 0;
+	
+	while (i < AlfIndentLevel * 4) {
+		indentStr := indentStr + ' ';
+		i := i + 1;
+	};
+	
+	return indentStr;
+}
+
+helper getLogIndent() : String {
+	var indentStr : String := '';
+	var i : Integer := 0;
+	
+	while (i < LogIndentLevel) {
+		indentStr := indentStr + ' ';
+		i := i + 1;
+	};
+	
+	return indentStr;
+}
+
+helper beginLog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + '>> Begin transforming ' + arg);
+	LogIndentLevel := LogIndentLevel + 2;
+}
+
+helper inlog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + " " + arg);
+}
+
+helper endLog(arg: String) {
+	LogIndentLevel := LogIndentLevel - 2;
+	var indentStr = getLogIndent();
+	log(indentStr + '<< End transforming ' + arg);
+}

@@ -4,8 +4,8 @@ transformation RoundRobinTransform(in srcModel:uml, out destModel : uml);
 configuration property LogIndentLevel : Integer;
 
 main() {
-	LogIndentLevel := 0;
-	log('In Main ');
+	if (LogIndentLevel = null) LogIndentLevel := 0;
+	log('In Main: LogIndentLevel is: ' + LogIndentLevel.toString());
 	srcModel.rootObjects()[Model]->map Model2Model();
 }
 

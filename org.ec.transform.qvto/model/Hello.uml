@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_QmRXQAzLEe2a9JEdtkAY8w">
+  <packagedElement xmi:type="uml:Package" xmi:id="_SPibIAzLEe2a9JEdtkAY8w" name="APkg">
+    <packagedElement xmi:type="uml:Class" xmi:id="_Up5kwAzLEe2a9JEdtkAY8w" name="ACls">
+      <ownedAttribute xmi:id="_WfsBsAzLEe2a9JEdtkAY8w" name="Index" type="_Up5kwAzLEe2a9JEdtkAY8w"/>
+      <ownedOperation xmi:id="_cFksIAzLEe2a9JEdtkAY8w" name="fooOp"/>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

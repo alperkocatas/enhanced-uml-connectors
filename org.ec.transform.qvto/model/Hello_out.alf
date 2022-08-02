@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alf:UnitDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:alf="http://www.omg.org/spec/ALF/20120827">
+  <definition xsi:type="alf:PackageDefinition" name="APkg">
+    <ownedMember visibility="public">
+      <definition xsi:type="alf:ClassDefinition" name="ACls">
+        <ownedMember visibility="public">
+          <definition xsi:type="alf:PropertyDefinition" name="Index">
+            <typePart/>
+          </definition>
+        </ownedMember>
+        <ownedMember visibility="public">
+          <definition xsi:type="alf:OperationDefinition" name="fooOp" isStub="true"/>
+        </ownedMember>
+      </definition>
+    </ownedMember>
+  </definition>
+</alf:UnitDefinition>

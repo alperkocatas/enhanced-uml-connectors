@@ -18,5 +18,5 @@
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetType1" value="NEW_MODEL"/>
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.targetType2" value="NEW_MODEL"/>
     <stringAttribute key="org.eclipse.m2m.qvt.oml.interpreter.traceFile" value="platform:/resource/org.ec.connectors/RoundRobinRequesterQvto/RoundRobinRequester_E2.RoundRobinTransform.qvtotrace"/>
-    <booleanAttribute key="org.eclipse.m2m.qvt.oml.interpreter.useTraceFile" value="true"/>
+    <booleanAttribute key="org.eclipse.m2m.qvt.oml.interpreter.useTraceFile" value="false"/>
 </launchConfiguration>
