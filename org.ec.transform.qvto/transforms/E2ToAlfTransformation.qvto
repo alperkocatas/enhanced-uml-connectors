@@ -95,7 +95,7 @@ helper generateAlfCodeFromE2Model() {
 	log("<begin> Alf Code: ");
 	log(alfCode);
 	log("<end> Alf Code");
-} 
+}
 
 helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: Activity) {
 		
@@ -111,12 +111,20 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 	
 		var paramName : String := param.name->asSequence()->at(1);
 	
-		if (paramName != "returnVal")
+		if (param.direction->asSequence()->at(1) <> ParameterDirectionKind::_return)
 		{
 			var paramStr : String := "";
-			var paramTypeStr : String := param.type.name->asSequence()->at(1);
+			var paramTypeStr : String := param.type.name->asSequence()->at(1).toString();
 			
-			paramStr := paramStr + paramName + ": " + paramTypeStr;
+			var paramDirectionStr = "in";
+			if (param.direction->asSequence()->at(1) = ParameterDirectionKind::_out) {
+				paramDirectionStr := "out";
+			}
+			else if (param.direction->asSequence()->at(1) = ParameterDirectionKind::_inout) {
+				paramDirectionStr := "inout";
+			};
+			
+			paramStr := paramStr + paramDirectionStr + " " + paramName + ": " + paramTypeStr;
 			count := count + 1;
 			
 			if (count < paramCount)
@@ -126,7 +134,17 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 		}
 	};
 	
-	operationSignatureStr := operationSignatureStr + ") {";
+	operationSignatureStr := operationSignatureStr + ")";
+	
+	if (params->select(name = "returnVal")->asSequence()->size() <> 0)
+	{
+		var returnParam : Parameter = params->select(name = "returnVal")->asSequence()->at(1);
+		
+		operationSignatureStr := operationSignatureStr + " : " + returnParam.type.name.toString(); 	
+	};
+	
+	operationSignatureStr := operationSignatureStr + " {";
+	
 	appendAlfCodeLine(operationSignatureStr);
 	AlfIndentLevel := AlfIndentLevel + 1;
 	
@@ -144,6 +162,7 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 	var transformedOpaqueActionBody : String:= opaqueActionBody
 		->replaceAll("PRV_CNT", IFC_ASSOC_MULTIPLICITY.toString())
 		->asSequence()->at(1);
+		
 	
 	appendAlfCodeLine(transformedOpaqueActionBody);
 	
@@ -168,7 +187,13 @@ helper generateConnectorClassAttributes(e2ConCls: Class) {
 			{
 				var attrCode : String := "private ";
 				var attrName : String := attr.name;
-				var attrType : String := attr.type.name;
+				
+				if (attr.type.name = null)
+				{
+					log("WARNING: type name of attribute " + attrName + " seems to be null");
+				};
+				
+				var attrType : String := attr.type.name.toString();
 				attrCode := attrCode + attrName + " : " + attrType;
 				
 				if (attr.defaultValue != null)
@@ -206,7 +231,7 @@ helper generateConnectorClassAttributes(e2ConCls: Class) {
 		}
 	}; //end: forEach
 	
-	appendAlfCodeLine("");
+	appendAlfCodeLine(" ");
 } 
 
 helper beginConnectorClass(e2ConCls: Class, e2xIfc: Interface)
@@ -226,7 +251,44 @@ helper endConnectorClass()
 
 helper generateInterfaceCode(ifc : Interface)
 {
-	// TODO	
+	// Generate interface alf code, which is like the following: 
+	//  public abstract class XIfc
+	//  {
+	//     public abstract xOp(in arg: Integer): Integer;     
+	//  }
+
+	appendAlfCodeLine("public abstract class " + ifc.name);
+	appendAlfCodeLine("{");
+	AlfIndentLevel := AlfIndentLevel + 1;
+
+	// For simplicity we assume that the interface has only one operation
+	assert fatal (ifc.ownedOperation->size() = 1) 
+		with log("Interface " + ifc.name + " must have exactly one operation ");
+
+	var op : Operation = ifc.ownedOperation->asSequence()->at(1);
+
+	// Now, we should iterate through parameters, and extract the single parameter, 
+	// and the return parameter. 
+	
+	var inParamSet : Set(Parameter) := 
+		op->ownedParameter->asSequence()->at(1)->select(direction = ParameterDirectionKind::_in);
+	assert fatal(inParamSet->size() = 1) with log("Number of parameters with direction=in " +
+		"must be 1 for operation " + op.name);
+	var param : Parameter := inParamSet->asSequence()->at(1);
+	
+	var returnParamSet : Set(Parameter) := 
+		op->ownedParameter->asSequence()->at(1)->select(direction = ParameterDirectionKind::_return);
+	assert fatal(returnParamSet->size() = 1) with log("Number of parameters with direction=return " +
+		"must be 1 for operation " + op.name);
+	var returnParam : Parameter := returnParamSet->asSequence()->at(1); 
+	
+	// TODO: the hardcoded "in" parameter direction should be read from the source model
+	
+	appendAlfCodeLine("public abstract " + op.name + "(in " + param.name + ": " + 
+		param.type.name.toString() + ") : " + returnParam.type.name.toString() + ";");
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}"); 
+	appendAlfCodeLine(""); 
 }
 
 helper generateAlfCodeImports()
@@ -252,6 +314,7 @@ helper endAlfPackage()
 
 helper appendAlfCodeLine(line : String)
 {
+	//log(">>>>appending line: " + line);
 	alfCode := alfCode + getAlfIndent() + line + "\n";
 }
 

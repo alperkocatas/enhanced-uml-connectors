@@ -28,9 +28,9 @@
         <edge xmi:type="uml:ControlFlow" xmi:id="__32GwMYsEeyq_sNlgGY9og" name="opaqueActionToActivityFinal" target="_926w0MYsEeyq_sNlgGY9og" source="_8c5p4MYsEeyq_sNlgGY9og"/>
         <node xmi:type="uml:OpaqueAction" xmi:id="_8c5p4MYsEeyq_sNlgGY9og" name="ConnectorOpaqueAction" incoming="__OaIMMYsEeyq_sNlgGY9og" outgoing="__32GwMYsEeyq_sNlgGY9og">
           <language>Alf</language>
-          <body>Integer result = this.OutPort[Index]->xOp(args);&#xD;
-            Index = Index + 1;&#xD;
-            Index = Index % PRV_CNT;   &#xD;
+          <body>Integer result = this.OutPort[this.Index].xOp(arg);&#xD;
+            this.Index = this.Index + 1;&#xD;
+            this.Index = this.Index % PRV_CNT;   &#xD;
             return result;</body>
         </node>
         <node xmi:type="uml:InitialNode" xmi:id="_8_BfgMYsEeyq_sNlgGY9og" name="InitialNode2" outgoing="__OaIMMYsEeyq_sNlgGY9og"/>
