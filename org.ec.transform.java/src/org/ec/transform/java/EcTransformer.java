@@ -66,9 +66,9 @@ import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
 import org.eclipse.emf.mwe.core.issues.Issues;
 import org.eclipse.emf.mwe.utils.Mapping;
 
-public class E2E3Transformer2 {
+public class EcTransformer {
 	
-	private static final Logger logger = Logger.getLogger(E2E3Transformer2.class);
+	private static final Logger logger = Logger.getLogger(EcTransformer.class);
 	
 	private String workspacePath = "/Users/akocatas/Dropbox/payprus-workspace/"; 
 	
@@ -132,9 +132,8 @@ public class E2E3Transformer2 {
 			System.out.println(temp.toString());
 		}
 		
-		
 		ModelExtent input = new BasicModelExtent(inObjects);	
-		ModelExtent output = new BasicModelExtent();
+		//ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 5);
 		
@@ -144,11 +143,11 @@ public class E2E3Transformer2 {
 		
 		URI transformationURI = URI.createFileURI(e1ToE2TxPath);
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
-		ExecutionDiagnostic result = executor.execute(context, input, output);
+		ExecutionDiagnostic result = executor.execute(context, input);
 		Diagnostic loadResult = executor.loadTransformation();
 		System.out.println(loadResult.getMessage());
 		
-		List<EObject> outObjects = output.getContents();
+		List<EObject> outObjects = input.getContents();
         URI outUri = URI.createURI("file:" + e2ModelPath);
         Resource res = resourceSet.createResource(outUri);
         res.getContents().addAll(outObjects);
@@ -334,7 +333,7 @@ public class E2E3Transformer2 {
 		
 		try
 		{	
-			E2E3Transformer2 tx = new E2E3Transformer2();
+			EcTransformer tx = new EcTransformer();
 			tx.initializeUMLResources();
 			tx.runE1ToE2Transformation(); 
 			tx.runE2ToAlfTransformation();

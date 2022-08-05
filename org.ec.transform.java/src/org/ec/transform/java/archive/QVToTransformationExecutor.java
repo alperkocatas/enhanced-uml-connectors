@@ -8,7 +8,7 @@
  * Contributors:
  *     E.D.Willink - initial API and implementation
  *******************************************************************************/
-package org.ec.transform.java;
+package org.ec.transform.java.archive;
 
 import java.io.IOException;
 import java.util.ArrayList;

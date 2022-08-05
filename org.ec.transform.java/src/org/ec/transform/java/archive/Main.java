@@ -1,4 +1,4 @@
-package org.ec.transform.java;
+package org.ec.transform.java.archive;
 
 import java.io.File;
 import java.io.FileInputStream;
