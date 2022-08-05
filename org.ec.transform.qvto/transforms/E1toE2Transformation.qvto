@@ -1,282 +1,101 @@
+// This is an inplace transformation, which is ran from inside Java to save outputs as a different
+// model file. 
+
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
-transformation RoundRobinTransform(in srcModel:uml, out destModel : uml);
+transformation RoundRobinTransform(inout e1Model:uml);
 configuration property LogIndentLevel : Integer;
+
+
+helper setDefaultConfigurationPropertyValues() {
+
+	if (LogIndentLevel = null)
+		LogIndentLevel := 0;	
+}
 
 main() {
 	if (LogIndentLevel = null) LogIndentLevel := 0;
-	log('In Main: LogIndentLevel is: ' + LogIndentLevel.toString());
-	srcModel.rootObjects()[Model]->map Model2Model();
+	log('In Main: LogIndentLevel is: ' + LogIndentLevel.toString());	
+	transformE1toE2();
 }
 
-mapping Model :: Model2Model () : Model {
-	inlog('Model2Model Class ' + self.name);
-	name := self.name;
-	packageImport += self.packageImport[PackageImport]->map PkgImport2PkgImport();
-	packagedElement += self.packagedElement[PrimitiveType]->map Pt2Pt();
-	packagedElement += self.packagedElement[Interface]->map Interface2Interface();
-	packagedElement += self.packagedElement[Class]->map PlainClass2Class();
-	packagedElement += self.packagedElement[Class]->map Class2Class();
-	packagedElement += self.packagedElement[Interaction]->map Interaction2Interaction();
-	packagedElement += self.packagedElement[Usage]->map Usage2Usage();
-}
-
-mapping Usage :: Usage2Usage() : Usage {
-	init {
-		beginLog("Usage");
-		result := self.clone();
-	}
-	
-	client := self.client.resolveoneIn(Class::Class2Class, Class);
-	if (client->size() = 0) {
-		client := self.client.late resolveoneIn(Class::Class2Class, Class);
-	};
-	
-	supplier := self.supplier.resolveoneIn(Interface::Interface2Interface, Interface);
-	if (supplier->size() = 0) {
-		inlog("Warning: could not resolve type of " + "InterfaceRealization" + " falling back to late resolve");
-		supplier := self.supplier.late resolveoneIn(Interface::Interface2Interface, Interface);	
-	};
-	
-	end {
-		endLog("Usage");
-	}
-}
-
-mapping PackageImport :: PkgImport2PkgImport() : PackageImport {
-	init {
-		beginLog("PackageImport");
-		result := self.clone();
-	}
-	
-	end {
-		endLog("PackageImport");
-	}
-}
-
-mapping PrimitiveType :: Pt2Pt() : PrimitiveType {
-	name := self.name;
-}
-
-mapping Class :: Class2Class() : Class  when {not self.oclIsKindOf(Behavior) and not self.IsPlainClass()} {
-
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-
-	nestedClassifier += self.nestedClassifier[Class]->map PlainClass2Class();
-	nestedClassifier += self.nestedClassifier[Class]->map Class2Class();
-	ownedAttribute += self.ownedAttribute[Property]->map Property2Property();
-	ownedAttribute += self.ownedAttribute[Port]->map Port2Port();
-	ownedConnector += self.ownedConnector[Connector]->map Connector2Connector();
-	interfaceRealization += self.interfaceRealization[InterfaceRealization]->
-								map InterfaceRealization2InterfaceRealization();
-	
-	// EnhancedConnector mappings	
-	nestedClassifier += self.ownedConnector[Connector]->map EnhancedPrimaryConnector2ConnectorClass(result);
-	
-	end {
-		endLog(self.name);
-	}
-}
-
-
-
-// Map the activity which defines the connector behavior into a method 
-// of the connector class. 
-
-//mapping Activity::ConnectorBehaviorActivity2LowerLevelMode():Activity
-//{
-//		
-//}
-//
-
-mapping Class :: PlainClass2Class() : Class  when {not self.oclIsKindOf(Behavior) and self.IsPlainClass()} {
-
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-
-	interfaceRealization += self.interfaceRealization[InterfaceRealization]->
-								map InterfaceRealization2InterfaceRealization();
-	
-	end {
-		endLog(self.name);
-	}
-}
-
-
-query Class::IsPlainClass() : Boolean =
-	self.nestedClassifier->size() = 0 and self.ownedPort->size() = 0;
-
-
-mapping InterfaceRealization :: InterfaceRealization2InterfaceRealization() : InterfaceRealization {
-	init {
-		beginLog("InterfaceRealization");
-	}
-	
-	client := self.client.resolveoneIn(Class::Class2Class, Class);
-	if (client->size() = 0) {
-		client := self.client.late resolveoneIn(Class::Class2Class, Class);
-	};
-	
-	supplier := self.supplier.resolveoneIn(Interface::Interface2Interface, Interface);
-	if (supplier->size() = 0) {
-		inlog("Warning: could not resolve type of " + "InterfaceRealization" + " falling back to late resolve");
-		supplier := self.supplier.late resolveoneIn(Interface::Interface2Interface, Interface);	
-	};
-	
-	contract := self.contract.resolveoneIn(Interface::Interface2Interface, Interface);
-	if (contract = null) {
-		inlog("Warning: could not resolve type of " + "InterfaceRealization" + " falling back to late resolve");
-		contract := self.contract.late resolveoneIn(Interface::Interface2Interface, Interface);	
-	}
-	
-	end {
-		endLog("InterfaceRealization");
-	}
-}
-
-// We need to exclude ports from this using a when clause. 
-mapping Property :: Property2Property() : Property when { (not self.oclIsKindOf(Port)) } {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	type := self.type.resolveoneIn(Class::Class2Class, Class);
-	if (type = null) {
-		inlog("Warning: could not resolve type of " + self.name + " falling back to late resolve");
-		type := self.type.late resolveoneIn(Class::Class2Class, Class);
-	};
-	
-	upper := self.upper;
-	lower := self.lower;
-	
-	end {
-		endLog(self.name)
-	}
-}
-
-mapping Connector :: Connector2Connector() : Connector 
-	when { not self.isPrimaryEnhancedConnector() and not self.isSecondaryEnhancedConnector()} {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	_end := self._end->map ConnectorEnd2ConnectorEnd();
-
- 	// TODO: should we make this conditional: if not normal resolve works, then use late resolve? 
- 	contract := self.contract.late resolveoneIn(Interaction::Interaction2Interaction, Interaction);
-
-	end {
-		endLog(self.name);
-	}
-}
-
-
-constructor Property::Property(nameArg:String) {
-	name := nameArg;
-}
-
-constructor Port::Port(nameArg:String, typeArg:Class) {
-	name := nameArg;
-	type := typeArg;
-}
-
-constructor ConnectorEnd::ConnectorEnd(portArg: Port, partWithPortArg: Property)
+helper transformE1toE2()
 {
-	role := portArg;
-	partWithPort := partWithPortArg;	
-}
-
-constructor Connector::Connector(nameArg: String, port1: Port, partWithPort1: Property, 
-								 port2: Port, partWithPort2: Property) {
-	name := nameArg;
-	_end += new ConnectorEnd(port1, partWithPort1);
-	_end += new ConnectorEnd(port2, partWithPort2);	
-}
-
-constructor Operation::Operation(otherOperation: Operation) {
-	name := otherOperation.name;
+	setDefaultConfigurationPropertyValues();
 	
-	otherOperation.ownedParameter->forEach(otherParam) {
-		var newParam = new Parameter(otherParam);
-		ownedParameter += newParam; 
-	}
-}
-
-constructor Parameter::Parameter(otherParam: Parameter) {
-	name := otherParam.name;
+	// In the future, we can dynamically search for enhanced connectors 
+	// inside the model, but for now, let's just assume that we know the location of the 
+	// enhanced connector. 
+		
+	// but let's just give it a try: iterate over all model elements and see what mappens: 
 	
-	// TODO:  If type is not a primitive type, 
-	// this might require a deeper resolve operation. 
-	type := otherParam.type;
+	var model : Model := e1Model.rootObjects()[Model]->asSequence()->at(1);
+	
+	var allStuff : Set(Element) := model->allOwnedElements()
+		->asSequence()->at(1);
+	
+	// Search for enhanced connector and its behavior.
+	
+	var count : Integer := 0; 
+	allStuff->forEach(e) {
+		
+		if (e->oclIsKindOf(Connector)->asSequence()->at(1) = true)
+		{
+			var con : Connector = e->oclAsType(Connector)->asSequence()->at(1); 
+			
+			if (con.isPrimaryEnhancedConnector() )
+			{
+				log("Found a primary enhanced connector: " + con.name);
+				transformPrimaryEnhancedConnector(con);
+			};
+		};	
+		count := count + 1;	
+	};
+	
+	log("Iterated through " + count.toString() + " model elements");
 }
 
-
-// Map primary connector to connector class and its object? 
-mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : Class) : Class 
-	when {self.isPrimaryEnhancedConnector()} {
-	init {
-		beginLog(self.name + " as Primary Enhanced Connector");
-	}
-	name := "ConnectorCls"; 
+helper transformPrimaryEnhancedConnector(ec : Connector)
+{
+	beginLog("Processing " + ec.name + " as Primary Enhanced Connector");
+	
+	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
+	
+	var connectorCls : Class := new Class("ConnectorCls");
+	
+	ownerClass.nestedClassifier += connectorCls;
 	
 	// Make sure connector end is singular, and it is connected to a port.
 	inlog("Checking if the connector is an assembly connector..."); 
-	assert fatal (self.IsAssemblyPortConnector()) with log("Connector " + self.name + 
+	assert fatal (ec.IsAssemblyPortConnector()) with log("Connector " + ec.name + 
 		" is not an assembly connector");
-	
-	
-	// TODO : Add ports to the class. 
-	// we can either create these ports from the scratch, or we can copy them, but from where? 
-	// Now, since self is the primary enhanced connector, we can access its connector ends
-	// and navigate to the properties, and then ports of their classes. 
-	
-	// Let's remember that we are indeed making a quite specific transformation here. Nothign too
-	// generic. So, we can just assume that there is someone at one end who requires an interface,
-	// and two or more ones who provide the same interface. 
-	
-	// Strategy:
-	// Locate the requiring end of the connection -  port and the part
-	// Locate the providing end of the connection
-	// Find the interface used in coordination.   // TODO: If we assume that there is a single 
-	// 		interface, our work will be easier. Otherwise, we should locate all branches of the 
-	//		enhanced connector and find the intersection of the interfaces. 
-	// Create a port on Connector class which provides the interface,
-	// Create a port on Connnector classs which requires the interface,
-	// Create an object of the Connector class,
-	// Connect the ports using a connector,
-	// Optinally: record information for this primary enhanced connector to a map-dictionar 
-	// so that you won't have to make this analysis again? For example, to find the coordinated interface.
-	
+		
 	// Create providing and requiring ports of the connector class
-	
 	inlog("Creating the connector class ports...");
-	var ports : List(Port) := self.GetProvidingAndRequiringEndPorts();
+	var ports : List(Port) := ec.GetProvidingAndRequiringEndPorts();
 	var requiringPort: Port := ports->at(1);
 	var providingPort: Port := ports->at(2);
 	
-	var parts : List(Property) := self.GetProvidingAndRequiringEndParts();
+	var parts : List(Property) := ec.GetProvidingAndRequiringEndParts();
 	var requiringPart : Property := parts->at(1);
 	var providingPart : Property := parts->at(2);
 	
-	var providerPortType : Class := providingPort.type.resolveoneIn(Class::PlainClass2Class, Class);
-	var providingPortConCls : Port := new Port("prvPort", providerPortType);
-	ownedAttribute += providingPortConCls;
+	// now, can we just use the reguar type? dont' we need any resolve? well let's try...
 	
-	var requiringPortType : Class := requiringPort.type.resolveoneIn(Class::PlainClass2Class, Class);
-	var requiringPortConCls : Port := new Port("reqPort", requiringPortType);
-	ownedAttribute += requiringPortConCls;
-
+	//var providerPortType : Class := providingPort.type.resolveoneIn(Class::PlainClass2Class, Class);
+	var providingPortConCls : Port := new Port("prvPort", 
+		providingPort.type->oclAsType(Class)->asSequence()->at(1));
+	connectorCls.ownedAttribute += providingPortConCls;
+	
+	//var requiringPortType : Class := requiringPort.type.resolveoneIn(Class::PlainClass2Class, Class);
+	var requiringPortConCls : Port := new Port("reqPort", 
+		requiringPort.type->oclAsType(Class)->asSequence()->at(1));
+	connectorCls.ownedAttribute += requiringPortConCls;
+	
 	// Create connector object
 	inlog("Creating the connector object...");  	
 	var conObj := new Property('ConnectorObj');
-	conObj.type := result;
+	conObj.type := connectorCls;
 	conObj.lower := 1;
 	conObj.upper := 1;
 	ownerClass.ownedAttribute += conObj.oclAsType(Property);
@@ -284,19 +103,14 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 	// Connect the providing port of the connector class to the 
 	// requiring port connected to the connector in the source model:
 	inlog("Creating connectors betwee connector object and connected parts...");
-	var requiringPortTarget : Port = requiringPort.resolveoneIn(Port::Port2Port, Port);
-	var requiringPartTarget : Property = requiringPart.resolveoneIn(Property::Property2Property, Property);
-	
-	var providingPortTarget : Port = providingPort.resolveoneIn(Port::Port2Port, Port);
-	var providingPartTarget : Property = providingPart.resolveoneIn(Property::Property2Property, Property);
 	
 	// Create required and provided side connectors and add them to the parent class
-	var reqEndCon : Connector := new Connector(self.name + "_reqEndCon", requiringPortTarget, requiringPartTarget, 
-												providingPortConCls, conObj); 
+	var reqEndCon : Connector := new Connector(ec.name + "_reqEndCon", requiringPort, 
+									requiringPart, providingPortConCls, conObj); 
 	ownerClass.ownedConnector += reqEndCon;
 	
-	var prvEndCon : Connector := new Connector(self.name + "_prvEndCon", requiringPortConCls, conObj, 
-												providingPortTarget, providingPartTarget); 
+	var prvEndCon : Connector := new Connector(ec.name + "_prvEndCon", requiringPortConCls, conObj, 
+												providingPort, providingPart); 
 	ownerClass.ownedConnector += prvEndCon;
 	
 	// Implement interface operation
@@ -306,23 +120,24 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
 	
 	var newOperation : Operation = new Operation(theOperation);
-	ownedOperation += newOperation;
-	
-	
-	
+	connectorCls.ownedOperation += newOperation;
 	
 	// Now, let's check if there are any dependencies from this primary enhanced connector to 
 	// a secondary enhanced connector. 
 	
-	if (self.clientDependency->size() <> 0)
+	var elementsToRemove : List(Element);
+	elementsToRemove += ec;
+	
+	if (ec.clientDependency->size() <> 0)
 	{
-		self.clientDependency->forEach(e) 
-		{
+		ec.clientDependency->forEach(e) 
+		{			
 			var target : Element = e.target->asSequence()->at(1);
 			
 			if (target->oclIsKindOf(Connector)->asSequence()->at(1))
 			{
-				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)->asSequence()->at(1);
+				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
+					->asSequence()->at(1);
 				
 				// TODO: Should we make sure that this secondary connector and primary connector
 				// forms a connected group? 
@@ -330,7 +145,7 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 				// suffice.
 				
 				assert fatal (secondaryEnhancedConnector.IsAssemblyPortConnector()) with 
-					log("Connector " + self.name + " is not an assembly connector");
+					log("Connector " + ec.name + " is not an assembly connector");
 				
 				inlog("Processing secondary enhanced connector: " + secondaryEnhancedConnector.name);
 					
@@ -342,26 +157,28 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 				var requiringPartSecondary : Property := parts->at(1);
 				var providingPartSecondary : Property := parts->at(2);
 				
-				// make sure requiring part is the same as requiring part of the primary enhanced connector: 
+				// make sure requiring part is the same as requiring part of the primary enhanced 
+				// connector: 
 				// TODO: This is specific.. only for one to many configurations. 
 				assert fatal (requiringPart = requiringPartSecondary) with
-					log("Requiring parts of primary enhanced connector " + self.name + " and " + 
-						"secondary enhanced connector " + secondaryEnhancedConnector.name + " are not same!");
+					log("Requiring parts of primary enhanced connector " + ec.name + " and " + 
+						"secondary enhanced connector " + secondaryEnhancedConnector.name + 
+						" are not same!");
 				
 				// Increase multiplicity of the requiring port of connector object by one. 
 				requiringPortConCls.lower := requiringPortConCls.lower + 1;
 				requiringPortConCls.upper := requiringPortConCls.upper + 1;
-				
-				var providingPortSecondaryTarget : Port = providingPortSecondary.resolveoneIn(Port::Port2Port, Port);
-				var providingPartSecondaryTarget : Property = providingPartSecondary.resolveoneIn(Property::Property2Property, Property);
-				
+	
 				// Now, create another reqEnd connector from connector object to the providing part. 
-				var prvEndConSec : Connector := new Connector(secondaryEnhancedConnector.name + "_prvEndCon", 
-																requiringPortConCls, conObj, 
-																providingPortSecondaryTarget, providingPartSecondaryTarget);
+				var prvEndConSec : Connector := new Connector(secondaryEnhancedConnector.name + 
+					"_prvEndCon", requiringPortConCls, conObj, 
+					providingPortSecondary, providingPartSecondary);
 				ownerClass.ownedConnector += prvEndConSec;
 				
-			}
+				elementsToRemove += secondaryEnhancedConnector;
+			};
+			
+			elementsToRemove += e;
 		}
 	};
 	
@@ -369,8 +186,8 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 	// Map the activity which defines the connector behavior into a method 
 	// of the connector class and its attributes, to attributes of the connector class. 
 	
-	// Let's locate the "contract" of the primarh enhanced connector first: 
-	var connectorBehaviorActivity : Activity = self.contract->oclAsType(Activity)->asSequence()->at(1);
+	// Let's locate the "contract" of the primary enhanced connector first: 
+	var connectorBehaviorActivity : Activity = ec.contract->oclAsType(Activity)->asSequence()->at(1);
 	
 	// Foreach property of the activity, create an attribute in the connector class
 	connectorBehaviorActivity.ownedAttribute->forEach(p) {
@@ -379,9 +196,10 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 		// TODO: make sure type of the property is a primitive type, 
 		// otherwise, this will require a deeper copy.
 		newProperty.type := p.type;
-		ownedAttribute += newProperty;
+		connectorCls.ownedAttribute += newProperty;
 	};
 	
+	elementsToRemove += connectorBehaviorActivity;
 	
 	// transfer rest of the activity as is, which is supposed to include:
 	// - Initial node 
@@ -424,13 +242,69 @@ mapping Connector ::EnhancedPrimaryConnector2ConnectorClass(inout ownerClass : C
 	var controlFlow2 : ControlFlow = new ControlFlow(newOpaqueAction, newActivityFinalNode);
 	newConnectorBehaviorActivity.edge += controlFlow2;
 	
-	ownedBehavior += newConnectorBehaviorActivity;
+	connectorCls.ownedBehavior += newConnectorBehaviorActivity;
 	
 	newOperation.method += newConnectorBehaviorActivity;
 	
-	end {
-		endLog(self.name);
+	
+	// Delete elements to remove in reverse direction
+	elementsToRemove := elementsToRemove->reverse();
+	elementsToRemove->forEach(elt)
+	{
+		// Strangely, debugger has a problem here, and after the first deletion, it does not
+		// iterate over other elements, however, all elements in the list gets deleted. 
+		e1Model.removeElement(elt);
+	};
+		
+	endLog("Done");
+}
+
+
+query Class::IsPlainClass() : Boolean =
+	self.nestedClassifier->size() = 0 and self.ownedPort->size() = 0;
+
+constructor Class::Class(nameArg:String)
+{
+	name := nameArg; 
+}
+
+constructor Property::Property(nameArg:String) {
+	name := nameArg;
+}
+
+constructor Port::Port(nameArg:String, typeArg:Class) {
+	name := nameArg;
+	type := typeArg;
+}
+
+constructor ConnectorEnd::ConnectorEnd(portArg: Port, partWithPortArg: Property)
+{
+	role := portArg;
+	partWithPort := partWithPortArg;	
+}
+
+constructor Connector::Connector(nameArg: String, port1: Port, partWithPort1: Property, 
+								 port2: Port, partWithPort2: Property) {
+	name := nameArg;
+	_end += new ConnectorEnd(port1, partWithPort1);
+	_end += new ConnectorEnd(port2, partWithPort2);	
+}
+
+constructor Operation::Operation(otherOperation: Operation) {
+	name := otherOperation.name;
+	
+	otherOperation.ownedParameter->forEach(otherParam) {
+		var newParam = new Parameter(otherParam);
+		ownedParameter += newParam; 
 	}
+}
+
+constructor Parameter::Parameter(otherParam: Parameter) {
+	name := otherParam.name;
+	
+	// TODO:  If type is not a primitive type, 
+	// this might require a deeper resolve operation. 
+	type := otherParam.type;
 }
 
 
@@ -457,8 +331,6 @@ constructor ControlFlow :: ControlFlow(sourceArg : ActivityNode, targetArg : Act
 	source := sourceArg;
 	target := targetArg; 
 }
-
-
 
 
 // check if connector has two ends, 
@@ -544,89 +416,6 @@ query Connector::isSecondaryEnhancedConnector() : Boolean {
 		};
 		
 	return false; 
-}
-
-
-
-mapping ConnectorEnd :: ConnectorEnd2ConnectorEnd() : ConnectorEnd {
-	init {
-		beginLog("ConnectorEnd");
-		result := self.clone();
-	}
-	
-	partWithPort := self.partWithPort.resolveoneIn(Property::Property2Property, Property);
-	role := self.role.resolveoneIn(Port::Port2Port, Port);
-	
-	end {
-		endLog("ConnectorEnd");
-	}
-}
-
-mapping Port :: Port2Port() : Port {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	type := self.type.resolveoneIn(Class::PlainClass2Class, Class);
-	if (type = null) {
-		inlog("Warning: could not resolve type of " + self.name + " falling back to late resolve");
-		type := self.type.late resolveoneIn(Class::PlainClass2Class, Class);
-	}
-	
-	end {
-		endLog(self.name);
-	}
-}
-
-mapping Interface :: Interface2Interface() : Interface {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	ownedOperation += self.ownedOperation[Operation]->map Operation2Operation();
-	
-	end {
-		endLog(self.name);
-	}
-}
-
-mapping Operation :: Operation2Operation() : Operation {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	ownedParameter += self.ownedParameter[Parameter]->map OwnedParameter2OwnedParameter();
-	
-	end {
-		endLog(self.name);
-	}
-}
-
-mapping Parameter::OwnedParameter2OwnedParameter() : Parameter {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-
-	end {
-		endLog(self.name);
-	}
-}
-
-mapping Interaction::Interaction2Interaction() : Interaction {
-	init {
-		beginLog(self.name);
-		result := self.clone();
-	}
-	
-	// TODO
-	
-	end {
-		endLog(self.name);
-	}
 }
 
 
