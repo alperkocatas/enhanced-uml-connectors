@@ -35,6 +35,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.m2m.internal.qvt.oml.evaluator.ThisInstanceResolver;
 import org.eclipse.m2m.qvt.oml.BasicModelExtent;
 import org.eclipse.m2m.qvt.oml.ExecutionContextImpl;
 import org.eclipse.m2m.qvt.oml.ExecutionDiagnostic;
@@ -100,6 +101,9 @@ public class EcTransformer {
 	
 	private String ConnectorBehaviorFumlFilePath;
 	
+	private String ConnectorClsModelPath = null;
+	private String OutportMultiplicity = null;
+	private String AlfPkgName = null;
 	
 	public void initializeUMLResources()
 	{
@@ -138,14 +142,22 @@ public class EcTransformer {
 		context.setConfigProperty("LogIndentLevel", 5);
 		
 	    OutputStreamWriter outStream = new OutputStreamWriter(System.out);
-	    Log log = new WriterLog(outStream);
-	    context.setLog(log);
-		
+		E1toE2TransformationLog log = new E1toE2TransformationLog();
+		context.setLog(log);
+	    
+	    
 		URI transformationURI = URI.createFileURI(e1ToE2TxPath);
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, input);
 		Diagnostic loadResult = executor.loadTransformation();
 		System.out.println(loadResult.getMessage());
+		
+		
+		if (log.CaptureOk)
+		{
+			this.ConnectorClsModelPath = log.ConnectorClsModelPath;
+			this.OutportMultiplicity = log.OutportMultiplicity;
+		}
 		
 		List<EObject> outObjects = input.getContents();
         URI outUri = URI.createURI("file:" + e2ModelPath);
@@ -174,10 +186,11 @@ public class EcTransformer {
 		ModelExtent input = new BasicModelExtent(inObjects);	
 		ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();		
-
-		AlfCodeCapturerLog logger = new AlfCodeCapturerLog();
-		context.setLog(logger);
-
+		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
+		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
+		
+		E2ToAlfTransformationLog log = new E2ToAlfTransformationLog();
+		context.setLog(log);
 	    
 		URI transformationURI = URI.createFileURI(e2ToAlfTxPath);
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
@@ -185,11 +198,13 @@ public class EcTransformer {
 		Diagnostic loadResult = executor.loadTransformation();
 		System.out.println(loadResult.getMessage());
 		
-		if (logger.CaptureOk = true)
+		if (log.CaptureOk = true)
 		{
 			System.out.println("Captured Alf code is: ");
-			System.out.println(logger.AlfCode);
-			ConnectorBehaviorAlfCode = logger.AlfCode; 
+			System.out.println(log.AlfCode);
+			ConnectorBehaviorAlfCode = log.AlfCode; 
+			
+			this.AlfPkgName = log.AlfPkgName;
 		}
 		else
 		{
@@ -282,9 +297,6 @@ public class EcTransformer {
 		resourceSet.createResource(e2ModelUri);
 		Resource r = resourceSet.getResource(e2ModelUri, true);
 		EList<EObject> inObjects = r.getContents();
-//		for (EObject temp : inObjects) {
-//			System.out.println(temp.toString());
-//		}
 		ModelExtent e2Input = new BasicModelExtent(inObjects);
 		
 		
@@ -294,9 +306,12 @@ public class EcTransformer {
 		EList<EObject> inObjects2 = r2.getContents();
 		ModelExtent fUmlInput = new BasicModelExtent(inObjects2);
 		
-//		ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 3);
+		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
+		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
+		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName); 
+		
 		
 	    OutputStreamWriter outStream = new OutputStreamWriter(System.out);
 	    Log log = new WriterLog(outStream);
@@ -370,12 +385,12 @@ public class EcTransformer {
 	protected static void hrule() {
 		System.out.println("------------------------------------");
 	}
-	
-	class AlfCodeCapturerLog implements Log {
 
-		public String AlfCode = "";
+	
+	class TransformationLog implements Log {
+
 		public boolean CaptureOk = false;
-		private boolean capture = false;
+		protected boolean capture = false;
 		
         @Override
         public void log(int level, String message, Object param) {
@@ -383,22 +398,6 @@ public class EcTransformer {
                 System.out.println("[" + level + "]: " + message);
             else
                 System.out.println(message);
-            
-            if (message.contains("<end> Alf Code"))
-            {
-            	capture = false;
-            	CaptureOk = true;
-            }
-            
-            if (capture == true)
-            {
-            	AlfCode += message + "\n";
-            }
-            
-            if (message.contains("<begin> Alf Code"))
-            {
-            	capture = true;
-            }
         }
 
         @Override
@@ -415,7 +414,68 @@ public class EcTransformer {
         public void log(String message) {
             log(0, message, null);
         }
-    }
-
+		
+	}
 	
+	class E1toE2TransformationLog extends TransformationLog {
+
+		public String ConnectorClsModelPath = null;
+		public String OutportMultiplicity = null;
+		
+        @Override
+        public void log(int level, String message, Object param) {
+        	super.log(level, message, param);
+        	
+            if (message.contains("CONNECTOR_CLS_MODEL_PATH="))
+            {
+            	ConnectorClsModelPath = message.replace("CONNECTOR_CLS_MODEL_PATH=", "");
+            	ConnectorClsModelPath = ConnectorClsModelPath.trim();
+            }
+            
+            if (message.contains("OUTPORT_MULTIPLICITY="))
+            {
+            	OutportMultiplicity = message.replace("OUTPORT_MULTIPLICITY=", "");
+            	OutportMultiplicity = OutportMultiplicity.trim();
+            }
+            
+            if (ConnectorClsModelPath != null && OutportMultiplicity != null)
+				this.CaptureOk = true;
+            else
+            	this.CaptureOk = false;
+        }
+    }
+	
+	class E2ToAlfTransformationLog extends TransformationLog {
+
+		public String AlfCode = "";
+		public String AlfPkgName = "";
+		
+        @Override
+        public void log(int level, String message, Object param) {
+        	
+        	super.log(level, message, param);            
+            
+        	if (message.contains("<end> Alf Code"))
+            {
+            	capture = false;
+            	CaptureOk = true;
+            }
+            
+            if (capture == true)
+            {
+            	AlfCode += message + "\n";
+            }
+            
+            if (message.contains("<begin> Alf Code"))
+            {
+            	capture = true;
+            }
+            
+            if (message.contains("ALF_PKG_NAME="))
+            {
+            	AlfPkgName = message.replace("ALF_PKG_NAME=", "");
+            	AlfPkgName = AlfPkgName.trim();
+            }
+        }
+    }	
 }
