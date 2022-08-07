@@ -1,54 +1,37 @@
+import EcTransformationLibrary;
+
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
 
 // The plan is to take as input two uml models, and output another uml model 
-transformation E2toE3TransformationTest1(inout e2Model:uml, in fUmlModel:uml);
+transformation E2toE3Transformation(inout e2Model:uml, in fUmlModel:uml) 
+	access EcTransformationLibrary;
 
-configuration property IFC_NAME : String;
-configuration property OP_NAME : String;
-configuration property CONNECTOR_CLS_NAME : String;
+configuration property CONNECTOR_CLS_MODEL_PATH : String;
+configuration property OUTPORT_MULTIPLICITY : Integer;
+configuration property ALF_PKG_NAME : String;
+
 configuration property IFC_ASSOC_NAME : String;
-configuration property IFC_ASSOC_MULTIPLICITY : Integer;
-configuration property CONTAINER_CLS_NAME : String;
-configuration property FUML_CONNECTOR_ACTIVITY_NAME : String;
-configuration property FUML_MODEL_REF_PATH_STR : String;
-configuration property FUML_CONTAINER_PKG_NAME : String;
-
 configuration property LogIndentLevel : Integer;
 
-helper setDefaultConfigurationPropertyValues() {
-	
-	if (IFC_NAME = null)
-		IFC_NAME := "XIfc";
-	
-	if (OP_NAME = null)
-		OP_NAME := "xOp";
-	
-	if (CONNECTOR_CLS_NAME = null)
-		CONNECTOR_CLS_NAME := "ConnectorCls";
+helper checkConfigurationPropertyValues() {
 			
 	if (IFC_ASSOC_NAME = null)
-		IFC_ASSOC_NAME := "ItsXIfc";
-
-	if (IFC_ASSOC_MULTIPLICITY = null)
-		IFC_ASSOC_MULTIPLICITY := 2;
+		IFC_ASSOC_NAME := "OutPort";
 		
-	if (CONTAINER_CLS_NAME = null)
-		CONTAINER_CLS_NAME := "ECls";
+	assert fatal (CONNECTOR_CLS_MODEL_PATH <> null) with 
+		log("CONNECTOR_CLS_MODEL_PATH parameter is mandatory");
 	
-	if (FUML_CONNECTOR_ACTIVITY_NAME = null)
-		FUML_CONNECTOR_ACTIVITY_NAME := "xOp$method$1";
-		
-	if (FUML_MODEL_REF_PATH_STR = null)
-		FUML_MODEL_REF_PATH_STR := "PortModel6_RoundRobinConnector";
-	
-	if (FUML_CONTAINER_PKG_NAME = null)
-		FUML_CONTAINER_PKG_NAME := "PortModel6_RoundRobinConnector"; 	
+	assert fatal (OUTPORT_MULTIPLICITY <> null) with 
+		log("OUTPORT_MULTIPLICITY parameter is mandatory");
+				
+	assert fatal (ALF_PKG_NAME <> null) with 
+		log("ALF_PKG_NAME parameter is mandatory");
 }
 
 
 main() {
-	LogIndentLevel := 0;
+	initializeLogger();
 	log('In Main ');
 
 	// can we just write a huge helper function which will do all the manipulation? 
@@ -63,46 +46,47 @@ constructor Property::Property(nameArg:String, typeArg : Interface,
 	upper := upperArg;
 }
 
+
+// We are searching for an activity like name "xOp$method$1";
+// and we want to skip names like destroy$method$1, ConnectorCls$method$1, 
+// ConnectorCls$initialization$1... 
+helper findConnectorBehaviorActivity(fUmlConCls: Class) : Activity {
+														
+	var behaviorSet : Set(Behavior) := fUmlConCls.ownedBehavior
+		->select(name.indexOf(fUmlConCls.name +"$") <= 0 and 
+				 name.indexOf("destroy" + "$") <= 0);
+		
+	assert fatal (behaviorSet->size() = 1) with 
+		log("fUML class " + fUmlConCls.name + " has more than one activities for connector " + 
+		    "behavior candidate!");	
+		
+	var fUmlConnectorBehaviorActivity : Activity := 
+		behaviorSet->oclAsType(Activity)->asSequence()->at(1);
+	
+	return fUmlConnectorBehaviorActivity;
+}
+
+
 helper transformE2toE3()  {
 
-	setDefaultConfigurationPropertyValues();
+	checkConfigurationPropertyValues();
 	
-	var arg : String := e2Model.rootObjects()[Model].name->asSequence()->at(1);
-	
-	log("got this in the e2Model: " + arg);
-	
-	var arg2 : String := fUmlModel.rootObjects()[Model].name->asSequence()->at(1);
-	log("got this in the fUmlModel: " + arg2);
-
-	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
-	
-	var fUmlPkg : Package := fUmlModel.packagedElement
-		->select(name = FUML_CONTAINER_PKG_NAME)
-		->oclAsType(Package)->asSequence()->at(1);
-						      
-	var fUmlConCls : Class := fUmlPkg.packagedElement
-		->select(name = CONNECTOR_CLS_NAME)
-		->oclAsType(Class)->asSequence()->at(1);
-														
-	var fUmlConnectorBehaviorActivity : Activity := fUmlConCls.ownedBehavior
-		->select(name = FUML_CONNECTOR_ACTIVITY_NAME)
-		->oclAsType(Activity)->asSequence()->at(1);
-				
 	// now, let's locate the connector class inside the e2 model: 
 	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
 	
-	var e2ContainerCls : Class := e2ModelElt.packagedElement
-		->select(name = CONTAINER_CLS_NAME)
-		->oclAsType(Class)->asSequence()->at(1);
+	var allObjects : Set(Element) := e2Model.rootObjects()->oclAsType(Element)->asSet();
 		
-	var e2ConCls : Class := e2ContainerCls.nestedClassifier
-		->select(name = CONNECTOR_CLS_NAME)->oclAsType(Class)->asSequence()->at(1);
+	var e2ConCls : Class := getModelElement(CONNECTOR_CLS_MODEL_PATH, e2Model)
+		->oclAsType(Class)->asSequence()->at(1);
 	
-	var e2xOp : Operation := e2ConCls.ownedOperation->select(name = OP_NAME)
-		->oclAsType(Operation)->asSequence()->at(1);
+	assert fatal (e2ConCls <> null) with
+		log("Could not find class " + CONNECTOR_CLS_MODEL_PATH + " in input model");
 	
-	var e2xIfc : Interface := e2ModelElt.packagedElement
-		->select(name = IFC_NAME)->oclAsType(Interface)->asSequence()->at(1);
+	var e2ContainerCls : Class := e2ConCls.owner->oclAsType(Class)->asSequence()->at(1);
+	
+	var e2xIfc : Interface := getInterfaceFromConnectorCls(e2ConCls);
+	
+	var e2xOp : Operation := e2xIfc.ownedOperation->asSequence()->at(1);
 	
 	// Create the ItsXIfc reference array: 
 	var foundCount : Integer := e2ConCls[Class].allAttributes()
@@ -112,7 +96,7 @@ helper transformE2toE3()  {
 	if (foundCount = 0)
 	{
 		e2ItsXIfc := new Property(IFC_ASSOC_NAME, e2xIfc, 
-			IFC_ASSOC_MULTIPLICITY, IFC_ASSOC_MULTIPLICITY);
+			OUTPORT_MULTIPLICITY, OUTPORT_MULTIPLICITY);
 		e2ConCls.ownedAttribute += e2ItsXIfc;
 	}
 	else if (foundCount = 1)
@@ -125,6 +109,25 @@ helper transformE2toE3()  {
 		log("WARNING: property " + IFC_ASSOC_NAME + " is defined more than once under class " + 
 			e2ConCls.name);
 	};
+	
+	
+	
+	// locate fUML model elements: ConnectorClass should be under the package named in alf 
+	
+	var arg2 : String := fUmlModel.rootObjects()[Model].name->asSequence()->at(1);
+	log("got this in the fUmlModel: " + arg2);
+
+	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
+	
+	var fUmlPkg : Package := fUmlModel.packagedElement
+		->select(name = ALF_PKG_NAME)
+		->oclAsType(Package)->asSequence()->at(1);
+						      
+	var fUmlConCls : Class := fUmlPkg.packagedElement
+		->select(name = e2ConCls.name)->oclAsType(Class)->asSequence()->at(1);
+														
+	var fUmlConnectorBehaviorActivity : Activity := findConnectorBehaviorActivity(fUmlConCls);
+				
 	
 	var newActivity: Activity = fUmlConnectorBehaviorActivity[Activity]
 		->deepclone()->asSequence()->at(1);
@@ -153,7 +156,7 @@ helper transformE2toE3()  {
 			var sfname : String := sfa.structuralFeature.name;
 			var sfqualifiedName : String := sfa.structuralFeature.qualifiedName;
 			
-			var idx : Integer := sfqualifiedName.indexOf(FUML_MODEL_REF_PATH_STR);  
+			var idx : Integer := sfqualifiedName.indexOf(ALF_PKG_NAME);  
 			if (idx > 0)
 			{
 				log("Found: StructuralFeatureAction: " + sfqualifiedName);
@@ -184,7 +187,7 @@ helper transformE2toE3()  {
 			
 			sfa.input->forEach(inputPin) {
 				
-				if (inputPin.type.qualifiedName.indexOf(FUML_MODEL_REF_PATH_STR) > 0)
+				if (inputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 				{
 					if (inputPin.type.name = e2ConCls.name) 
 					{
@@ -203,7 +206,7 @@ helper transformE2toE3()  {
 			
 			sfa.output->forEach(outputPin) {
 				
-				if (outputPin.type.qualifiedName.indexOf(FUML_MODEL_REF_PATH_STR) > 0) 
+				if (outputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0) 
 				{
 					if (outputPin.type.name = e2ConCls.name)
 					{
@@ -227,7 +230,7 @@ helper transformE2toE3()  {
 			var rsa : ReadSelfAction := e.oclAsType(ReadSelfAction);
 			var rsaResultTypeQualifiedName : String := rsa.result.type.qualifiedName;
 			
-			if (rsaResultTypeQualifiedName.indexOf(FUML_MODEL_REF_PATH_STR) > 0)
+			if (rsaResultTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
 				log("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
 				count := count + 1; 
@@ -249,7 +252,7 @@ helper transformE2toE3()  {
 			var coa : CallOperationAction := e.oclAsType(CallOperationAction);
 			var coaOpQualifiedName = coa.operation.qualifiedName;
 			
-			if (coaOpQualifiedName.indexOf(FUML_MODEL_REF_PATH_STR) > 0)
+			if (coaOpQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
 				log("Found: CallOperation operation: " + coaOpQualifiedName);
 				
@@ -266,7 +269,7 @@ helper transformE2toE3()  {
 			
 			var coaTargetTypeQName : String := coa.target.type.qualifiedName;
 			 
-			if (coaTargetTypeQName.indexOf(FUML_MODEL_REF_PATH_STR) > 0)
+			if (coaTargetTypeQName.indexOf(ALF_PKG_NAME) > 0)
 			{
 				log("Found: CallOperation target type: " + coaTargetTypeQName);
 				
@@ -295,31 +298,24 @@ helper transformE2toE3()  {
 }
 
 
-helper getLogIndent() : String {
-	var indentStr : String := '';
-	var i : Integer := 0;
+// Find model element represented by the pathStr 
+helper getModelElement(pathStr: String, inputModel:uml) : Element
+{	
+	var allObjects := inputModel.rootObjects().allSubobjects();
 	
-	while (i < LogIndentLevel) {
-		indentStr := indentStr + ' ';
-		i := i + 1;
+	allObjects->forEach(e) {
+		if (e.oclIsKindOf(NamedElement)->asSequence()->at(1) = true)
+		{
+			var ne : NamedElement := e->oclAsType(NamedElement)->asSequence()->at(1);
+			  
+			var elementPath : String := getModelPath(ne);
+			
+			if (elementPath = pathStr)
+			{
+				return e->oclAsType(Element)->asSequence()->at(1);
+			}	
+		}
 	};
 	
-	return indentStr;
-}
-
-helper beginLog(arg: String) {
-	var indentStr = getLogIndent();
-	log(indentStr + '>> Begin transforming ' + arg);
-	LogIndentLevel := LogIndentLevel + 2;
-}
-
-helper inlog(arg: String) {
-	var indentStr = getLogIndent();
-	log(indentStr + " " + arg);
-}
-
-helper endLog(arg: String) {
-	LogIndentLevel := LogIndentLevel - 2;
-	var indentStr = getLogIndent();
-	log(indentStr + '<< End transforming ' + arg);
+	return null;
 }

@@ -1,42 +1,27 @@
 // This is an inplace transformation, which is ran from inside Java to save outputs as a different
 // model file. 
 
+import EcTransformationLibrary;
+
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
-transformation RoundRobinTransform(inout e1Model:uml);
-configuration property LogIndentLevel : Integer;
-
-
-helper setDefaultConfigurationPropertyValues() {
-
-	if (LogIndentLevel = null)
-		LogIndentLevel := 0;	
-}
+transformation E1toE2Transformation(inout e1Model:uml)
+	access EcTransformationLibrary;
 
 main() {
-	if (LogIndentLevel = null) LogIndentLevel := 0;
+	initializeLogger();
 	log('In Main: LogIndentLevel is: ' + LogIndentLevel.toString());	
 	transformE1toE2();
 }
 
 helper transformE1toE2()
 {
-	setDefaultConfigurationPropertyValues();
-	
-	// In the future, we can dynamically search for enhanced connectors 
-	// inside the model, but for now, let's just assume that we know the location of the 
-	// enhanced connector. 
-		
-	// but let's just give it a try: iterate over all model elements and see what mappens: 
-	
 	var model : Model := e1Model.rootObjects()[Model]->asSequence()->at(1);
 	
+	// Search for enhanced connectors inside the model 
 	var allStuff : Set(Element) := model->allOwnedElements()
 		->asSequence()->at(1);
 	
-	// Search for enhanced connector and its behavior.
-	
-	var count : Integer := 0; 
 	allStuff->forEach(e) {
 		
 		if (e->oclIsKindOf(Connector)->asSequence()->at(1) = true)
@@ -47,13 +32,15 @@ helper transformE1toE2()
 			{
 				log("Found a primary enhanced connector: " + con.name);
 				transformPrimaryEnhancedConnector(con);
+				
+				// For simplicity, let's assume that the model contains at most one 
+				// enhanced connector. So, break after transforming it. 
+				break;
 			};
-		};	
-		count := count + 1;	
+		};		
 	};
-	
-	log("Iterated through " + count.toString() + " model elements");
 }
+
 
 helper transformPrimaryEnhancedConnector(ec : Connector)
 {
@@ -61,9 +48,12 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	
 	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
 	
-	var connectorCls : Class := new Class("ConnectorCls");
+	var connectorCls : Class := new Class(ec.name + "_ConnectorCls");
 	
 	ownerClass.nestedClassifier += connectorCls;
+	
+	var connectorClsModelPath : String := getModelPath(connectorCls);
+	inlog("CONNECTOR_CLS_MODEL_PATH=" + connectorClsModelPath);
 	
 	// Make sure connector end is singular, and it is connected to a port.
 	inlog("Checking if the connector is an assembly connector..."); 
@@ -114,8 +104,7 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	ownerClass.ownedConnector += prvEndCon;
 	
 	// Implement interface operation
-	// TODO: This is also specific: assumes that there are only one operation defined in the 
-	// interface. 
+	// TODO: Assumption: We assume that there is only one operation defined in the interface. 
 	var theInterface : Interface = providingPort.provided->asSequence()->at(1);
 	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
 	
@@ -128,6 +117,8 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	var elementsToRemove : List(Element);
 	elementsToRemove += ec;
 	
+	var outPortMultiplicity : Integer := 1;
+	
 	if (ec.clientDependency->size() <> 0)
 	{
 		ec.clientDependency->forEach(e) 
@@ -139,11 +130,8 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
 					->asSequence()->at(1);
 				
-				// TODO: Should we make sure that this secondary connector and primary connector
-				// forms a connected group? 
-				// I think, for now, assuming that it will originate from the same required port would 
-				// suffice.
-				
+				// TODO: Assumption: We assume that this secondary connector and primary connector
+				// form a connected group. 
 				assert fatal (secondaryEnhancedConnector.IsAssemblyPortConnector()) with 
 					log("Connector " + ec.name + " is not an assembly connector");
 				
@@ -176,12 +164,15 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 				ownerClass.ownedConnector += prvEndConSec;
 				
 				elementsToRemove += secondaryEnhancedConnector;
+				
+				outPortMultiplicity := outPortMultiplicity + 1;
 			};
 			
 			elementsToRemove += e;
 		}
 	};
 	
+	inlog("OUTPORT_MULTIPLICITY=" + outPortMultiplicity.toString());
 	
 	// Map the activity which defines the connector behavior into a method 
 	// of the connector class and its attributes, to attributes of the connector class. 
@@ -201,21 +192,16 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	
 	elementsToRemove += connectorBehaviorActivity;
 	
-	// transfer rest of the activity as is, which is supposed to include:
+	// Assumption: The connector behavior activity consists of:
 	// - Initial node 
 	// - Opaque action
 	// - Final node
 	// - Transitions in between
-	//  
-	
-	// now, what is the proper way to copy these model elements? 
-	// first, let's create the initial node, opaque action and the activity final. 
-	// then, let's provide these as input and create control flows in between. 
-	// but.. that will also be a bit specific.. But.. that specificity is not expected
-	// to hurt theory, since this activity structure is the way we define connector
-	// behavior activities.. so.. let's just do it the specific way. Indeed, we can create
-	// the elements even without looking at the source model, maybe? 
-	
+
+	// Copy the connector behavior activity 
+	// TODO: Revise: Since we are doing an inplace transformation now, We may not have to make 
+	// this duplication. We can just move existing activity
+	// inside the connector class, and move the attributes to the connector class. 
 	var newConnectorBehaviorActivity : Activity = new Activity(connectorBehaviorActivity.name);
 	newConnectorBehaviorActivity.visibility := VisibilityKind::package;
 	
@@ -302,16 +288,14 @@ constructor Operation::Operation(otherOperation: Operation) {
 constructor Parameter::Parameter(otherParam: Parameter) {
 	name := otherParam.name;
 	
-	// TODO:  If type is not a primitive type, 
+	 
 	// this might require a deeper resolve operation. 
 	type := otherParam.type;
 }
 
-
 // Create a new activity using the connector behavior activity
 constructor Activity::Activity(nameArg: String) {
 	name := nameArg;
-	
 }
 
 constructor OpaqueAction ::OpaqueAction(otherOpaqueAction: OpaqueAction) {
@@ -391,7 +375,6 @@ query Connector::GetProvidingAndRequiringEndParts() : List(Property) {
 	};
 }
 
-
 // If the connector has "contract", this should return true. 
 query Connector::isPrimaryEnhancedConnector() : Boolean = (self.contract->size() = 1);
 
@@ -419,31 +402,3 @@ query Connector::isSecondaryEnhancedConnector() : Boolean {
 }
 
 
-helper getLogIndent() : String {
-	var indentStr : String := '';
-	var i : Integer := 0;
-	
-	while (i < LogIndentLevel) {
-		indentStr := indentStr + ' ';
-		i := i + 1;
-	};
-	
-	return indentStr;
-}
-
-helper beginLog(arg: String) {
-	var indentStr = getLogIndent();
-	log(indentStr + '>> Begin transforming ' + arg);
-	LogIndentLevel := LogIndentLevel + 2;
-}
-
-helper inlog(arg: String) {
-	var indentStr = getLogIndent();
-	log(indentStr + " " + arg);
-}
-
-helper endLog(arg: String) {
-	LogIndentLevel := LogIndentLevel - 2;
-	var indentStr = getLogIndent();
-	log(indentStr + '<< End transforming ' + arg);
-}

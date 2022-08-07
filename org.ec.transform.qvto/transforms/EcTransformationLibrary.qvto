@@ -1,0 +1,81 @@
+modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
+
+library EcTransformationLibrary;
+
+configuration property LogIndentLevel : Integer;
+
+helper initializeLogger() {
+
+	if (LogIndentLevel = null)
+		LogIndentLevel := 0;	
+}
+
+// Calculate model path of an element using ownership relations. 
+helper getModelPath(e: NamedElement) : String
+{
+	if (e.owner = null)
+	{
+		return e.name;
+	};
+	
+	var namedElementOwner : NamedElement := 
+		e->owner->oclAsType(NamedElement)->asSequence()->at(1); 
+	return getModelPath(namedElementOwner) + "::" + e.name;
+}
+
+
+// analyze ports of the connector class to get the interface
+helper getInterfaceFromConnectorCls(conCls : Class) : Interface 
+{
+	var theInterface : Interface := null;
+	
+	conCls->ownedPort->forEach(p)
+	{
+		if (p.provided->size() <> 0)
+		{
+			theInterface := p.provided->asSequence()->at(1);
+			return theInterface;
+		};
+		
+		if (p.required->size() <> 0)
+		{
+			theInterface := p.required->asSequence()->at(1);
+			return theInterface;
+		};
+	};
+	
+	return null;
+}
+
+
+helper getLogIndent() : String {
+	var indentStr : String := '';
+	var i : Integer := 0;
+	
+	while (i < LogIndentLevel) {
+		indentStr := indentStr + ' ';
+		i := i + 1;
+	};
+	
+	return indentStr;
+}
+
+
+helper beginLog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + '>> Begin transforming ' + arg);
+	LogIndentLevel := LogIndentLevel + 2;
+}
+
+
+helper inlog(arg: String) {
+	var indentStr = getLogIndent();
+	log(indentStr + " " + arg);
+}
+
+
+helper endLog(arg: String) {
+	LogIndentLevel := LogIndentLevel - 2;
+	var indentStr = getLogIndent();
+	log(indentStr + '<< End transforming ' + arg);
+}
