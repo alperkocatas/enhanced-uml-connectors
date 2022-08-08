@@ -2,10 +2,6 @@ package org.ec.transform.java;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,74 +9,33 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import javax.lang.model.type.PrimitiveType;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.EPackage.Registry;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.m2m.internal.qvt.oml.evaluator.ThisInstanceResolver;
 import org.eclipse.m2m.qvt.oml.BasicModelExtent;
 import org.eclipse.m2m.qvt.oml.ExecutionContextImpl;
 import org.eclipse.m2m.qvt.oml.ExecutionDiagnostic;
 import org.eclipse.m2m.qvt.oml.ModelExtent;
 import org.eclipse.m2m.qvt.oml.TransformationExecutor;
 import org.eclipse.m2m.qvt.oml.util.Log;
-import org.eclipse.m2m.qvt.oml.util.StringBufferLog;
 import org.eclipse.m2m.qvt.oml.util.WriterLog;
-import org.eclipse.ocl.ecore.impl.PrimitiveTypeImpl;
-import org.eclipse.uml2.common.util.UML2Util;
-import org.eclipse.uml2.uml.AggregationKind;
-import org.eclipse.uml2.uml.Association;
-import org.eclipse.uml2.uml.Classifier;
-import org.eclipse.uml2.uml.Enumeration;
-import org.eclipse.uml2.uml.EnumerationLiteral;
-import org.eclipse.uml2.uml.Generalization;
-import org.eclipse.uml2.uml.Interaction;
-import org.eclipse.uml2.uml.Lifeline;
-import org.eclipse.uml2.uml.LiteralUnlimitedNatural;
-import org.eclipse.uml2.uml.Model;
-import org.eclipse.uml2.uml.PackageableElement;
-import org.eclipse.uml2.uml.Property;
-import org.eclipse.uml2.uml.Type;
-import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.UMLPackage;
-import org.eclipse.uml2.uml.internal.resource.UMLResourceFactoryImpl;
 import org.eclipse.uml2.uml.resource.UMLResource;
-import org.eclipse.uml2.uml.resources.util.UMLResourcesUtil;
-import org.eclipse.emf.mwe.core.issues.Issues;
-import org.eclipse.emf.mwe.utils.Mapping;
 
 public class EcTransformer {
 	
 	private static final Logger logger = Logger.getLogger(EcTransformer.class);
 	
 	private String workspacePath = "/Users/akocatas/Dropbox/payprus-workspace/"; 
-	
-	private String e1ModelPath = workspacePath + "org.ec.connectors/" + 
-			"RoundRobinRequesterQvto/RoundRobinRequester_E1.uml";
-	
-	private String e2ModelPath = workspacePath + "org.ec.connectors/" + 
-			"RoundRobinRequesterQvto/RoundRobinRequester_E2.uml";
-	
-	private String e3ModelPath = workspacePath + "org.ec.connectors/" + 
-			"RoundRobinRequesterQvto/RoundRobinRequester_E3.uml";
 	
 	private String e1ToE2TxPath = workspacePath + "org.ec.transform.qvto/" + 
 			"transforms/E1toE2Transformation.qvto";
@@ -91,19 +46,107 @@ public class EcTransformer {
 	private String e2Toe3TxPath = workspacePath + "org.ec.transform.qvto/" + 
 			"transforms/E2toE3TransformationTest1.qvto";
 	
-	private String fUMLOutputDir = workspacePath + "org.ec.connectors/alf_output/";
+	private String fUMLOutputDir = workspacePath + "org.ec.connectors/alf_output/";	
+	
+	private String AlfWsPath = "/Users/akocatas/Documents/Alf-Reference-Implementation-master/";
+	
+	private String e1ModelDir; 
+	
+	
+	private String e1ModelPath = workspacePath + "org.ec.connectors/" + 
+			"RoundRobinRequesterQvto/RoundRobinRequester_E1.uml";
+	
+	
+	private String e2ModelPath;
+	
+	private String e3ModelPath;
+	
 	
 	private ResourceSet resourceSet;
 	
 	private String ConnectorBehaviorAlfCode;
-	
-	private String AlfWsPath = "/Users/akocatas/Documents/Alf-Reference-Implementation-master/";
 	
 	private String ConnectorBehaviorFumlFilePath;
 	
 	private String ConnectorClsModelPath = null;
 	private String OutportMultiplicity = null;
 	private String AlfPkgName = null;
+	
+	
+	public static void main(String[]args)
+	{
+		// Steps:
+		// - Run the E1toE2Transformation first to get E2 model, 
+		// - Run the E2ToAlfTransformation using E2 model as input, 
+		//   and get the alf code printed as log,
+		// - certain parameters should also be printed in the log by this 
+		//   or previous transformation
+		// - run alfc to compile the alf code into fUML model, 
+		// - run E2toE3Transformation to pull back the connector behavior activity 
+		//   into the E2 model, to get the E3 model. 
+		
+		try
+		{
+			logger.info("Starting...");
+			
+			EcTransformer tx = new EcTransformer();
+			
+			if (args.length == 1)
+				tx.e1ModelPath  = args[0].trim();
+			
+			tx.CalculateFilePaths();
+			tx.initializeUMLResources();
+			tx.runE1ToE2Transformation(); 
+			tx.runE2ToAlfTransformation();
+			tx.compileAlfCode();
+			tx.reformatFUmlConnectorBehaviorFile();
+			tx.runE2toE3Transformation();
+			
+			logger.info("All done");
+		}
+		catch (Exception err)
+		{
+			System.out.println("Error: " + err.getMessage());
+			err.printStackTrace();
+		}
+	}	
+	
+	private void CalculateFilePaths()
+	{
+		
+		File e1File = new File(e1ModelPath);
+		
+		// Calculate model dir
+		e1ModelDir = getDirectory(e1File);
+		
+		String e1FileName = e1File.getName();
+		
+		e2ModelPath = e1ModelDir +  "/" + e1FileName.replace(".uml", "_E2.uml");
+		
+		e3ModelPath = e1ModelDir +  "/" + e1FileName.replace(".uml", "_E3.uml");
+		
+		AlfPkgName = e1FileName.replace(".uml", "");
+	}
+	
+	/**
+	 * return the directory of the file
+	 * @param filePath
+	 * @return
+	 */
+	public static String getDirectory(File file)
+	{
+		if (file.exists())
+		{
+			String parent = file.getParent();
+			
+			if ((new File(parent)).isDirectory())
+			{
+				return parent;
+			}
+		}
+		
+		return null;
+	}
 	
 	public void initializeUMLResources()
 	{
@@ -132,9 +175,9 @@ public class EcTransformer {
 		resourceSet.createResource(e1ModelUri);
 		Resource r = resourceSet.getResource(e1ModelUri, true);
 		EList<EObject> inObjects = r.getContents();
-		for (EObject temp : inObjects) {
-			System.out.println(temp.toString());
-		}
+//		for (EObject temp : inObjects) {
+//			System.out.println(temp.toString());
+//		}
 		
 		ModelExtent input = new BasicModelExtent(inObjects);	
 		//ModelExtent output = new BasicModelExtent();
@@ -150,7 +193,7 @@ public class EcTransformer {
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, input);
 		Diagnostic loadResult = executor.loadTransformation();
-		System.out.println(loadResult.getMessage());
+		logger.info("E1 to E2 transformation load result: " + loadResult.getMessage());
 		
 		
 		if (log.CaptureOk)
@@ -165,10 +208,12 @@ public class EcTransformer {
         res.getContents().addAll(outObjects);
         try {
             res.save(Collections.emptyMap());
-            logger.info("E1toE2Transformation ok...");
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        logger.info("E1 to E2 transformation ran successfully");
+        printLogSeparator();
 	}
 	
 	public void runE2ToAlfTransformation() throws Exception
@@ -179,15 +224,17 @@ public class EcTransformer {
 		resourceSet.createResource(e1ModelUri);
 		Resource r = resourceSet.getResource(e1ModelUri, true);
 		EList<EObject> inObjects = r.getContents();
-		for (EObject temp : inObjects) {
-			System.out.println(temp.toString());
-		}
+//		for (EObject temp : inObjects) {
+//			System.out.println(temp.toString());
+//		}
 		
 		ModelExtent input = new BasicModelExtent(inObjects);	
 		ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();		
 		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
 		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
+		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName);
+		
 		
 		E2ToAlfTransformationLog log = new E2ToAlfTransformationLog();
 		context.setLog(log);
@@ -196,33 +243,37 @@ public class EcTransformer {
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, input, output);
 		Diagnostic loadResult = executor.loadTransformation();
-		System.out.println(loadResult.getMessage());
+		logger.info("E2 to Alf transformation load result: " + loadResult.getMessage());
 		
 		if (log.CaptureOk = true)
 		{
-			System.out.println("Captured Alf code is: ");
-			System.out.println(log.AlfCode);
+			logger.info("Alf code is captured successfully");
 			ConnectorBehaviorAlfCode = log.AlfCode; 
 			
-			this.AlfPkgName = log.AlfPkgName;
 		}
 		else
 		{
 			throw new Exception("Alf code could not be captured after E2toE3 model transformation");
 		}
+		
+		logger.info("E2 to Alf transformation ran successfully");
+		printLogSeparator();
 	}
 	
 	public void compileAlfCode() throws IOException, InterruptedException
 	{
 		// Create an alf file in ??		
 		String alfPrjPath = AlfWsPath + "dist/alf/";
-		String alfPkgName = "PortModel6_RoundRobinConnector";
-		String alfFilePath = alfPrjPath + "Models/" + alfPkgName + ".alf";
+		String alfFilePath = alfPrjPath + "Models/" + AlfPkgName + ".alf";
+
+		logger.info("Creating alf file: " + alfFilePath);
 		
 		// Create Alf File:
 		FileWriter writer = new FileWriter(alfFilePath);
 		writer.write(this.ConnectorBehaviorAlfCode);
 		writer.close();
+		
+		logger.info("Compiling alf file using alfc");
 		
 		// Compile Alf File using alfc
 		String alfcPath = alfPrjPath + "alfc";
@@ -247,27 +298,31 @@ public class EcTransformer {
 		BufferedReader br = new BufferedReader(isr);
 		String line;
 
-		System.out.printf("Output of running %s is:\n", alfcPath);
-
 		while ((line = br.readLine()) != null) {
-		  System.out.println(line);
+		  logger.info("alfc stdout: " + line);
 		}
 
 
 		process.waitFor();
 		
 		if (process.exitValue() != 0) {
-			System.out.printf("Error output of running %s is:\n", alfcPath);
+			logger.warn("Error occurred while compiling Alf file");
+			
 			InputStream eis = process.getErrorStream();
 			InputStreamReader eisr = new InputStreamReader(eis);
 			BufferedReader ebr = new BufferedReader(eisr);
 			
 			while ((line = ebr.readLine()) != null) {
-				System.out.println(line);
-			}
+				logger.error("alfc stderr: " + line);
+			}	
+		}
+		else
+		{
+			logger.info("Alf code compiled successfully");
 		}
 		
-		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + "/" + alfPkgName + ".uml";
+		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + "/" + AlfPkgName + ".uml";
+		printLogSeparator();
 	}
 	
 	/**
@@ -276,7 +331,6 @@ public class EcTransformer {
 	 */
 	public void reformatFUmlConnectorBehaviorFile() throws IOException
 	{		
-		
 		logger.info("Replacing fUML pathmaps");
 		String fileContents = new String(
 				Files.readAllBytes(Paths.get(ConnectorBehaviorFumlFilePath)));
@@ -287,6 +341,7 @@ public class EcTransformer {
 		FileWriter writer = new FileWriter(ConnectorBehaviorFumlFilePath);
 		writer.write(fileContents);
 		writer.close();
+		printLogSeparator();
 	}
 	
 	public void runE2toE3Transformation()
@@ -321,7 +376,7 @@ public class EcTransformer {
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, e2Input, fUmlInput);
 		Diagnostic loadResult = executor.loadTransformation();
-		System.out.println(loadResult.getMessage());
+		logger.info(loadResult.getMessage());
 		
 		List<EObject> outObjects = e2Input.getContents();
         URI outUri = URI.createURI("file:" + e3ModelPath);
@@ -332,60 +387,16 @@ public class EcTransformer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        logger.info("E2toE3Transformation executed successfully");
+        printLogSeparator();
 	}
-	
-	public static void main(String[]args)
+
+	public void printLogSeparator()
 	{
-		// Steps:
-		// - Run the E1toE2Transformation first to get E2 model, 
-		// - Run the E2ToAlfTransformation using E2 model as input, 
-		//   and get the alf code printed as log,
-		// - certain parameters should also be printed in the log by this 
-		//   or previous transformation
-		// - run alfc to compile the alf code into fUML model, 
-		// - run E2toE3Transformation to pull back the connector behavior activity 
-		//   into the E2 model, to get the E3 model. 
-		
-		try
-		{	
-			EcTransformer tx = new EcTransformer();
-			tx.initializeUMLResources();
-			tx.runE1ToE2Transformation(); 
-			tx.runE2ToAlfTransformation();
-			tx.compileAlfCode();
-			tx.reformatFUmlConnectorBehaviorFile();
-			tx.runE2toE3Transformation();
-		}
-		catch (Exception err)
-		{
-			System.out.println("Error: " + err.getMessage());
-			err.printStackTrace();
-		}
-	}	
-	
-	 
-	
-	//
-	// Logging utilities
-	//
-
-	protected static void banner(String format, Object... args) {
-		System.out.println();
-		hrule();
-
-		System.out.printf(format, args);
-		if (!format.endsWith("%n")) {
-			System.out.println();
-		}
-
-		hrule();
-		System.out.println();
+		logger.info("----------------------------------------------------------------------------");
+		logger.info("");
 	}
-	
-	protected static void hrule() {
-		System.out.println("------------------------------------");
-	}
-
 	
 	class TransformationLog implements Log {
 
@@ -448,7 +459,6 @@ public class EcTransformer {
 	class E2ToAlfTransformationLog extends TransformationLog {
 
 		public String AlfCode = "";
-		public String AlfPkgName = "";
 		
         @Override
         public void log(int level, String message, Object param) {
@@ -469,12 +479,6 @@ public class EcTransformer {
             if (message.contains("<begin> Alf Code"))
             {
             	capture = true;
-            }
-            
-            if (message.contains("ALF_PKG_NAME="))
-            {
-            	AlfPkgName = message.replace("ALF_PKG_NAME=", "");
-            	AlfPkgName = AlfPkgName.trim();
             }
         }
     }	
