@@ -10,8 +10,9 @@ transformation E1toE2Transformation(inout e1Model:uml)
 
 main() {
 	initializeLogger();
-	log('In Main: LogIndentLevel is: ' + LogIndentLevel.toString());	
+	beginLog("Starting E1 to E2 Transformation...");	
 	transformE1toE2();
+	endLog("Done");
 }
 
 helper transformE1toE2()
@@ -30,7 +31,7 @@ helper transformE1toE2()
 			
 			if (con.isPrimaryEnhancedConnector() )
 			{
-				log("Found a primary enhanced connector: " + con.name);
+				inlog("Found a primary enhanced connector: " + con.name);
 				transformPrimaryEnhancedConnector(con);
 				
 				// For simplicity, let's assume that the model contains at most one 
@@ -44,7 +45,7 @@ helper transformE1toE2()
 
 helper transformPrimaryEnhancedConnector(ec : Connector)
 {
-	beginLog("Processing " + ec.name + " as Primary Enhanced Connector");
+	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector");
 	
 	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
 	

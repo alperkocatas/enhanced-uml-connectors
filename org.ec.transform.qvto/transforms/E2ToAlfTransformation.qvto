@@ -19,10 +19,10 @@ helper checkConfigurationPropertyValues() {
 	if (IFC_ASSOC_NAME = null)
 		IFC_ASSOC_NAME := "OutPort";
 		
-	if (ALF_PKG_NAME = null)
-		ALF_PKG_NAME := "PortModel6_RoundRobinConnector";
-		
 	AlfIndentLevel := 0;	
+	
+	assert fatal (ALF_PKG_NAME <> null) with 
+		log("ALF_PKG_NAME parameter is mandatory");
 	
 	assert fatal (CONNECTOR_CLS_MODEL_PATH <> null) with 
 		log("CONNECTOR_CLS_MODEL_PATH parameter is mandatory");
@@ -33,10 +33,12 @@ helper checkConfigurationPropertyValues() {
 
 main() {
 	initializeLogger();
-	log('In Main ');
-
+	beginLog("Starting E2 to Alf Transformation...");
+	
 	// can we just write a huge helper function which will do all the manipulation? 
 	generateAlfCodeFromE2Model();
+	
+	endLog("Done");
 }
 
 helper generateAlfCodeFromE2Model() {
@@ -75,11 +77,9 @@ helper generateAlfCodeFromE2Model() {
 	endConnectorClass();	
 	endAlfPackage();
 	
-	log("<begin> Alf Code: ");
+	inlog("<begin> Alf Code: ");
 	log(alfCode);
-	log("<end> Alf Code");
-	
-	inlog("ALF_PKG_NAME=" + ALF_PKG_NAME);
+	inlog("<end> Alf Code");
 }
 
 helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: Activity) {
@@ -175,7 +175,7 @@ helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
 				
 				if (attr.type.name = null)
 				{
-					log("WARNING: type name of attribute " + attrName + " seems to be null");
+					inlog("WARNING: type name of attribute " + attrName + " seems to be null");
 				};
 				
 				var attrType : String := attr.type.name.toString();
@@ -201,7 +201,7 @@ helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
 					}
 					else
 					{
-						log("WARNING: Default value of attribute " + attrName + " is unrecognized");
+						inlog("WARNING: Default value of attribute " + attrName + " is unrecognized");
 					} 
 				};
 				
@@ -212,7 +212,7 @@ helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
 		}
 		else
 		{
-			log("WARNING: Type of attribute " + attr.name + " is null")
+			inlog("WARNING: Type of attribute " + attr.name + " is null")
 		}
 	}; //end: forEach
 	

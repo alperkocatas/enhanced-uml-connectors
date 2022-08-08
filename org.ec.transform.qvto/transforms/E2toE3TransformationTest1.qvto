@@ -32,10 +32,12 @@ helper checkConfigurationPropertyValues() {
 
 main() {
 	initializeLogger();
-	log('In Main ');
+	beginLog('Starting E2 to E3 transformation');
 
 	// can we just write a huge helper function which will do all the manipulation? 
-	transformE2toE3();	
+	transformE2toE3();
+	
+	endLog('Done');	
 }
 
 constructor Property::Property(nameArg:String, typeArg : Interface, 
@@ -70,6 +72,8 @@ helper findConnectorBehaviorActivity(fUmlConCls: Class) : Activity {
 helper transformE2toE3()  {
 
 	checkConfigurationPropertyValues();
+	
+	beginLog("Locating e2 model elements...");
 	
 	// now, let's locate the connector class inside the e2 model: 
 	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
@@ -110,13 +114,14 @@ helper transformE2toE3()  {
 			e2ConCls.name);
 	};
 	
+	endLog("Done");
 	
+	beginLog("Locating fUML model elements");
 	
 	// locate fUML model elements: ConnectorClass should be under the package named in alf 
 	
 	var arg2 : String := fUmlModel.rootObjects()[Model].name->asSequence()->at(1);
-	log("got this in the fUmlModel: " + arg2);
-
+	
 	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
 	
 	var fUmlPkg : Package := fUmlModel.packagedElement
@@ -127,7 +132,10 @@ helper transformE2toE3()  {
 		->select(name = e2ConCls.name)->oclAsType(Class)->asSequence()->at(1);
 														
 	var fUmlConnectorBehaviorActivity : Activity := findConnectorBehaviorActivity(fUmlConCls);
-				
+	
+	endLog("Done");
+	
+	beginLog("Copying fUML activity for connector behavior into e2 model");
 	
 	var newActivity: Activity = fUmlConnectorBehaviorActivity[Activity]
 		->deepclone()->asSequence()->at(1);
@@ -142,6 +150,10 @@ helper transformE2toE3()  {
 	
 	// Set specification of the newActivity to xOp in the e2 model. 
 	newActivity.specification := e2xOp;
+	
+	endLog("Done");
+	
+	beginLog("Fixing unresolved references of connector behavior activity in e2 Model");
 	
 	var allStuff : Set(Element) := newActivity[Activity]->allOwnedElements()
 		->asSequence()->at(1);
@@ -159,7 +171,7 @@ helper transformE2toE3()  {
 			var idx : Integer := sfqualifiedName.indexOf(ALF_PKG_NAME);  
 			if (idx > 0)
 			{
-				log("Found: StructuralFeatureAction: " + sfqualifiedName);
+				inlog("Found: StructuralFeatureAction: " + sfqualifiedName);
 				count := count + 1; 	
 				
 				// Now, we should do a name resolution here. 
@@ -169,7 +181,7 @@ helper transformE2toE3()  {
 				
 				if (foundCount != 1)
 				{ 
-					log("WARNING: Expected to find exactly 1 attribute with name " + sfname + 
+					inlog("WARNING: Expected to find exactly 1 attribute with name " + sfname + 
 						" under class " + e2ConCls.qualifiedName  + " but found " + 
 						foundCount.toString());
 				}
@@ -180,7 +192,7 @@ helper transformE2toE3()  {
 												 	
 					// Now, let's alter the structural feature to this one. 
 					sfa.structuralFeature := e2Property;
-					log("Updated structuralFeature field of StructuralFeatureAction " + 
+					inlog("Updated structuralFeature field of StructuralFeatureAction " + 
 						sfqualifiedName);
 				}
 			};   
@@ -192,14 +204,14 @@ helper transformE2toE3()  {
 					if (inputPin.type.name = e2ConCls.name) 
 					{
 						inputPin.type := e2ConCls;
-						log("Updated inputPin.type field of StructuralFeatureAction " + 
+						inlog("Updated inputPin.type field of StructuralFeatureAction " + 
 							sfqualifiedName + " as " + e2ConCls.name);
 					}
 				}
 				else if (inputPin.type.name = e2xIfc.name)
 				{
 					inputPin.type := e2xIfc;
-					log("Updated inputPin.type field of StructuralFeatureAction " + 
+					inlog("Updated inputPin.type field of StructuralFeatureAction " + 
 						sfqualifiedName + " as " + e2xIfc.name);	
 				}
 			};
@@ -211,13 +223,13 @@ helper transformE2toE3()  {
 					if (outputPin.type.name = e2ConCls.name)
 					{
 						outputPin.type := e2ConCls;
-						log("Updated outputPin.type field of StructuralFeatureAction " + 
+						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
 							sfqualifiedName + " as " + e2ConCls.name);
 					}
 					else if (outputPin.type.name = e2xIfc.name)
 					{
 						outputPin.type := e2xIfc;
-						log("Updated outputPin.type field of StructuralFeatureAction " + 
+						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
 							sfqualifiedName + " as " + e2xIfc.name);	
 					}
 				}	
@@ -232,7 +244,7 @@ helper transformE2toE3()  {
 			
 			if (rsaResultTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				log("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
+				inlog("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
 				count := count + 1; 
 				
 				var rsaResultTypeName : String := rsa.result.type.name;
@@ -243,7 +255,7 @@ helper transformE2toE3()  {
 				if (rsaResultTypeName = e2ConCls.name)
 				{
 					rsa.result.type := e2ConCls;
-					log("Updated result.type field of ReadSelfAction: " + rsa.name);
+					inlog("Updated result.type field of ReadSelfAction: " + rsa.name);
 				}
 			}
 		}
@@ -254,13 +266,13 @@ helper transformE2toE3()  {
 			
 			if (coaOpQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				log("Found: CallOperation operation: " + coaOpQualifiedName);
+				inlog("Found: CallOperation operation: " + coaOpQualifiedName);
 				
 				var coaOpName := coa.operation.name;
 				
 				if (coaOpName = e2xOp.name)
 				{
-					log("Updating operation field of CallOperationAction: " + coa.name);
+					inlog("Updating operation field of CallOperationAction: " + coa.name);
 					coa.operation := e2xOp;
 					count := count + 1;
 				}
@@ -271,19 +283,19 @@ helper transformE2toE3()  {
 			 
 			if (coaTargetTypeQName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				log("Found: CallOperation target type: " + coaTargetTypeQName);
+				inlog("Found: CallOperation target type: " + coaTargetTypeQName);
 				
 				var coaTargetTypeName : String := coa.target.type.name;
 				if (coaTargetTypeName = e2ConCls.name)
 				{
-					log("Updating target.type field of CallOperationAction: " + coa.name +
+					inlog("Updating target.type field of CallOperationAction: " + coa.name +
 						" as " + e2xIfc.name);
 					coa.target.type := e2ConCls;
 					count := count + 1;
 				}
 				else if (coaTargetTypeName = e2xIfc.name)
 				{
-					log("Updating target.type field of CallOperationAction: " + coa.name + 
+					inlog("Updating target.type field of CallOperationAction: " + coa.name + 
 						" as " + e2xIfc.name);
 					coa.target.type := e2xIfc;
 					count := count + 1;
@@ -292,9 +304,9 @@ helper transformE2toE3()  {
 		}
 	};
 	
-	log("Replaced " + count.toString() + " references");
+	inlog("Replaced " + count.toString() + " references");
 	
-		
+	endLog("Done");
 }
 
 
