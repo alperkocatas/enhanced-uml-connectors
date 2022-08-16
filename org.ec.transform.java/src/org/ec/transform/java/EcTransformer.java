@@ -44,7 +44,7 @@ public class EcTransformer {
 			"transforms/E2ToAlfTransformation.qvto";
 	
 	private String e2Toe3TxPath = workspacePath + "org.ec.transform.qvto/" + 
-			"transforms/E2toE3TransformationTest1.qvto";
+			"transforms/E2toE3Transformation.qvto";
 	
 	private String fUMLOutputDir = workspacePath + "org.ec.connectors/alf_output/";	
 	
@@ -54,7 +54,10 @@ public class EcTransformer {
 	
 	
 	private String e1ModelPath = workspacePath + "org.ec.connectors/" + 
-			"RoundRobinRequesterQvto/RoundRobinRequester_E1.uml";
+			"RoundRobinRequester/RoundRobinRequester_E1.uml";
+	//		"MultiDestRequester/MultiDestRequester_E1.uml";
+	
+	
 	
 	
 	private String e2ModelPath;
@@ -71,6 +74,7 @@ public class EcTransformer {
 	private String ConnectorClsModelPath = null;
 	private String OutportMultiplicity = null;
 	private String AlfPkgName = null;
+	private String EcConfiguration = null;
 	
 	
 	public static void main(String[]args)
@@ -102,12 +106,14 @@ public class EcTransformer {
 			tx.reformatFUmlConnectorBehaviorFile();
 			tx.runE2toE3Transformation();
 			
-			logger.info("All done");
+			logger.info("Process completed successfully");
 		}
 		catch (Exception err)
 		{
 			System.out.println("Error: " + err.getMessage());
 			err.printStackTrace();
+			
+			System.out.println("Process completed with error(s)");
 		}
 	}	
 	
@@ -167,7 +173,7 @@ public class EcTransformer {
 	}
 	
 	
-	public void runE1ToE2Transformation()
+	public void runE1ToE2Transformation() throws Exception
 	{
 		logger.info("Running E1toE2Transformation");
 
@@ -195,11 +201,20 @@ public class EcTransformer {
 		Diagnostic loadResult = executor.loadTransformation();
 		logger.info("E1 to E2 transformation load result: " + loadResult.getMessage());
 		
+		if (loadResult.getSeverity() != Diagnostic.OK)
+		{
+			throw new Exception("Error occurred while loading E1 to E2 transformation");
+		}
 		
 		if (log.CaptureOk)
 		{
 			this.ConnectorClsModelPath = log.ConnectorClsModelPath;
 			this.OutportMultiplicity = log.OutportMultiplicity;
+			this.EcConfiguration = log.EcConfiguration;
+		}
+		else
+		{
+			throw new Exception("Results of E1 to E2 transformation could not be captured");
 		}
 		
 		List<EObject> outObjects = input.getContents();
@@ -234,6 +249,7 @@ public class EcTransformer {
 		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
 		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
 		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName);
+		context.setConfigProperty("EC_CONFIGURATION", this.EcConfiguration);
 		
 		
 		E2ToAlfTransformationLog log = new E2ToAlfTransformationLog();
@@ -244,12 +260,16 @@ public class EcTransformer {
 		ExecutionDiagnostic result = executor.execute(context, input, output);
 		Diagnostic loadResult = executor.loadTransformation();
 		logger.info("E2 to Alf transformation load result: " + loadResult.getMessage());
+
+		if (loadResult.getSeverity() != Diagnostic.OK)
+		{
+			throw new Exception("Error occurred while loading E1 to E2 transformation");
+		}
 		
 		if (log.CaptureOk = true)
 		{
 			logger.info("Alf code is captured successfully");
 			ConnectorBehaviorAlfCode = log.AlfCode; 
-			
 		}
 		else
 		{
@@ -260,7 +280,7 @@ public class EcTransformer {
 		printLogSeparator();
 	}
 	
-	public void compileAlfCode() throws IOException, InterruptedException
+	public void compileAlfCode() throws IOException, InterruptedException, Exception
 	{
 		// Create an alf file in ??		
 		String alfPrjPath = AlfWsPath + "dist/alf/";
@@ -298,16 +318,21 @@ public class EcTransformer {
 		BufferedReader br = new BufferedReader(isr);
 		String line;
 
+		boolean alfCompilationIsSuccessful = false;
 		while ((line = br.readLine()) != null) {
 		  logger.info("alfc stdout: " + line);
+		  
+		  if (line.contains("Mapped successfully."))
+		  {
+			  alfCompilationIsSuccessful = true;
+		  }
 		}
-
 
 		process.waitFor();
 		
+		// Unfortunately, alfc does not exit with error code if the code doest not compile
+		// so this is just left as a defensive code. 
 		if (process.exitValue() != 0) {
-			logger.warn("Error occurred while compiling Alf file");
-			
 			InputStream eis = process.getErrorStream();
 			InputStreamReader eisr = new InputStreamReader(eis);
 			BufferedReader ebr = new BufferedReader(eisr);
@@ -315,10 +340,18 @@ public class EcTransformer {
 			while ((line = ebr.readLine()) != null) {
 				logger.error("alfc stderr: " + line);
 			}	
+			
+			throw new Exception("Error occurred while compiling Alf file");
 		}
 		else
 		{
 			logger.info("Alf code compiled successfully");
+		}
+		
+		// actual alf compilation result is determined here. 
+		if (alfCompilationIsSuccessful == false)
+		{
+			throw new Exception("Error occurred while compiling Alf file");
 		}
 		
 		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + "/" + AlfPkgName + ".uml";
@@ -344,7 +377,8 @@ public class EcTransformer {
 		printLogSeparator();
 	}
 	
-	public void runE2toE3Transformation()
+	
+	public void runE2toE3Transformation() throws Exception
 	{
 		logger.info("Running E2toE3Transformation");
 
@@ -377,6 +411,11 @@ public class EcTransformer {
 		ExecutionDiagnostic result = executor.execute(context, e2Input, fUmlInput);
 		Diagnostic loadResult = executor.loadTransformation();
 		logger.info(loadResult.getMessage());
+		
+		if (loadResult.getSeverity() != Diagnostic.OK)
+		{
+			throw new Exception("Error occurred while loading E1 to E2 transformation");
+		}
 		
 		List<EObject> outObjects = e2Input.getContents();
         URI outUri = URI.createURI("file:" + e3ModelPath);
@@ -432,6 +471,7 @@ public class EcTransformer {
 
 		public String ConnectorClsModelPath = null;
 		public String OutportMultiplicity = null;
+		public String EcConfiguration = null;
 		
         @Override
         public void log(int level, String message, Object param) {
@@ -449,10 +489,22 @@ public class EcTransformer {
             	OutportMultiplicity = OutportMultiplicity.trim();
             }
             
-            if (ConnectorClsModelPath != null && OutportMultiplicity != null)
+            if (message.contains("EC_CONFIGURATION="))
+            {
+            	EcConfiguration = message.replace("EC_CONFIGURATION=", "");
+            	EcConfiguration = EcConfiguration.trim();
+            }
+            
+            if (ConnectorClsModelPath != null && 
+            	OutportMultiplicity != null &&
+            	EcConfiguration != null)
+            {
 				this.CaptureOk = true;
+            }
             else
+            {
             	this.CaptureOk = false;
+            }
         }
     }
 	

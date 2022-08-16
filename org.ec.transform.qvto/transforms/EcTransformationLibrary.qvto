@@ -2,7 +2,10 @@ modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
 library EcTransformationLibrary;
 
+
 configuration property LogIndentLevel : Integer;
+
+
 
 helper initializeLogger() {
 

@@ -1,6 +1,5 @@
 // This is an inplace transformation, which is ran from inside Java to save outputs as a different
 // model file. 
-
 import EcTransformationLibrary;
 
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
@@ -32,7 +31,19 @@ helper transformE1toE2()
 			if (con.isPrimaryEnhancedConnector() )
 			{
 				inlog("Found a primary enhanced connector: " + con.name);
-				transformPrimaryEnhancedConnector(con);
+				
+				
+				var conf : String = con.getEcConfiguration();
+				
+				if (conf <> "UnknownConfiguration")
+				{
+					inlog("EC_CONFIGURATION=" + conf);
+					transformEcConnector(con, conf);
+				}
+				else
+				{
+					// TODO: Error.. uncrecognized connector configuration
+				};
 				
 				// For simplicity, let's assume that the model contains at most one 
 				// enhanced connector. So, break after transforming it. 
@@ -43,7 +54,474 @@ helper transformE1toE2()
 }
 
 
-helper transformPrimaryEnhancedConnector(ec : Connector)
+
+// Analyze the enhanced connector and decide if it is a single requester, multiple provider 
+// configuration
+//enum ConnectorConfigurationKind {
+//	"SingleRequesterMultipleProvider",
+//	"MultipleRequesterSingleProvider", 
+//	"SingleRequesterSingleProvider" 
+//  "UnknownConfiguration"
+//};
+// We will be using this configuration property as above enumeration
+query Connector::getEcConfiguration() : String {
+
+	var requesterPorts : Set(Port);
+	var providerPorts : Set(Port);
+
+	var ports : List(Port) := self.GetProvidingAndRequiringEndPorts();
+	var requiringPort: Port := ports->at(1);
+	var providingPort: Port := ports->at(2);
+	
+	requesterPorts += requiringPort;
+	providerPorts += providingPort;
+	
+	if (self.clientDependency->size() <> 0)
+	{
+		self.clientDependency->forEach(e) 
+		{			
+			var target : Element = e.target->asSequence()->at(1);
+			
+			if (target->oclIsKindOf(Connector)->asSequence()->at(1))
+			{
+				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
+					->asSequence()->at(1);
+				
+				ports := secondaryEnhancedConnector.GetProvidingAndRequiringEndPorts();
+				var requiringPortSecondary : Port := ports->at(1);
+				var providingPortSecondary : Port := ports->at(2);
+				
+				requesterPorts += requiringPortSecondary;
+				providerPorts += providingPortSecondary;
+			};
+		};
+	};
+	
+	if (requesterPorts->size() = 1 and providerPorts->size() > 1)
+	{
+		return "SingleRequesterMultipleProvider";
+	}		
+	else if (requesterPorts->size() > 1 and providerPorts->size() = 1)
+	{
+		return "MultipleRequesterSingleProvider";
+	}
+	else if (requesterPorts->size() = 1 and providerPorts->size() = 1)
+	{
+		return "SingleRequesterSingleProvider";
+	};
+	
+	return "UnknownConfiguration";
+}
+
+
+helper transformEcConnector(ec : Connector, conf : String)
+{
+	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector..");
+	inlog("Connector configuration is: " + conf);
+	
+	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
+	
+	var connectorCls : Class := new Class(ec.name + "_ConnectorCls");
+	
+	ownerClass.nestedClassifier += connectorCls;
+	
+	var connectorClsModelPath : String := getModelPath(connectorCls);
+	inlog("CONNECTOR_CLS_MODEL_PATH=" + connectorClsModelPath);
+	
+	// Make sure connector end is singular, and it is connected to a port.
+	inlog("Checking if the connector is an assembly connector..."); 
+	assert fatal (ec.IsAssemblyPortConnector()) with log("Connector " + ec.name + 
+		" is not an assembly connector");
+		
+	// Create providing and requiring ports of the connector class
+	inlog("Creating the connector class ports");
+	var ports : List(Port) := ec.GetProvidingAndRequiringEndPorts();
+	var requiringPort: Port := ports->at(1);
+	var providingPort: Port := ports->at(2);
+	
+	var parts : List(Property) := ec.GetProvidingAndRequiringEndParts();
+	var requiringPart : Property := parts->at(1);
+	var providingPart : Property := parts->at(2);
+	
+	var providingPortConCls : Port := new Port("prvPort", 
+		providingPort.type->oclAsType(Class)->asSequence()->at(1));
+	connectorCls.ownedAttribute += providingPortConCls;
+	
+	var requiringPortConCls : Port := new Port("reqPort", 
+		requiringPort.type->oclAsType(Class)->asSequence()->at(1));
+	connectorCls.ownedAttribute += requiringPortConCls;
+	
+	var reqPortObj : Property := null;
+	var requestPortCls : Class := null;
+	if (conf = "MultipleRequesterSingleProvider")
+	{
+		inlog("Creating request port class and its ports");
+		requestPortCls := new Class("RequestPortCls");
+		connectorCls.nestedClassifier += requestPortCls;
+		
+		var providingPortReqPortCls : Port := new Port("prvPort", 
+			providingPort.type->oclAsType(Class)->asSequence()->at(1));
+		requestPortCls.ownedAttribute += providingPortReqPortCls;
+						
+		inlog("Create Request Port object inside the connector class");
+		reqPortObj := new Property('InPort');
+		reqPortObj.type := requestPortCls;
+		reqPortObj.lower := 1;
+		reqPortObj.upper := 1;
+		reqPortObj.isOrdered := true;
+		reqPortObj.isUnique := false;
+		connectorCls.ownedAttribute += reqPortObj.oclAsType(Property);
+		
+		inlog("Creating connector betweeen request port object and providing port of connector class");
+		var inPortConClsConnector : Connector := new Connector("InPortConnector", providingPortConCls, 
+										null, providingPortReqPortCls, reqPortObj); 
+		connectorCls.ownedConnector += inPortConClsConnector;
+		
+	};	
+	
+	// Create connector object
+	inlog("Creating the connector object...");  	
+	var conObj := new Property('ConnectorObj');
+	conObj.type := connectorCls;
+	conObj.lower := 1;
+	conObj.upper := 1;
+	ownerClass.ownedAttribute += conObj.oclAsType(Property);
+	
+	inlog("Creating connectors between connector object and connected parts...");
+	
+	// Create required and provided side connectors and add them to the parent class
+	var reqEndCon : Connector := new Connector(ec.name + "_reqEndCon", requiringPort, 
+									requiringPart, providingPortConCls, conObj); 
+	ownerClass.ownedConnector += reqEndCon;
+	
+	var prvEndCon : Connector := new Connector(ec.name + "_prvEndCon", requiringPortConCls, conObj, 
+												providingPort, providingPart); 
+	ownerClass.ownedConnector += prvEndCon;
+	
+	// Implement interface operation
+	// TODO: Assumption: We assume that there is only one operation defined in the interface. 
+	var theInterface : Interface = providingPort.provided->asSequence()->at(1);
+	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
+	
+	var newOperation : Operation = new Operation(theOperation);
+	connectorCls.ownedOperation += newOperation;
+	
+	// Now, let's check if there are any dependencies from this primary enhanced connector to 
+	// a secondary enhanced connector. 
+	
+	var elementsToRemove : List(Element);
+	elementsToRemove += ec;
+	
+	var inOutPortMultiplicity : Integer := 1;
+	
+	if (ec.clientDependency->size() <> 0)
+	{
+		ec.clientDependency->forEach(e) 
+		{			
+			var target : Element = e.target->asSequence()->at(1);
+			
+			if (target->oclIsKindOf(Connector)->asSequence()->at(1))
+			{
+				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
+					->asSequence()->at(1);
+				
+				// TODO: Assumption: We assume that this secondary connector and primary connector
+				// form a connected group. 
+				assert fatal (secondaryEnhancedConnector.IsAssemblyPortConnector()) with 
+					log("Connector " + ec.name + " is not an assembly connector");
+				
+				inlog("Processing secondary enhanced connector: " + secondaryEnhancedConnector.name);
+					
+				ports := secondaryEnhancedConnector.GetProvidingAndRequiringEndPorts();
+				var requiringPortSecondary : Port := ports->at(1);
+				var providingPortSecondary : Port := ports->at(2);
+	
+				parts := secondaryEnhancedConnector.GetProvidingAndRequiringEndParts();
+				var requiringPartSecondary : Property := parts->at(1);
+				var providingPartSecondary : Property := parts->at(2);
+		
+				
+				if (conf = "SingleRequesterMultipleProvider")
+				{
+					// Make sure requiring part is the same as requiring part of the primary 
+					// enhanced connector: 
+					assert fatal (requiringPart = requiringPartSecondary) with
+						log("Requiring parts of primary enhanced connector " + ec.name + " and " + 
+							"secondary enhanced connector " + secondaryEnhancedConnector.name + 
+							" are not same!");
+				
+					// Increase multiplicity of the requiring port of connector object by one 
+					requiringPortConCls.lower := requiringPortConCls.lower + 1;
+					requiringPortConCls.upper := requiringPortConCls.upper + 1;
+	
+					// Create another reqEnd connector from connector object to the providing part. 
+					var prvEndConSec : Connector := new Connector(secondaryEnhancedConnector.name + 
+						"_prvEndCon", requiringPortConCls, conObj, 
+						providingPortSecondary, providingPartSecondary);
+					ownerClass.ownedConnector += prvEndConSec;
+				}
+				else if (conf = "MultipleRequesterSingleProvider")
+				{
+					// Make sure providing part is the same as providing part of the primary 
+					// enhanced connector: 
+					assert fatal (providingPart = providingPartSecondary) with
+						log("Providing parts of primary enhanced connector " + ec.name + " and " + 
+							"secondary enhanced connector " + secondaryEnhancedConnector.name + 
+							" are not same!");
+					
+					// Increase multiplicity of the providing port of connector object by one 
+					providingPortConCls.lower := providingPortConCls.lower + 1;
+					providingPortConCls.upper := providingPortConCls.upper + 1;
+		
+					// Increase multiplicity of the request port object by one
+					reqPortObj.lower := reqPortObj.lower + 1;
+					reqPortObj.upper := reqPortObj.upper + 1; 
+		
+					// Create another prvEnd connector from connector object to the providing part. 
+					var reqEndConSec : Connector := new Connector(secondaryEnhancedConnector.name + 
+						"_reqEndCon", providingPortConCls, conObj, 
+						requiringPortSecondary, requiringPartSecondary);
+					ownerClass.ownedConnector += reqEndConSec;
+				};
+				
+				elementsToRemove += secondaryEnhancedConnector;
+				
+				inOutPortMultiplicity := inOutPortMultiplicity + 1;
+			};
+			
+			elementsToRemove += e;
+		}
+	};
+	
+	if (conf = "SingleRequesterMultipleProvider")
+	{
+		inlog("OUTPORT_MULTIPLICITY=" + inOutPortMultiplicity.toString());
+	}
+	else if (conf = "MultipleRequesterSingleProvider")
+	{
+		inlog("INPORT_MULTIPLICITY=" + inOutPortMultiplicity.toString());	
+	};
+	
+	// Create the OutPort attribute for Connector Class
+	var outPortAttr : Property := new Property("OutPort");
+	outPortAttr.type := theInterface;
+	outPortAttr.isOrdered := true;
+	outPortAttr.isUnique := false;
+	 
+	if (conf = "SingleRequesterMultipleProvider")
+	{
+		outPortAttr.lower := inOutPortMultiplicity;
+		outPortAttr.upper := inOutPortMultiplicity;
+	}
+	else if (conf = "MultipleRequesterSingleProvider")
+	{
+		outPortAttr.lower := 1;
+		outPortAttr.upper := 1;	
+	};
+	connectorCls.ownedAttribute += outPortAttr;
+	
+	// Map the activity which defines the connector behavior into a method 
+	// of the connector class and its attributes, to attributes of the connector class. 
+	
+	// Let's locate the "contract" of the primary enhanced connector first: 
+	var connectorBehaviorActivity : Activity = ec.contract->oclAsType(Activity)->asSequence()->at(1);
+	
+	
+	// Foreach property of the activity, create an attribute in the connector class
+	// Since we are doing an inplace transformation, altering the owner of the attribute 
+	// will suffice: 
+	connectorBehaviorActivity.ownedAttribute->forEach(p) {
+	
+		// If the configuration is n:1 and this is a request buffer, create its copy inside
+		// the requestPortCls. 
+		if (conf = "MultipleRequesterSingleProvider" and p.hasStereotype("RequestBuffer") )
+		{
+			requestPortCls.ownedAttribute += p;
+			
+			// and since multiplicity of this will now be governed by multiplicity of the 
+			// requestPortCls object, set its multiplicity to 1: 
+			
+			p.lower := 1;
+			p.upper := 1;
+			
+			// Set visibility of request buffer as public
+			// so that connector class can access it:
+			p.visibility := VisibilityKind::_public;
+		}
+		else
+		{
+			connectorCls.ownedAttribute += p;
+		};
+		
+	};
+	
+	
+	
+	elementsToRemove += connectorBehaviorActivity;
+	
+	
+	
+	// Assumption: The connector behavior activity consists of:
+	// - Initial node 
+	// - Opaque action
+	// - Final node
+	// - Transitions in between
+
+	// Copy the connector behavior activity as an OpaqueBehavior into the connector class
+	var opaqueAction : OpaqueAction := 
+		connectorBehaviorActivity.ownedElement->select(oa | oa.oclIsKindOf(OpaqueAction))
+			->oclAsType(OpaqueAction)->asSequence()->at(1);
+	assert fatal(opaqueAction <> null) with log("No OpaqueAction was found under connector behavior");
+	
+	var opaqueActionBody : String := opaqueAction.body->asSequence()->at(1);
+	
+	var transformedOpaqueActionBody : String:= opaqueActionBody
+		->replaceAll("PRV_CNT", inOutPortMultiplicity.toString())
+		->replaceAll("REQ_CNT", inOutPortMultiplicity.toString())
+		->asSequence()->at(1);
+	
+	var connectorOpaqueBehavior : OpaqueBehavior := 
+		new OpaqueBehavior(connectorBehaviorActivity.name);
+	
+	connectorOpaqueBehavior.body := transformedOpaqueActionBody;
+	connectorCls.ownedBehavior += connectorOpaqueBehavior;
+	newOperation.method += connectorOpaqueBehavior;
+	
+	// Delete elements to remove in reverse direction
+	elementsToRemove := elementsToRemove->reverse();
+	elementsToRemove->forEach(elt)
+	{
+		// Strangely, debugger has a problem here, and after the first deletion, it does not
+		// iterate over other elements, however, all elements in the list gets deleted. 
+		e1Model.removeElement(elt);
+	};
+	
+	
+	if (conf = "MultipleRequesterSingleProvider")
+	{
+		CreateConnectorClsConstructorForMultipleRequesterSingleProvider(
+			connectorCls, 
+			inOutPortMultiplicity);
+		
+		CreateRequestClassConstructorForMultipleRequesterSingleProvider(
+			requestPortCls,
+			connectorCls);
+			
+		CreateRequestPortClsRequestHandlerOperation(
+			requestPortCls, 
+			theOperation);
+	};
+		
+		
+	endLog("Done");
+}
+
+helper CreateConnectorClsConstructorForMultipleRequesterSingleProvider(
+	inout connectorCls:Class, 
+	in inPortMultiplicity: Integer)
+{
+	var constructorOperation := new Operation(connectorCls.name);
+	connectorCls.ownedOperation += constructorOperation;		
+
+	var constructorBehavior : OpaqueBehavior := new OpaqueBehavior(connectorCls.name + "Behavior");
+	
+	constructorBehavior.language := "Alf";
+	
+	var constructorBehaviorStr : String = "";
+	
+	constructorBehaviorStr := 
+		"Integer i = 1;" + "\n" + 
+     	"while (i <= " + inPortMultiplicity.toString() + ") " + "\n" +
+     	"{" + "\n" +
+     	"    this.InPort[i] = new RequestPortCls(this);" + "\n" +
+     	"    i = i + 1;" + "\n" +
+     	"}" + "\n"; 
+	
+	constructorBehavior.body += constructorBehaviorStr;
+	
+	connectorCls.ownedBehavior += constructorBehavior;
+	constructorOperation.method := constructorBehavior;
+}
+
+
+helper CreateRequestClassConstructorForMultipleRequesterSingleProvider(
+	inout requestPortCls:Class, 
+	in connectorCls : Class)
+{
+	var connClsAsAttribute : Property := new Property("ownerConnector");
+	connClsAsAttribute.type := connectorCls;
+	connClsAsAttribute.lower := 1;
+	connClsAsAttribute.upper := 1;
+	requestPortCls.ownedAttribute += connClsAsAttribute;
+	
+	var constructorOperation := new Operation(requestPortCls.name);
+	requestPortCls.ownedOperation += constructorOperation;		
+
+	var constructorParam : Parameter = new Parameter("c", connectorCls);
+	constructorOperation.ownedParameter += constructorParam;
+
+	var constructorBehavior : OpaqueBehavior := new OpaqueBehavior(requestPortCls.name + "Behavior");
+	constructorBehavior.language := "Alf";
+
+	var constructorBehaviorParam : Parameter = new Parameter("c", connectorCls);
+	constructorBehavior.ownedParameter += constructorBehaviorParam;
+	
+	var constructorBehaviorStr : String = "";	
+	constructorBehaviorStr := "this.ownerConnector  = c;" + "\n";
+	
+	constructorBehavior.body += constructorBehaviorStr;
+
+	requestPortCls.ownedBehavior += constructorBehavior;
+	constructorOperation.method := constructorBehavior;
+}
+
+
+helper CreateRequestPortClsRequestHandlerOperation(
+	inout requestPortCls:Class, 
+	in otherRequestOperation: Operation)
+{
+
+	var requestOperation := new Operation(otherRequestOperation);
+	requestPortCls.ownedOperation += requestOperation;		
+
+	var requestOperationBehavior : OpaqueBehavior := 
+		new OpaqueBehavior(requestOperation.name + "Behavior");
+	
+	requestOperationBehavior.language := "Alf";
+	
+	var behaviorStr : String = "";
+	
+	// TODO: Assumption: we assume that the request operation has a single argument 
+	// and a return value.  
+	
+	var paramName : String := otherRequestOperation.ownedParameter->asSequence()->at(1).name;
+	
+	behaviorStr := 
+		"// Store incoming request in request buffer" + "\n" +
+		"this.RequestBuffer[1] = " + paramName + ";" + "\n" +
+		"\n" +
+		"// Let connector object process the request" + "\n" +
+        "return this.ownerConnector." + otherRequestOperation.name + 
+        		"(" + paramName + ");" + "\n";
+	
+	requestOperationBehavior.body += behaviorStr;
+	requestPortCls.ownedBehavior += requestOperationBehavior;
+	requestOperation.method := requestOperationBehavior;
+}
+
+
+constructor OpaqueBehavior::OpaqueBehavior(nameArg:String) {
+	name := nameArg;
+}
+
+
+query Element::hasStereotype(stereotypeName : String): Boolean {
+
+	return self.getAppliedStereotypes()->select(name = stereotypeName)->size() <> 0;	
+} 
+
+
+helper transformSingleRequesterMultipleProviderPrimaryEnhancedConnector(ec : Connector)
 {
 	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector");
 	
@@ -93,7 +571,7 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	
 	// Connect the providing port of the connector class to the 
 	// requiring port connected to the connector in the source model:
-	inlog("Creating connectors betwee connector object and connected parts...");
+	inlog("Creating connectors between connector object and connected parts...");
 	
 	// Create required and provided side connectors and add them to the parent class
 	var reqEndCon : Connector := new Connector(ec.name + "_reqEndCon", requiringPort, 
@@ -189,6 +667,11 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 		// otherwise, this will require a deeper copy.
 		newProperty.type := p.type;
 		connectorCls.ownedAttribute += newProperty;
+		
+		newProperty.isUnique := p.isUnique;
+		newProperty.isOrdered := p.isOrdered; 
+		newProperty.lower := p.lower;
+		newProperty.upper := p.upper;
 	};
 	
 	elementsToRemove += connectorBehaviorActivity;
@@ -215,6 +698,13 @@ helper transformPrimaryEnhancedConnector(ec : Connector)
 	var newOpaqueAction : OpaqueAction = new OpaqueAction(opaqueAction);
 	newConnectorBehaviorActivity.ownedNode += newOpaqueAction;
 	
+	 
+	var opaqueActionBody : String := newOpaqueAction.body->asSequence()->at(1);
+	var transformedOpaqueActionBody : String:= opaqueActionBody
+		->replaceAll("PRV_CNT", outPortMultiplicity.toString())
+		->asSequence()->at(1);
+	
+	newOpaqueAction.body := transformedOpaqueActionBody;
 	
 	// create initial node and final nodes
 	var newInitialNode : InitialNode = new InitialNode("initialNode");
@@ -286,12 +776,24 @@ constructor Operation::Operation(otherOperation: Operation) {
 	}
 }
 
+	
+constructor Operation::Operation(nameArg : String) {
+	name := nameArg;
+}
+
+
 constructor Parameter::Parameter(otherParam: Parameter) {
 	name := otherParam.name;
 	
-	 
-	// this might require a deeper resolve operation. 
+	// TODO: this might require a deeper resolve operation. 
 	type := otherParam.type;
+	
+	direction := otherParam.direction;
+}
+
+constructor Parameter::Parameter(nameArg: String, typeArg : Type) {
+	name := nameArg; 
+	type := typeArg;
 }
 
 // Create a new activity using the connector behavior activity
@@ -401,5 +903,3 @@ query Connector::isSecondaryEnhancedConnector() : Boolean {
 		
 	return false; 
 }
-
-

@@ -7,7 +7,6 @@ transformation E2ToAlfTransformation(in e2Model:uml) access EcTransformationLibr
 // properties that should be set from outside: 
 configuration property CONNECTOR_CLS_MODEL_PATH : String;
 configuration property OUTPORT_MULTIPLICITY : Integer;
-
 configuration property IFC_ASSOC_NAME : String;
 configuration property ALF_PKG_NAME : String;
 
@@ -29,13 +28,16 @@ helper checkConfigurationPropertyValues() {
 	
 	assert fatal (OUTPORT_MULTIPLICITY <> null) with 
 		log("OUTPORT_MULTIPLICITY parameter is mandatory");
+	
+	assert fatal (IFC_ASSOC_NAME <> null) with 
+		log("IFC_ASSOC_NAME parameter is mandatory");
+		
 }
 
 main() {
 	initializeLogger();
 	beginLog("Starting E2 to Alf Transformation...");
-	
-	// can we just write a huge helper function which will do all the manipulation? 
+	 
 	generateAlfCodeFromE2Model();
 	
 	endLog("Done");
@@ -62,7 +64,7 @@ helper generateAlfCodeFromE2Model() {
 		->oclAsType(Operation)->asSequence()->at(1);
 	
 	assert fatal (e2xOp.method != null and 
-		e2xOp.method.oclIsKindOf(Activity)->asSequence()->at(1)) 
+		e2xOp.method.oclIsKindOf(OpaqueBehavior)->asSequence()->at(1)) 
 		with log("Operation " + e2xOp.name + " has no connector behavior attached"); 
 	
 	var connectorBehavior : Activity := e2xOp.method->oclAsType(Activity)->asSequence()->at(1);
@@ -71,10 +73,7 @@ helper generateAlfCodeFromE2Model() {
 	generateAlfCodeImports();
 	beginAlfPackage(ALF_PKG_NAME);
 	generateInterfaceCode(e2xIfc);	
-	beginConnectorClass(e2ConCls, e2xIfc);
-	generateConnectorClassAttributes(e2ConCls, e2xIfc);	
-	generateConnectorBehaviorOperation(e2xOp, connectorBehavior);	
-	endConnectorClass();	
+	generateClassCode(e2ConCls);
 	endAlfPackage();
 	
 	inlog("<begin> Alf Code: ");
@@ -141,36 +140,36 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 	var opaqueAction := connectorBehavior.ownedElement
 		->selectByKind(OpaqueAction)->asSequence()->at(1);
 	
-	// TODO: get the real OUTPORT_MULTIPLICITY value as a parameter 
-	// from the E1 to E2 transformation. 
-	var opaqueActionBody : String := opaqueAction.body->asSequence()->at(1);
-	var transformedOpaqueActionBody : String:= opaqueActionBody
-		->replaceAll("PRV_CNT", OUTPORT_MULTIPLICITY.toString())
-		->asSequence()->at(1);
-		
-	
-	appendAlfCodeLine(transformedOpaqueActionBody);
+	appendAlfCodeLine(opaqueAction.body->asSequence()->at(1));
 	
 	AlfIndentLevel := AlfIndentLevel - 1;
 	appendAlfCodeLine("}");  
 	
 }
 
-helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
-	
-	// Create the interface array
-	var interfacePtrArrayStr : String := "public " + IFC_ASSOC_NAME + " : " + e2xIfc.name + 
-		"[" + OUTPORT_MULTIPLICITY.toString() + "] ordered nonunique;";
-	
-	appendAlfCodeLine(interfacePtrArrayStr);
-	
-	e2ConCls.ownedAttribute->forEach(attr) {
+helper generateClassAttributes(cls: Class)
+{
+	cls.ownedAttribute->forEach(attr) {
 		
 		if (attr.type != null)
 		{
 			if (attr->oclIsKindOf(Port)->asSequence()->at(1) = false)
 			{
-				var attrCode : String := "private ";
+				var attrCode : String := "";
+				
+				if (attr.visibility = VisibilityKind::_private)
+				{
+					attrCode := attrCode + "private ";
+				}
+				else if (attr.visibility = VisibilityKind::_protected)
+				{
+					attrCode := attrCode + "protected ";
+				}
+				else if (attr.visibility = VisibilityKind::_public)
+				{
+					attrCode := attrCode + "public ";
+				};
+				
 				var attrName : String := attr.name;
 				
 				if (attr.type.name = null)
@@ -181,28 +180,25 @@ helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
 				var attrType : String := attr.type.name.toString();
 				attrCode := attrCode + attrName + " : " + attrType;
 				
+				var multiplicityStr : String := "[" + attr.lower.toString() + ".." +
+													  attr.upper.toString() + "]";
+								
+				attrCode := attrCode + multiplicityStr;
+				
+				if (attr.isOrdered = true)
+				{
+					attrCode := attrCode + " ordered";
+				};
+				
+				if (attr.isUnique = false)
+				{
+					attrCode := attrCode + " nonunique";
+				};
+				
 				if (attr.defaultValue != null)
 				{
-					if (attr.defaultValue->oclIsKindOf(LiteralInteger)->asSequence()->at(1))
-					{
-						var defVal : LiteralInteger :=
-							attr.defaultValue->oclAsType(LiteralInteger)->asSequence()->at(1);  
-					
-						attrCode := attrCode + " = " + 
-							defVal.value.toString();
-					}
-					else if (attr.defaultValue->oclIsKindOf(LiteralString)->asSequence()->at(1))
-					{
-						var defVal : LiteralString :=
-							attr.defaultValue->oclAsType(LiteralString)->asSequence()->at(1);  
-					
-						attrCode := attrCode + " = " + 
-							defVal.value.toString();
-					}
-					else
-					{
-						inlog("WARNING: Default value of attribute " + attrName + " is unrecognized");
-					} 
+					attrCode := attrCode + " = " + 
+							attr._default.toString();
 				};
 				
 				attrCode := attrCode + ";";
@@ -214,18 +210,7 @@ helper generateConnectorClassAttributes(e2ConCls: Class, e2xIfc : Interface) {
 		{
 			inlog("WARNING: Type of attribute " + attr.name + " is null")
 		}
-	}; //end: forEach
-	
-	appendAlfCodeLine(" ");
-} 
-
-helper beginConnectorClass(e2ConCls: Class, e2xIfc: Interface)
-{
-	appendAlfCodeLine(
-		 "public class " + e2ConCls.name + 
-		" specializes " + e2xIfc.name + " {");
-		
-	AlfIndentLevel := AlfIndentLevel + 1;	
+	}; //end: forEach	
 }
 
 helper endConnectorClass()
@@ -245,7 +230,14 @@ helper generateInterfaceCode(ifc : Interface)
 	appendAlfCodeLine("public abstract class " + ifc.name);
 	appendAlfCodeLine("{");
 	AlfIndentLevel := AlfIndentLevel + 1;
+	appendAlfCodeLine( getInterfaceOperationSignature(ifc) + ";");
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}"); 
+	appendAlfCodeLine(""); 
+}
 
+helper getInterfaceOperationSignature(ifc: Interface) : String
+{
 	// For simplicity we assume that the interface has only one operation
 	assert fatal (ifc.ownedOperation->size() = 1) 
 		with log("Interface " + ifc.name + " must have exactly one operation ");
@@ -257,23 +249,189 @@ helper generateInterfaceCode(ifc : Interface)
 	
 	var inParamSet : Set(Parameter) := 
 		op->ownedParameter->asSequence()->at(1)->select(direction = ParameterDirectionKind::_in);
+	
 	assert fatal(inParamSet->size() = 1) with log("Number of parameters with direction=in " +
 		"must be 1 for operation " + op.name);
-	var param : Parameter := inParamSet->asSequence()->at(1);
+
 	
 	var returnParamSet : Set(Parameter) := 
 		op->ownedParameter->asSequence()->at(1)->select(direction = ParameterDirectionKind::_return);
 	assert fatal(returnParamSet->size() = 1) with log("Number of parameters with direction=return " +
 		"must be 1 for operation " + op.name);
-	var returnParam : Parameter := returnParamSet->asSequence()->at(1); 
+
+	var operationSignature := getOperationSignature(op, true);
+
+	return operationSignature;
+}
+
+helper getOperationSignature(operation: Operation, generateAsAbstract: Boolean) : String
+{
+	// Now, we should iterate through parameters, and extract the single parameter, 
+	// and the return parameter. 
 	
-	// TODO: the hardcoded "in" parameter direction should be read from the source model
+	var parametersStr : String := "";
+	operation->ownedParameter->forEach(param)
+	{
+		var p : Parameter := param->asSequence()->at(1);
 	
-	appendAlfCodeLine("public abstract " + op.name + "(in " + param.name + ": " + 
-		param.type.name.toString() + ") : " + returnParam.type.name.toString() + ";");
+		if (p.direction <> ParameterDirectionKind::_return)
+		{
+			parametersStr := parametersStr + "," + p.direction.toString() + " " + p.name + ":" + 
+				p.type.name;
+		}
+	};
+	
+	parametersStr := parametersStr.replaceFirst(",", "");
+	
+	var returnParam : Parameter := 
+		operation->ownedParameter->asSequence()->at(1)
+		->select(direction = ParameterDirectionKind::_return)->asSequence()->at(1);
+	
+	var returnParamStr := "";
+	if (returnParam <> null)
+	{
+		returnParamStr := ": " + returnParam.type.name;	
+	};
+	
+	var abstractStr : String := "";
+	if (generateAsAbstract = true)
+		abstractStr := "abstract ";
+	
+	var signatureStr : String = 	
+		operation.visibility.toString() + " " + abstractStr + operation.name + 
+		"(" + parametersStr + ") " + returnParamStr;
+	
+	return signatureStr;
+}
+
+helper getOperationCode(operation: Operation, method: OpaqueBehavior) : String
+{
+	var operationCode : String := "";
+	var signatureStr : String := getOperationSignature(operation, operation.isAbstract);
+	operationCode := operationCode + signatureStr + "\n" + getAlfIndent() + "{\n";
+	
+	
+	var operationBody : String := method.body->asSequence()->at(1);
+	
+	var lines : Sequence(String) := operationBody.tokenize("\n", true);
+	operationBody := "";
+	
+	AlfIndentLevel := AlfIndentLevel + 1;
+	lines->forEach(line)
+	{
+		operationBody := operationBody + getAlfIndent() + line; 
+	};
+	AlfIndentLevel := AlfIndentLevel - 1;
+	
+	operationCode := operationCode + operationBody;
+	operationCode := operationCode + "\n" + getAlfIndent() + "}\n";
+	return operationCode;
+}
+
+helper generateClassCode(cls:Class)
+{
+	var classDeclarationStr := "public class " + cls.name;
+	
+	if (cls.generalization->size() <> 0)
+	{
+		var specializationStr : String := classDeclarationStr + " specializes";
+		
+		cls.generalization->forEach(g)
+		{
+			if (g.oclIsKindOf(Class)->asSequence()->at(1) = true or
+				g.oclIsKindOf(Interface)->asSequence()->at(1) = true)
+			{
+				var ne : NamedElement := g.oclAsType(NamedElement)->asSequence()->at(1);
+				specializationStr := ", " + specializationStr + ne.name;
+			}
+		};
+		
+		specializationStr.replaceFirst(",", "");
+		
+		if (specializationStr <> " specializes")
+		{
+			classDeclarationStr := classDeclarationStr + specializationStr;
+		}
+	};
+	
+	appendAlfCodeLine(classDeclarationStr);
+	
+	appendAlfCodeLine("{");
+	AlfIndentLevel := AlfIndentLevel + 1;
+	
+	generateClassAttributes(cls);
+	appendAlfCodeLine("");
+
+	// Generate operations which has methods as OpaqueBehaviors: 	
+	cls->ownedOperation->forEach(operationSet)
+	{ 
+		operationSet->forEach(operation)
+		{
+			var operationBehavior : OpaqueBehavior := null;
+			var behavior := operation.method->asSequence()->at(1);
+			if (behavior->oclIsTypeOf(OpaqueBehavior)->asSequence()->at(1) = true)
+			{
+				operationBehavior := behavior->oclAsType(OpaqueBehavior)->asSequence()->at(1);
+			};	
+		
+			if (operationBehavior <> null)
+			{
+				if (operation.name->asSequence()->at(1) = cls.name)
+					appendAlfCodeLine("@Create");
+				
+				var operationCode : String := 
+					getOperationCode(operation->asSequence()->at(1), operationBehavior);
+					
+				appendAlfCodeLine(operationCode);
+			};
+		};
+	};
+	
+	// Generate nested classes
+	cls.nestedClassifier->forEach(nestedCls)
+	{
+		if (nestedCls->oclIsTypeOf(Class)->asSequence()->at(1) = true)
+		generateClassCode(nestedCls->oclAsType(Class)->asSequence()->at(1));	
+	};
+	
 	AlfIndentLevel := AlfIndentLevel - 1;
 	appendAlfCodeLine("}"); 
-	appendAlfCodeLine(""); 
+	appendAlfCodeLine("");
+}
+
+helper __generateRequestPortClass(reqPortCls:Class, connectorCls: Class, ifc : Interface)
+{
+	appendAlfCodeLine("public class RequestPortCls specializes " + ifc.name);
+	appendAlfCodeLine("{");
+	AlfIndentLevel := AlfIndentLevel + 1;
+	
+	generateClassAttributes(reqPortCls);
+	appendAlfCodeLine("");
+	
+	// Generate Constructor
+	appendAlfCodeLine("@Create");
+	appendAlfCodeLine("public RequestPortCls(in c: " + connectorCls.name + ") {");
+	appendAlfCodeLine("    this.ownerConnector = c;");
+	appendAlfCodeLine("{");
+	appendAlfCodeLine("");
+	
+	// Generate interface operation
+	appendAlfCodeLine(getInterfaceOperationSignature(ifc) + " {");
+	appendAlfCodeLine("    // Store incoming request in request buffer");
+	appendAlfCodeLine("    this.RequestBuffer[1] = arg;");
+	appendAlfCodeLine("    ");
+	appendAlfCodeLine("    // Let the connector object process the request");
+	
+	var interfaceOperation : Operation := ifc.ownedOperation->asSequence()->at(1);
+	var param : Parameter := interfaceOperation.ownedParameter->asSequence()->at(1);
+	
+	appendAlfCodeLine("    return this.ownerConnector." + interfaceOperation.name + "(" +
+		param.name + ");");
+	appendAlfCodeLine("}"); 
+	
+	AlfIndentLevel := AlfIndentLevel - 1;
+	appendAlfCodeLine("}"); 
+	appendAlfCodeLine("");
 }
 
 helper generateAlfCodeImports()
