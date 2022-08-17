@@ -77,51 +77,22 @@ helper transformE2toE3()  {
 	
 	// now, let's locate the connector class inside the e2 model: 
 	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
-	
 	var allObjects : Set(Element) := e2Model.rootObjects()->oclAsType(Element)->asSet();
 		
 	var e2ConCls : Class := getModelElement(CONNECTOR_CLS_MODEL_PATH, e2Model)
 		->oclAsType(Class)->asSequence()->at(1);
-	
 	assert fatal (e2ConCls <> null) with
 		log("Could not find class " + CONNECTOR_CLS_MODEL_PATH + " in input model");
 	
-	var e2ContainerCls : Class := e2ConCls.owner->oclAsType(Class)->asSequence()->at(1);
-	
+	//var e2ContainerCls : Class := e2ConCls.owner->oclAsType(Class)->asSequence()->at(1);
 	var e2xIfc : Interface := getInterfaceFromConnectorCls(e2ConCls);
-	
-	var e2xOp : Operation := e2xIfc.ownedOperation->asSequence()->at(1);
-	
-	// Create the ItsXIfc reference array: 
-	var foundCount : Integer := e2ConCls[Class].allAttributes()
-					->collect(name = IFC_ASSOC_NAME)->count(true);
-	
-	var e2ItsXIfc : Property;			
-	if (foundCount = 0)
-	{
-		e2ItsXIfc := new Property(IFC_ASSOC_NAME, e2xIfc, 
-			OUTPORT_MULTIPLICITY, OUTPORT_MULTIPLICITY);
-		e2ConCls.ownedAttribute += e2ItsXIfc;
-	}
-	else if (foundCount = 1)
-	{
-		e2ItsXIfc := e2ConCls[Class].allAttributes()
-			->select(name = IFC_ASSOC_NAME)->oclAsType(Property)->asSequence()->at(1);
-	}
-	else
-	{
-		log("WARNING: property " + IFC_ASSOC_NAME + " is defined more than once under class " + 
-			e2ConCls.name);
-	};
-	
+	//var e2xOp : Operation := e2xIfc.ownedOperation->asSequence()->at(1);
+		
 	endLog("Done");
 	
 	beginLog("Locating fUML model elements");
 	
 	// locate fUML model elements: ConnectorClass should be under the package named in alf 
-	
-	var arg2 : String := fUmlModel.rootObjects()[Model].name->asSequence()->at(1);
-	
 	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
 	
 	var fUmlPkg : Package := fUmlModel.packagedElement
@@ -134,31 +105,113 @@ helper transformE2toE3()  {
 	var fUmlConnectorBehaviorActivity : Activity := findConnectorBehaviorActivity(fUmlConCls);
 	
 	endLog("Done");
+
+	var resolverSet : Set(Element);
 	
-	beginLog("Copying fUML activity for connector behavior into e2 model");
-	
-	var newActivity: Activity = fUmlConnectorBehaviorActivity[Activity]
-		->deepclone()->asSequence()->at(1);
-	
-	e2ConCls.ownedBehavior += newActivity;
-	
-	// Delete existing method of e2xOp;
-	if (e2xOp.method != null)
+	importClassBehaviorsFromFumlModel(e2ConCls, fUmlConCls, e2xIfc);
+}
+
+helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: Class, 
+	in e2xIfc: Interface)
+{
+	// Copy attributes of fUML class which does not exist in the e2 class:
+	fumlClass.ownedAttribute->forEach(fUmlAttr)
 	{
-		e2Model.removeElement(e2xOp.method.oclAsType(Element)->asSequence()->at(1));
+		if (e2Cls.ownedAttribute->select(name = fUmlAttr.name)->size() = 0)
+		{
+			e2Cls.ownedAttribute += fUmlAttr;
+		}
 	};
 	
-	// Set specification of the newActivity to xOp in the e2 model. 
-	newActivity.specification := e2xOp;
+	// Transform operations under e2 class: 
+	fumlClass.ownedOperation->forEach(fUmlOperation)
+	{
+		var opBehavior : Activity := fUmlOperation.method->oclAsType(Activity)->asSequence()->at(1);
+		var theOperation : Operation := null;
+		
+		// Check if the operation exists in the e2 class: 
+		if (e2Cls.ownedOperation->select(name = fUmlOperation.name)->size() <> 0)
+		{
+			var e2Op : Operation := 
+				e2Cls.ownedOperation->select(name = fUmlOperation.name)
+				->asSequence()->at(1);
+			
+			// Delete existing method of e2 operation;
+			if (e2Op.method != null)
+			{
+				e2Model.removeElement(e2Op.method.oclAsType(Element)->asSequence()->at(1));
+			};
+			
+			// Set specification of the newActivity to xOp in the e2 model. 
+			opBehavior.specification := e2Op;
+			theOperation := e2Op;
+		}
+		else
+		{
+			// move the operation into e2Cls
+			e2Cls.ownedOperation += fUmlOperation;
+			theOperation := fUmlOperation; 
+		};
+		
+		// move operation behavior under e2class
+		e2Cls.ownedBehavior += opBehavior;
+		
+		transformOperationBehavior(e2Cls, theOperation, opBehavior, e2xIfc);
+	};
+	
+	// Do the same things for nested classes? 
+	e2Cls.nestedClassifier->forEach(nestedE2Classifier)
+	{
+		var nesteE2Class : Class := nestedE2Classifier->oclAsType(Class)->asSequence()->at(1); 
+		var fUmlNestedClass : Class := fumlClass.nestedClassifier->select(name = nesteE2Class.name)
+			->oclAsType(Class)->asSequence()->at(1);
+			
+		assert fatal (fUmlNestedClass <> null) with log("No counterpart for the nested " + 
+			"e2 model classifier " + nesteE2Class.name + " under fUML class " + fumlClass.name);
+	
+		importClassBehaviorsFromFumlModel(nesteE2Class, fUmlNestedClass, e2xIfc);
+	};
+}
+
+// Copy given fUmlActivity into given e2Cls class, 
+// e2xOp will be the specification of the new activity 
+// and new activity will be the method of operation e2xOp. 
+// e2Ifc will be replaced with its e2Ifc counterparts
+// if found in fUmlActivity 
+helper transformOperationBehavior(
+	inout e2Cls: Class, 
+	inout e2xOp : Operation,
+	in fUmlActivity: Activity, 
+	in e2Ifc : Interface)
+{
+
+	var count : Integer := 0;
+	
+	beginLog("Fixing unresolved operation parameters of " + e2xOp.name);
+	
+	e2xOp.ownedParameter->forEach(param) {
+	
+		var qualName : String := param.type.qualifiedName;
+		
+		if (qualName.indexOf(ALF_PKG_NAME) > 0)
+		{
+			inlog("Found parameter: " + param.name);
+			if (param.name = e2Cls.name)
+			{
+				inlog("Updating type field of parameter " + param.name + " as " + e2Cls.name);
+				param.type := e2Cls;
+				count := count + 1;
+			}
+		}
+	};
 	
 	endLog("Done");
 	
 	beginLog("Fixing unresolved references of connector behavior activity in e2 Model");
 	
-	var allStuff : Set(Element) := newActivity[Activity]->allOwnedElements()
+	var allStuff : Set(Element) := fUmlActivity[Activity]->allOwnedElements()
 		->asSequence()->at(1);
-	
-	var count : Integer := 0; 
+	 
 	allStuff->forEach(e) {
 		
 		if (e.oclIsKindOf(StructuralFeatureAction))
@@ -176,18 +229,18 @@ helper transformE2toE3()  {
 				
 				// Now, we should do a name resolution here. 
 				// Try to find the structuralFeature in the connectorClass. 
-				foundCount := e2ConCls[Class].allAttributes()
+				var foundCount : Integer := e2Cls[Class].allAttributes()
 					->collect(name = sfname)->count(true);
 				
 				if (foundCount != 1)
 				{ 
 					inlog("WARNING: Expected to find exactly 1 attribute with name " + sfname + 
-						" under class " + e2ConCls.qualifiedName  + " but found " + 
+						" under class " + e2Cls.qualifiedName  + " but found " + 
 						foundCount.toString());
 				}
 				else
 				{
-					var e2Property : Property := e2ConCls[Class].allAttributes()
+					var e2Property : Property := e2Cls[Class].allAttributes()
 						->select(name = sfname)->oclAsType(Property)->asSequence()->at(1);
 												 	
 					// Now, let's alter the structural feature to this one. 
@@ -195,24 +248,24 @@ helper transformE2toE3()  {
 					inlog("Updated structuralFeature field of StructuralFeatureAction " + 
 						sfqualifiedName);
 				}
-			};   
+			};    
 			
 			sfa.input->forEach(inputPin) {
 				
 				if (inputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					if (inputPin.type.name = e2ConCls.name) 
+					if (inputPin.type.name = e2Cls.name) 
 					{
-						inputPin.type := e2ConCls;
+						inputPin.type := e2Cls;
 						inlog("Updated inputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2ConCls.name);
+							sfqualifiedName + " as " + e2Cls.name);
 					}
 				}
-				else if (inputPin.type.name = e2xIfc.name)
+				else if (inputPin.type.name = e2Ifc.name)
 				{
-					inputPin.type := e2xIfc;
+					inputPin.type := e2Ifc;
 					inlog("Updated inputPin.type field of StructuralFeatureAction " + 
-						sfqualifiedName + " as " + e2xIfc.name);	
+						sfqualifiedName + " as " + e2Ifc.name);	
 				}
 			};
 			
@@ -220,17 +273,17 @@ helper transformE2toE3()  {
 				
 				if (outputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0) 
 				{
-					if (outputPin.type.name = e2ConCls.name)
+					if (outputPin.type.name = e2Cls.name)
 					{
-						outputPin.type := e2ConCls;
+						outputPin.type := e2Cls;
 						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2ConCls.name);
+							sfqualifiedName + " as " + e2Cls.name);
 					}
-					else if (outputPin.type.name = e2xIfc.name)
+					else if (outputPin.type.name = e2Ifc.name)
 					{
-						outputPin.type := e2xIfc;
+						outputPin.type := e2Ifc;
 						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2xIfc.name);	
+							sfqualifiedName + " as " + e2Ifc.name);	
 					}
 				}	
 			};
@@ -252,9 +305,9 @@ helper transformE2toE3()  {
 				// Now, should we be specific about it and assume that the type is 
 				// of ConnectorCls? 
 				// TODO: may require revising
-				if (rsaResultTypeName = e2ConCls.name)
+				if (rsaResultTypeName = e2Cls.name)
 				{
-					rsa.result.type := e2ConCls;
+					rsa.result.type := e2Cls;
 					inlog("Updated result.type field of ReadSelfAction: " + rsa.name);
 				}
 			}
@@ -286,26 +339,69 @@ helper transformE2toE3()  {
 				inlog("Found: CallOperation target type: " + coaTargetTypeQName);
 				
 				var coaTargetTypeName : String := coa.target.type.name;
-				if (coaTargetTypeName = e2ConCls.name)
+				if (coaTargetTypeName = e2Cls.name)
 				{
 					inlog("Updating target.type field of CallOperationAction: " + coa.name +
-						" as " + e2xIfc.name);
-					coa.target.type := e2ConCls;
+						" as " + e2Ifc.name);
+					coa.target.type := e2Cls;
 					count := count + 1;
 				}
-				else if (coaTargetTypeName = e2xIfc.name)
+				else if (coaTargetTypeName = e2Ifc.name)
 				{
 					inlog("Updating target.type field of CallOperationAction: " + coa.name + 
-						" as " + e2xIfc.name);
-					coa.target.type := e2xIfc;
+						" as " + e2Ifc.name);
+					coa.target.type := e2Ifc;
 					count := count + 1;
+				}
+			}
+		}
+		else if (e.oclIsKindOf(ActivityParameterNode))
+		{
+			var activityParameterNode : ActivityParameterNode := 
+				e.oclAsType(ActivityParameterNode);
+			
+			var apnTypeQualifiedName : String := activityParameterNode.type.qualifiedName;
+			
+			if (apnTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
+			{
+				inlog("Found: ActivityParameterNode type: " + apnTypeQualifiedName);
+				if (activityParameterNode.type.name = e2Cls.name)
+				{
+					inlog("Updating type field of ActivityParameterNode: " + 
+						activityParameterNode.name + " as " + e2Cls.name);
+					activityParameterNode.type := e2Cls;
+					count := count + 1;
+				}
+				else
+				{
+					inlog("WARNING: don't know what to do with unknown ActivityParameterNode type");
+				}
+			}	
+		}
+		else if (e.oclIsKindOf(ExpansionRegion))
+		{
+			var er : ExpansionRegion := e.oclAsType(ExpansionRegion);
+			
+			er.structuredNodeInput->forEach(sni) {
+				var qualName : String := sni.type.qualifiedName;
+				
+				if (qualName.indexOf(ALF_PKG_NAME) > 0)
+				{
+					inlog("Found: ExpansionReqion structuredNodeInput type: " + qualName);
+					if (sni.type.name = e2Cls.name)
+					{
+						inlog("Updating type field of structured node input: " + sni.name + 
+							" as " + e2Cls.name);
+						sni.type := e2Cls;
+						count := count + 1;
+					}
 				}
 			}
 		}
 	};
 	
-	inlog("Replaced " + count.toString() + " references");
 	
+	inlog("Replaced " + count.toString() + " references");
 	endLog("Done");
 }
 
