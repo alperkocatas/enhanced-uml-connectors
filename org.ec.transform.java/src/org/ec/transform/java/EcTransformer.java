@@ -55,7 +55,8 @@ public class EcTransformer {
 	
 	private String e1ModelPath = workspacePath + "org.ec.connectors/" + 
 			"RoundRobinRequester/RoundRobinRequester_E1.uml";
-	//		"MultiDestRequester/MultiDestRequester_E1.uml";
+//			"MultiDestRequester/MultiDestRequester_E1.uml";
+//			"RequestBarrier/RequestBarrier_E1.uml";
 	
 	
 	
@@ -72,7 +73,7 @@ public class EcTransformer {
 	private String ConnectorBehaviorFumlFilePath;
 	
 	private String ConnectorClsModelPath = null;
-	private String OutportMultiplicity = null;
+	private String InOutportMultiplicity = null;
 	private String AlfPkgName = null;
 	private String EcConfiguration = null;
 	
@@ -209,7 +210,7 @@ public class EcTransformer {
 		if (log.CaptureOk)
 		{
 			this.ConnectorClsModelPath = log.ConnectorClsModelPath;
-			this.OutportMultiplicity = log.OutportMultiplicity;
+			this.InOutportMultiplicity = log.InOutportMultiplicity;
 			this.EcConfiguration = log.EcConfiguration;
 		}
 		else
@@ -247,7 +248,7 @@ public class EcTransformer {
 		ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();		
 		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
-		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
+		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.InOutportMultiplicity);
 		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName);
 		context.setConfigProperty("EC_CONFIGURATION", this.EcConfiguration);
 		
@@ -398,7 +399,7 @@ public class EcTransformer {
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 3);
 		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
-		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.OutportMultiplicity);
+		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.InOutportMultiplicity);
 		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName); 
 		
 		
@@ -414,7 +415,7 @@ public class EcTransformer {
 		
 		if (loadResult.getSeverity() != Diagnostic.OK)
 		{
-			throw new Exception("Error occurred while loading E1 to E2 transformation");
+			throw new Exception("Error occurred while loading E2 to E3 transformation");
 		}
 		
 		List<EObject> outObjects = e2Input.getContents();
@@ -470,7 +471,7 @@ public class EcTransformer {
 	class E1toE2TransformationLog extends TransformationLog {
 
 		public String ConnectorClsModelPath = null;
-		public String OutportMultiplicity = null;
+		public String InOutportMultiplicity = null;
 		public String EcConfiguration = null;
 		
         @Override
@@ -485,8 +486,14 @@ public class EcTransformer {
             
             if (message.contains("OUTPORT_MULTIPLICITY="))
             {
-            	OutportMultiplicity = message.replace("OUTPORT_MULTIPLICITY=", "");
-            	OutportMultiplicity = OutportMultiplicity.trim();
+            	InOutportMultiplicity = message.replace("OUTPORT_MULTIPLICITY=", "");
+            	InOutportMultiplicity = InOutportMultiplicity.trim();
+            }
+            
+            if (message.contains("INPORT_MULTIPLICITY="))
+            {
+            	InOutportMultiplicity = message.replace("INPORT_MULTIPLICITY=", "");
+            	InOutportMultiplicity = InOutportMultiplicity.trim();
             }
             
             if (message.contains("EC_CONFIGURATION="))
@@ -496,7 +503,7 @@ public class EcTransformer {
             }
             
             if (ConnectorClsModelPath != null && 
-            	OutportMultiplicity != null &&
+            	InOutportMultiplicity != null &&
             	EcConfiguration != null)
             {
 				this.CaptureOk = true;

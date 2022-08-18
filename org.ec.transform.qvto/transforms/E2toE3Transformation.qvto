@@ -84,9 +84,7 @@ helper transformE2toE3()  {
 	assert fatal (e2ConCls <> null) with
 		log("Could not find class " + CONNECTOR_CLS_MODEL_PATH + " in input model");
 	
-	//var e2ContainerCls : Class := e2ConCls.owner->oclAsType(Class)->asSequence()->at(1);
 	var e2xIfc : Interface := getInterfaceFromConnectorCls(e2ConCls);
-	//var e2xOp : Operation := e2xIfc.ownedOperation->asSequence()->at(1);
 		
 	endLog("Done");
 	
@@ -102,17 +100,16 @@ helper transformE2toE3()  {
 	var fUmlConCls : Class := fUmlPkg.packagedElement
 		->select(name = e2ConCls.name)->oclAsType(Class)->asSequence()->at(1);
 														
-	var fUmlConnectorBehaviorActivity : Activity := findConnectorBehaviorActivity(fUmlConCls);
 	
 	endLog("Done");
 
-	var resolverSet : Set(Element);
+	var resolverSet : Set(NamedElement) := buildResolverSet(e2ConCls, e2xIfc);
 	
-	importClassBehaviorsFromFumlModel(e2ConCls, fUmlConCls, e2xIfc);
+	importClassBehaviorsFromFumlModel(e2ConCls, fUmlConCls, resolverSet);
 }
 
 helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: Class, 
-	in e2xIfc: Interface)
+	in resolverSet : Set(NamedElement) )
 {
 	// Copy attributes of fUML class which does not exist in the e2 class:
 	fumlClass.ownedAttribute->forEach(fUmlAttr)
@@ -156,9 +153,10 @@ helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: C
 		// move operation behavior under e2class
 		e2Cls.ownedBehavior += opBehavior;
 		
-		transformOperationBehavior(e2Cls, theOperation, opBehavior, e2xIfc);
+		transformOperationBehavior(e2Cls, theOperation, opBehavior, resolverSet);
 	};
 	
+	  
 	// Do the same things for nested classes? 
 	e2Cls.nestedClassifier->forEach(nestedE2Classifier)
 	{
@@ -169,9 +167,136 @@ helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: C
 		assert fatal (fUmlNestedClass <> null) with log("No counterpart for the nested " + 
 			"e2 model classifier " + nesteE2Class.name + " under fUML class " + fumlClass.name);
 	
-		importClassBehaviorsFromFumlModel(nesteE2Class, fUmlNestedClass, e2xIfc);
+		importClassBehaviorsFromFumlModel(nesteE2Class, fUmlNestedClass, resolverSet);
 	};
 }
+
+helper buildResolverSet(e2Cls : Class, e2Ifc : Interface) : Set(NamedElement)
+{
+	var resolverSet : Set(NamedElement);
+
+	resolverSet += e2Cls;
+	resolverSet += e2Ifc;
+	
+	var allStuff : Set(Element) := e2Cls[Class]->allOwnedElements()
+		->asSequence()->at(1);
+	 
+	allStuff->forEach(e) {
+		if (e->oclIsTypeOf(Class)->asSequence()->at(1) or
+		    e->oclIsTypeOf(Property)->asSequence()->at(1) or  
+		    e->oclIsTypeOf(Operation)->asSequence()->at(1) 
+		)
+		{
+			resolverSet += e->oclAsType(NamedElement);
+		}
+	};
+	 
+	e2Ifc.ownedOperation->forEach(op) {
+		resolverSet += op;
+	};	
+	
+	 
+	return resolverSet;
+}
+
+helper resolveUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
+	NamedElement
+{
+	// First, try to make a plain name resolution: 
+	var resultSet : Set(NamedElement) := resolverSet->select(name = queryElement.name);	
+	if (resultSet->size() = 1)
+	{
+		return resultSet->asSequence()->at(1); 
+	}
+	else if (resultSet->size() = 0)
+	{
+		return null;
+	};
+	
+	// Refine by metaclass: 
+	resultSet := resultSet->select(metaClassName() = queryElement.metaClassName() );
+	if (resultSet->size() = 1)
+	{
+		return resultSet->asSequence()->at(1); 
+	}
+	else if (resultSet->size() = 0)
+	{
+		return null;
+	};
+	
+	// Refine by matching owner's of element:
+	resultSet := resultSet->select(
+			owner->oclAsType(NamedElement)->asSequence()->at(1).name = 
+			queryElement.owner->oclAsType(NamedElement)->asSequence()->at(1).name);	
+	if (resultSet->size() = 1)
+	{
+		return resultSet->asSequence()->at(1);
+	};
+
+	return null;
+}
+
+helper resolveTypeUsingSet(resolverSet : Set(NamedElement),	queryElement: NamedElement) : 
+	Type
+{
+	var ne : NamedElement := resolveUsingSet(resolverSet, queryElement);
+	
+	if (ne <> null)
+	{
+		return ne->oclAsType(Type)->asSequence()->at(1);
+	}
+	else
+	{
+		return null;
+	}
+}
+
+helper resolveClassUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
+	Class
+{
+	var ne : NamedElement := resolveUsingSet(resolverSet, queryElement);
+	
+	if (ne <> null)
+	{
+		return ne->oclAsType(Class)->asSequence()->at(1);
+	}
+	else
+	{
+		return null;
+	}
+}
+
+
+helper resolvePropertyUsingSet(resolverSet : Set(NamedElement),	queryElement: NamedElement) : 
+	Property
+{
+	var ne : NamedElement := resolveUsingSet(resolverSet, queryElement);
+	
+	if (ne <> null)
+	{
+		return ne->oclAsType(Property)->asSequence()->at(1);
+	}
+	else
+	{
+		return null;
+	}
+}
+
+helper resolveOperationUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
+	Operation
+{
+	var ne : NamedElement := resolveUsingSet(resolverSet, queryElement);
+	
+	if (ne <> null)
+	{
+		return ne->oclAsType(Operation)->asSequence()->at(1);
+	}
+	else
+	{
+		return null;
+	}
+}
+
 
 // Copy given fUmlActivity into given e2Cls class, 
 // e2xOp will be the specification of the new activity 
@@ -182,12 +307,12 @@ helper transformOperationBehavior(
 	inout e2Cls: Class, 
 	inout e2xOp : Operation,
 	in fUmlActivity: Activity, 
-	in e2Ifc : Interface)
+	in resolverSet : Set(NamedElement) )
 {
-
 	var count : Integer := 0;
 	
-	beginLog("Fixing unresolved operation parameters of " + e2xOp.name);
+	beginLog("Fixing unresolved references of connector behavior activity " +  
+		fUmlActivity.qualifiedName);
 	
 	e2xOp.ownedParameter->forEach(param) {
 	
@@ -196,18 +321,21 @@ helper transformOperationBehavior(
 		if (qualName.indexOf(ALF_PKG_NAME) > 0)
 		{
 			inlog("Found parameter: " + param.name);
-			if (param.name = e2Cls.name)
+			
+			var type : Type := resolveTypeUsingSet(resolverSet, param.type);
+			
+			if (type <> null)
 			{
-				inlog("Updating type field of parameter " + param.name + " as " + e2Cls.name);
-				param.type := e2Cls;
-				count := count + 1;
+				inlog("Updating type field of parameter " + param.name + " as " + type.name);
+				param.type := type;
+				count := count + 1;	
 			}
+			else
+			{
+				inlog("WARNING #16: could not resolve parameter type: " + param.type.name);
+			};
 		}
 	};
-	
-	endLog("Done");
-	
-	beginLog("Fixing unresolved references of connector behavior activity in e2 Model");
 	
 	var allStuff : Set(Element) := fUmlActivity[Activity]->allOwnedElements()
 		->asSequence()->at(1);
@@ -218,77 +346,203 @@ helper transformOperationBehavior(
 		{
 			var sfa : StructuralFeatureAction = e.oclAsType(StructuralFeatureAction);
 			
-			var sfname : String := sfa.structuralFeature.name;
 			var sfqualifiedName : String := sfa.structuralFeature.qualifiedName;
 			
 			var idx : Integer := sfqualifiedName.indexOf(ALF_PKG_NAME);  
 			if (idx > 0)
 			{
-				inlog("Found: StructuralFeatureAction: " + sfqualifiedName);
+				inlog("Found: StructuralFeatureAction: " + sfa.qualifiedName);
 				count := count + 1; 	
-				
-				// Now, we should do a name resolution here. 
-				// Try to find the structuralFeature in the connectorClass. 
-				var foundCount : Integer := e2Cls[Class].allAttributes()
-					->collect(name = sfname)->count(true);
+
+				var foundCount : Integer := 
+					resolveUsingSet(resolverSet, sfa.structuralFeature)->size();
 				
 				if (foundCount != 1)
 				{ 
-					inlog("WARNING: Expected to find exactly 1 attribute with name " + sfname + 
+					inlog("WARNING #1: Expected to find exactly 1 attribute with name " + 
+						sfa.structuralFeature.name +  
 						" under class " + e2Cls.qualifiedName  + " but found " + 
 						foundCount.toString());
 				}
 				else
 				{
-					var e2Property : Property := e2Cls[Class].allAttributes()
-						->select(name = sfname)->oclAsType(Property)->asSequence()->at(1);
-												 	
+					var e2Property : Property := 
+						resolvePropertyUsingSet(resolverSet, sfa.structuralFeature); 
+					
 					// Now, let's alter the structural feature to this one. 
 					sfa.structuralFeature := e2Property;
 					inlog("Updated structuralFeature field of StructuralFeatureAction " + 
-						sfqualifiedName);
+						sfa.qualifiedName);
+					count := count + 1;
+				};
+				
+				
+				
+				var sfaObjectTypeQualName : String := sfa._object.type.qualifiedName;
+				
+				idx := sfaObjectTypeQualName.indexOf(ALF_PKG_NAME);
+				if (idx > 0)
+				{
+					inlog("Found StructuralFeatureAction object: " + sfa._object.qualifiedName);
+					var type : Type := resolveTypeUsingSet(resolverSet, sfa._object.type);
+						
+					if (type <> null)
+					{
+						inlog("Updating object.type field of StructuralFeatureAction " + 
+							sfa.qualifiedName + " as " + type.name);
+						sfa._object.type := type;
+						count := count + 1;
+					}
+					else
+					{
+						inlog("WARNING #2: don't know what to do with unknown " + 
+							"StructuralFeatureAction object.type: " + sfaObjectTypeQualName);
+					}
+				};  
+				
+				var outputPin : OutputPin := null;
+				
+				if (sfa->oclIsTypeOf(ReadStructuralFeatureAction)->asSequence()->at(1))
+				{
+					var tmp : ReadStructuralFeatureAction :=
+						sfa->oclAsType(ReadStructuralFeatureAction)->asSequence()
+						->at(1);
+					outputPin := tmp._result;
 				}
+				else if (sfa->oclIsTypeOf(WriteStructuralFeatureAction)->asSequence()->at(1))
+				{
+					var tmp : WriteStructuralFeatureAction :=
+						sfa->oclAsType(WriteStructuralFeatureAction)->asSequence()
+						->at(1);
+					outputPin := tmp._result;
+				}
+				else if (sfa->oclIsTypeOf(ClearStructuralFeatureAction)->asSequence()->at(1))
+				{
+					var tmp : ClearStructuralFeatureAction :=
+						sfa->oclAsType(ClearStructuralFeatureAction)->asSequence()
+						->at(1);
+					outputPin := tmp._result;
+				}
+				else if (sfa->oclIsTypeOf(AddStructuralFeatureValueAction)->asSequence()->at(1))
+				{
+					var tmp : AddStructuralFeatureValueAction :=
+						sfa->oclAsType(AddStructuralFeatureValueAction)->asSequence()
+						->at(1);
+					outputPin := tmp._result;
+				}
+				else if (sfa->oclIsTypeOf(RemoveStructuralFeatureValueAction)->asSequence()->at(1))
+				{
+					var tmp : RemoveStructuralFeatureValueAction :=
+						sfa->oclAsType(RemoveStructuralFeatureValueAction)->asSequence()
+						->at(1);
+					outputPin := tmp._result;
+				}
+				else
+				{
+					inlog("WARNING #3: uncrecognized Structural feature action type");
+				}; 
+				
+				var sfaResultTypeQualName : String := outputPin.type.qualifiedName;
+				
+				idx := sfaResultTypeQualName.indexOf(ALF_PKG_NAME);
+				if (idx > 0)
+				{
+					inlog("Found StructuralFeatureAction result: " + sfaResultTypeQualName);
+					
+					var type : Type := resolveTypeUsingSet(resolverSet, outputPin.type);
+
+					if (type <> null)
+					{
+						inlog("Updating result.type field of StructuralFeatureAction " + 
+							sfa.name + " as " + type.name);
+						
+						if (sfa->oclIsTypeOf(ReadStructuralFeatureAction)->asSequence()->at(1))
+						{
+							var tmp : ReadStructuralFeatureAction :=
+								sfa->oclAsType(ReadStructuralFeatureAction)->asSequence()
+								->at(1);
+							tmp._result.type := type;
+						}
+						else if (sfa->oclIsTypeOf(WriteStructuralFeatureAction)->asSequence()->at(1))
+						{
+							var tmp : WriteStructuralFeatureAction :=
+								sfa->oclAsType(WriteStructuralFeatureAction)->asSequence()
+								->at(1);
+							tmp._result.type := type;
+						}
+						else if (sfa->oclIsTypeOf(ClearStructuralFeatureAction)->asSequence()->at(1))
+						{
+							var tmp : ClearStructuralFeatureAction :=
+								sfa->oclAsType(ClearStructuralFeatureAction)->asSequence()
+								->at(1);
+							tmp._result.type := type;
+						}
+						else if (sfa->oclIsTypeOf(AddStructuralFeatureValueAction)->asSequence()->at(1))
+						{
+							var tmp : AddStructuralFeatureValueAction :=
+								sfa->oclAsType(AddStructuralFeatureValueAction)->asSequence()
+								->at(1);
+							tmp._result.type := type;
+						}
+						else if (sfa->oclIsTypeOf(RemoveStructuralFeatureValueAction)->asSequence()->at(1))
+						{
+							var tmp : RemoveStructuralFeatureValueAction :=
+								sfa->oclAsType(RemoveStructuralFeatureValueAction)->asSequence()
+								->at(1);
+							tmp._result.type := type;
+						}
+						else
+						{
+							inlog("WARNING #4: uncrecognized Structural feature action type");
+						}; 
+						
+						count := count + 1;
+					}
+					else
+					{
+						inlog("WARNING #5: don't know what to do with unknown " + 
+							"StructuralFeatureAction object.type: " + sfaObjectTypeQualName);
+					};
+				};
 			};    
 			
 			sfa.input->forEach(inputPin) {
 				
 				if (inputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					if (inputPin.type.name = e2Cls.name) 
+					var type : Type := resolveTypeUsingSet(resolverSet, inputPin.type);
+					if (type <> null)
 					{
-						inputPin.type := e2Cls;
-						inlog("Updated inputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2Cls.name);
+						inlog("Updating inputPin.type field of StructuralFeatureAction " + 
+							sfa.name + " as " + type.name);
+						inputPin.type := type;
+						count := count + 1;
 					}
-				}
-				else if (inputPin.type.name = e2Ifc.name)
-				{
-					inputPin.type := e2Ifc;
-					inlog("Updated inputPin.type field of StructuralFeatureAction " + 
-						sfqualifiedName + " as " + e2Ifc.name);	
-				}
+					else
+					{
+						inlog("WARNING #6: could not resolve type: " + inputPin.type.name);
+					};
+				};
 			};
 			
 			sfa.output->forEach(outputPin) {
 				
 				if (outputPin.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0) 
 				{
-					if (outputPin.type.name = e2Cls.name)
+					var type : Type := resolveTypeUsingSet(resolverSet, outputPin.type);
+					if (type <> null)
 					{
-						outputPin.type := e2Cls;
-						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2Cls.name);
+						inlog("Updating outputPin.type field of StructuralFeatureAction " + 
+							sfa.name + " as " + type.name);
+						outputPin.type := type;
+						count := count + 1;
 					}
-					else if (outputPin.type.name = e2Ifc.name)
+					else
 					{
-						outputPin.type := e2Ifc;
-						inlog("Updated outputPin.type field of StructuralFeatureAction " + 
-							sfqualifiedName + " as " + e2Ifc.name);	
-					}
+						inlog("WARNING #7: could not resolve type: " + outputPin.type.name);
+					};
 				}	
 			};
-			
-			
 		}
 		else if (e.oclIsKindOf(ReadSelfAction)) 
 		{
@@ -302,15 +556,18 @@ helper transformOperationBehavior(
 				
 				var rsaResultTypeName : String := rsa.result.type.name;
 				
-				// Now, should we be specific about it and assume that the type is 
-				// of ConnectorCls? 
-				// TODO: may require revising
 				if (rsaResultTypeName = e2Cls.name)
 				{
 					rsa.result.type := e2Cls;
 					inlog("Updated result.type field of ReadSelfAction: " + rsa.name);
+					count := count + 1;
 				}
-			}
+				else
+				{
+					inlog("WARNING #8: unrecognized type: " + rsaResultTypeName + 
+						" in ReadSelfAction");
+				};
+			};
 		}
 		else if (e.oclIsKindOf(CallOperationAction))
 		{
@@ -321,15 +578,19 @@ helper transformOperationBehavior(
 			{
 				inlog("Found: CallOperation operation: " + coaOpQualifiedName);
 				
-				var coaOpName := coa.operation.name;
+				var op := resolveOperationUsingSet(resolverSet, coa.operation);
 				
-				if (coaOpName = e2xOp.name)
+				if (op <> null)
 				{
 					inlog("Updating operation field of CallOperationAction: " + coa.name);
-					coa.operation := e2xOp;
+					coa.operation := op;
 					count := count + 1;
 				}
-				
+				else
+				{
+					inlog("WARNING #9: could not resolve Operation: " + coa.operation.name + 
+						" in CallOperationAction");
+				};
 			};
 			
 			var coaTargetTypeQName : String := coa.target.type.qualifiedName;
@@ -338,22 +599,60 @@ helper transformOperationBehavior(
 			{
 				inlog("Found: CallOperation target type: " + coaTargetTypeQName);
 				
-				var coaTargetTypeName : String := coa.target.type.name;
-				if (coaTargetTypeName = e2Cls.name)
+				var type : Type := resolveTypeUsingSet(resolverSet, coa.target.type);
+				
+				if (type <> null)
 				{
 					inlog("Updating target.type field of CallOperationAction: " + coa.name +
-						" as " + e2Ifc.name);
-					coa.target.type := e2Cls;
+						" as " + type.name);
+					coa.target.type := type;
 					count := count + 1;
 				}
-				else if (coaTargetTypeName = e2Ifc.name)
+				else
 				{
-					inlog("Updating target.type field of CallOperationAction: " + coa.name + 
-						" as " + e2Ifc.name);
-					coa.target.type := e2Ifc;
-					count := count + 1;
-				}
-			}
+					inlog("WARNING #10: could not resolve type: " + coa.target.type.name);	
+				};
+			};
+			
+			coa.argument->forEach(arg)
+			{
+				var coaArgumentTypeQName : String := arg.type.qualifiedName;
+				if (coaArgumentTypeQName.indexOf(ALF_PKG_NAME) > 0)
+				{
+					inlog("Found: CallOperationAction argument type: " + coaArgumentTypeQName);
+					
+					var type : Type := resolveTypeUsingSet(resolverSet, arg.type);
+					if (type <> null)
+					{
+						inlog("Updating argument.type field of CallOperationAction: " + coa.name + 
+							" as " + type.name);
+						arg.type := type;
+						count:= count +1;
+					}
+					else
+					{
+						inlog("WARNING #11: could not resolve type: " + arg.type.name);	
+					};
+				};
+			};
+			
+			coa._result->forEach(res)
+			{
+				var coaResultTypeQName := res.type.qualifiedName;
+				if (coaResultTypeQName.indexOf(ALF_PKG_NAME) > 0)
+				{
+					inlog("Found CallOperationAction result tyupe: " + coaResultTypeQName);
+					
+					var type := resolveTypeUsingSet(resolverSet, res.type);
+					if (type <> null)
+					{
+						inlog("Updating result.type field of CallOperationAction: " + coa.name + 
+							" as " + type.name);
+						res.type := type;
+						count := count + 1;
+					};
+				};
+			};
 		}
 		else if (e.oclIsKindOf(ActivityParameterNode))
 		{
@@ -365,18 +664,20 @@ helper transformOperationBehavior(
 			if (apnTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
 				inlog("Found: ActivityParameterNode type: " + apnTypeQualifiedName);
-				if (activityParameterNode.type.name = e2Cls.name)
+				
+				var type : Type := resolveTypeUsingSet(resolverSet, activityParameterNode.type);
+				if (type <> null)
 				{
 					inlog("Updating type field of ActivityParameterNode: " + 
-						activityParameterNode.name + " as " + e2Cls.name);
-					activityParameterNode.type := e2Cls;
+						activityParameterNode.name + " as " + type.name);
+					activityParameterNode.type := type;
 					count := count + 1;
 				}
 				else
 				{
-					inlog("WARNING: don't know what to do with unknown ActivityParameterNode type");
-				}
-			}	
+					inlog("WARNING #12: could not resolve type: " + activityParameterNode.type.name);
+				};
+			};
 		}
 		else if (e.oclIsKindOf(ExpansionRegion))
 		{
@@ -388,18 +689,162 @@ helper transformOperationBehavior(
 				if (qualName.indexOf(ALF_PKG_NAME) > 0)
 				{
 					inlog("Found: ExpansionReqion structuredNodeInput type: " + qualName);
-					if (sni.type.name = e2Cls.name)
+					
+					var type : Type := resolveTypeUsingSet(resolverSet, sni.type);
+					if (type <> null)
 					{
 						inlog("Updating type field of structured node input: " + sni.name + 
-							" as " + e2Cls.name);
-						sni.type := e2Cls;
-						count := count + 1;
+							" as " + type.name);
+						sni.type := type;
+						count := count + 1;					
 					}
-				}
-			}
+					else
+					{
+						inlog("WARNING #13: could not resolve type: " + sni.type.name);
+					};
+				};
+			};
 		}
+		else if (e.oclIsKindOf(CreateObjectAction))
+		{
+			var coa : CreateObjectAction := e.oclAsType(CreateObjectAction);
+			
+			if (coa.classifier.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
+			{
+				inlog("Found: CreateObjectAction: classifier: " + coa.classifier.name);
+				
+				var cls : Class := resolveClassUsingSet(resolverSet, coa.classifier);
+				
+				if (cls <> null)
+				{
+					inlog("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
+						cls.name);
+					coa.classifier := cls;
+					count := count + 1;
+				}
+				else
+				{
+					inlog("WARNING #14: could not resolve type: " + coa.classifier.name);
+				};
+			};
+			
+			if (coa._result.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
+			{
+				inlog("Found: CreateObjectAction: result type: " + coa._result.type.name);
+				
+				var type : Type := resolveTypeUsingSet(resolverSet, coa._result.type);
+				
+				if (type <> null)
+				{
+					inlog("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
+						type.name);
+					coa._result.type := type;
+					count := count + 1;
+				}
+				else
+				{
+					inlog("WARNING #15: could not resolve type: " + coa._result.type.name);
+				};
+			};
+		}
+		else if (e.oclIsKindOf(StructuredActivityNode))
+		{
+			var san : StructuredActivityNode := e.oclAsType(StructuredActivityNode);
+			
+			san.structuredNodeInput->forEach(sni) {
+				var qualName : String := sni.type.qualifiedName;
+				
+				if (qualName.indexOf(ALF_PKG_NAME) > 0)
+				{
+					inlog("Found: StructuredActivityNode structuredNodeInput type: " + qualName);
+					
+					var type : Type := resolveTypeUsingSet(resolverSet, sni.type);
+					if (type <> null)
+					{
+						inlog("Updating type field of structured node input: " + sni.name + 
+							" as " + type.name);
+						sni.type := type;
+						count := count + 1;					
+					}
+					else
+					{
+						inlog("WARNING #18: could not resolve type: " + sni.type.name);
+					};
+				};
+			};
+			
+			san.structuredNodeOutput->forEach(sno)
+			{
+				var qualName : String := sno.type.qualifiedName;
+				
+				if (qualName.indexOf(ALF_PKG_NAME) > 0)
+				{
+					inlog("Found: StructuredActivityNode structuredNodeOutput type: " + qualName);
+					
+					var type : Type := resolveTypeUsingSet(resolverSet, sno.type);
+					if (type <> null)
+					{
+						inlog("Updating type field of structured node output: " + sno.name + 
+							" as " + type.name);
+						sno.type := type;
+						count := count + 1;					
+					}
+					else
+					{
+						inlog("WARNING #18: could not resolve type: " + sno.type.name);
+					};
+				};				
+			};
+			
+			
+			if (san.oclIsKindOf(LoopNode))
+			{
+				var loopNode : LoopNode := e.oclAsType(LoopNode);
+				
+				loopNode.loopVariable->forEach(lv)
+				{
+					if (lv.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
+					{
+						inlog("Found loop variable type: " + lv.name);
+						
+						var type : Type := resolveTypeUsingSet(resolverSet, lv.type);
+						if (type <> null)
+						{
+							inlog("Updating type field of loop variable " + lv.name + " as " + 
+								type.name);
+							lv.type := type;
+							count := count + 1;
+						}
+						else
+						{
+							inlog("WARNING #19: could not resolve type: " + lv.type.name);
+						};
+					};
+				};
+			};
+		}
+		else if (e.oclIsKindOf(Parameter))
+		{
+			var param : Parameter := e.oclAsType(Parameter);
+			
+			if (param.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
+			{
+				inlog("Found Parameter type: " + param.name);
+				
+				var type : Type := resolveTypeUsingSet(resolverSet, param.type);
+				if (type <> null)
+				{
+					inlog("Updating type field of parameter: " + param.name);
+					param.type := type;
+					count := count + 1;
+				}
+				else
+				{
+					inlog("WARNING #17: could not resolve type: " + param.type.name);
+				};
+			};
+		};
 	};
-	
 	
 	inlog("Replaced " + count.toString() + " references");
 	endLog("Done");
@@ -421,8 +866,8 @@ helper getModelElement(pathStr: String, inputModel:uml) : Element
 			if (elementPath = pathStr)
 			{
 				return e->oclAsType(Element)->asSequence()->at(1);
-			}	
-		}
+			};	
+		};
 	};
 	
 	return null;
