@@ -51,6 +51,11 @@ helper getInterfaceFromConnectorCls(conCls : Class) : Interface
 }
 
 
+query Element::hasStereotype(stereotypeName : String): Boolean {
+
+	return self.getAppliedStereotypes()->select(name = stereotypeName)->size() <> 0;	
+} 
+
 helper getLogIndent() : String {
 	var indentStr : String := '';
 	var i : Integer := 0;

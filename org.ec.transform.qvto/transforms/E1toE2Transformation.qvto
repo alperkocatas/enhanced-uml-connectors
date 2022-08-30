@@ -22,6 +22,8 @@ helper transformE1toE2()
 	var allStuff : Set(Element) := model->allOwnedElements()
 		->asSequence()->at(1);
 	
+	var foundOne : Boolean := false;
+	
 	allStuff->forEach(e) {
 		
 		if (e->oclIsKindOf(Connector)->asSequence()->at(1) = true)
@@ -38,6 +40,7 @@ helper transformE1toE2()
 				if (conf <> "UnknownConfiguration")
 				{
 					inlog("EC_CONFIGURATION=" + conf);
+					foundOne := true;
 					transformEcConnector(con, conf);
 				}
 				else
@@ -51,6 +54,8 @@ helper transformE1toE2()
 			};
 		};		
 	};
+	
+	assert fatal (foundOne = true) with log("Could not find any enhanced connector in input model!"); 
 }
 
 
@@ -101,13 +106,10 @@ query Connector::getEcConfiguration() : String {
 	{
 		return "SingleRequesterMultipleProvider";
 	}		
-	else if (requesterPorts->size() > 1 and providerPorts->size() = 1)
+	else if (requesterPorts->size() > 1 and providerPorts->size() = 1 or 
+		     requesterPorts->size() = 1 and providerPorts->size() = 1)
 	{
 		return "MultipleRequesterSingleProvider";
-	}
-	else if (requesterPorts->size() = 1 and providerPorts->size() = 1)
-	{
-		return "SingleRequesterSingleProvider";
 	};
 	
 	return "UnknownConfiguration";
@@ -153,31 +155,29 @@ helper transformEcConnector(ec : Connector, conf : String)
 	
 	var reqPortObj : Property := null;
 	var requestPortCls : Class := null;
-	if (conf = "MultipleRequesterSingleProvider")
-	{
-		inlog("Creating request port class and its ports");
-		requestPortCls := new Class("RequestPortCls");
-		connectorCls.nestedClassifier += requestPortCls;
-		
-		var providingPortReqPortCls : Port := new Port("prvPort", 
-			providingPort.type->oclAsType(Class)->asSequence()->at(1));
-		requestPortCls.ownedAttribute += providingPortReqPortCls;
-						
-		inlog("Create Request Port object inside the connector class");
-		reqPortObj := new Property('InPort');
-		reqPortObj.type := requestPortCls;
-		reqPortObj.lower := 1;
-		reqPortObj.upper := 1;
-		reqPortObj.isOrdered := true;
-		reqPortObj.isUnique := false;
-		connectorCls.ownedAttribute += reqPortObj.oclAsType(Property);
-		
-		inlog("Creating connector betweeen request port object and providing port of connector class");
-		var inPortConClsConnector : Connector := new Connector("InPortConnector", providingPortConCls, 
-										null, providingPortReqPortCls, reqPortObj); 
-		connectorCls.ownedConnector += inPortConClsConnector;
-		
-	};	
+	
+	inlog("Creating request port class and its ports");
+	requestPortCls := new Class("RequestPortCls");
+	connectorCls.nestedClassifier += requestPortCls;
+	
+	var providingPortReqPortCls : Port := new Port("prvPort", 
+		providingPort.type->oclAsType(Class)->asSequence()->at(1));
+	requestPortCls.ownedAttribute += providingPortReqPortCls;
+					
+	inlog("Create Request Port object inside the connector class");
+	reqPortObj := new Property('InPort');
+	reqPortObj.type := requestPortCls;
+	reqPortObj.lower := 1;
+	reqPortObj.upper := 1;
+	reqPortObj.isOrdered := true;
+	reqPortObj.isUnique := false;
+	connectorCls.ownedAttribute += reqPortObj.oclAsType(Property);
+	
+	inlog("Creating connector betweeen request port object and providing port of connector class");
+	var inPortConClsConnector : Connector := new Connector("InPortConnector", providingPortConCls, 
+									null, providingPortReqPortCls, reqPortObj); 
+	connectorCls.ownedConnector += inPortConClsConnector;
+
 	
 	// Create connector object
 	inlog("Creating the connector object...");  	
@@ -324,42 +324,112 @@ helper transformEcConnector(ec : Connector, conf : String)
 	// of the connector class and its attributes, to attributes of the connector class. 
 	
 	// Let's locate the "contract" of the primary enhanced connector first: 
-	var connectorBehaviorActivity : Activity = ec.contract->oclAsType(Activity)->asSequence()->at(1);
+	var connectorBehaviorOpaqueBehavior : OpaqueBehavior = 
+		ec.contract->oclAsType(OpaqueBehavior)->asSequence()->at(1);
 	
+	var requestBufferExists : Boolean := false;
+	var requestBufferType : String := "SingleCopy";
+	
+	var replyBufferExists : Boolean := false;
+	var replyBufferType : String := "SingleCopy";
 	
 	// Foreach property of the activity, create an attribute in the connector class
 	// Since we are doing an inplace transformation, altering the owner of the attribute 
 	// will suffice: 
-	connectorBehaviorActivity.ownedAttribute->forEach(p) {
+	connectorBehaviorOpaqueBehavior.ownedAttribute->forEach(p) {
 	
 		// If the configuration is n:1 and this is a request buffer, create its copy inside
 		// the requestPortCls. 
-		if (conf = "MultipleRequesterSingleProvider" and p.hasStereotype("RequestBuffer") )
-		{
+		if (p.hasStereotype("RequestBuffer") )
+		{			
 			requestPortCls.ownedAttribute += p;
 			
 			// and since multiplicity of this will now be governed by multiplicity of the 
 			// requestPortCls object, set its multiplicity to 1: 
-			
 			p.lower := 1;
 			p.upper := 1;
 			
 			// Set visibility of request buffer as public
 			// so that connector class can access it:
 			p.visibility := VisibilityKind::_public;
+			
+			requestBufferExists := true;
+			
+			var st : Stereotype := p.getAppliedStereotypes()->select(name = "RequestBuffer")
+				->asSequence()->at(1);
+
+			var bufferTypeLiteral : EnumerationLiteral := p.getValue(st, "type")
+				.oclAsType(EnumerationLiteral);
+			
+			if (bufferTypeLiteral.name = "Fifo")
+			{
+				requestBufferType := "Fifo";
+			}
+			else if (bufferTypeLiteral.name = "SingleCopy")
+			{
+				requestBufferType := "SingleCopy";
+				// set lower multiplicity to 0 to allow empty buffer semantics.
+				p.lower := 0; 		
+			};
+	
+			
+			// Set the type of request buffer according to argument type of the operation
+			// declared in the coordinated interface:  
+			var parameter : Parameter := 
+				theOperation.ownedParameter->select(direction != ParameterDirectionKind::_return)
+				->asSequence()->at(1);
+			
+			// We set the parameter type regardless of buffer type, and will hangle Queue vs
+			// primitive type decision in the next step in the transformation chain: 
+			p.type := parameter.type;
+		}
+		else if (p.hasStereotype("ReplyBuffer"))
+		{
+			inlog("Setting multiplicity and return type of the reply buffer");
+			// Set multiplicity of the reply buffer according to number of providers: 
+			p.lower := inOutPortMultiplicity;
+			p.upper := inOutPortMultiplicity;
+			
+			// Set type of the reply buffer according to the return type of the operation
+			// declared in the coordinated interface: 
+			// We set the parameter type regardless of buffer type, and will hangle Queue vs
+			// primitive type decision in the next step in the transformation chain:
+			var returnParam : Parameter := 
+				theOperation.ownedParameter->select(direction = ParameterDirectionKind::_return)
+				->asSequence()->at(1);
+			p.type := returnParam.type;
+			
+			connectorCls.ownedAttribute += p;
+			
+			replyBufferExists := true;
+			
+			var st : Stereotype := p.getAppliedStereotypes()->select(name = "ReplyBuffer")
+				->asSequence()->at(1);
+
+			var bufferTypeLiteral : EnumerationLiteral := p.getValue(st, "type")
+				.oclAsType(EnumerationLiteral);
+			
+			if (bufferTypeLiteral.name = "Fifo") 
+			{
+				replyBufferType := "Fifo";
+			}	
+			else if (bufferTypeLiteral.name = "SingleCopy")
+			{
+				requestBufferType := "SingleCopy";
+				
+				// TODO: when reply buffers are single copy, we implement an array which is 
+				// at the size of the number of providers. But.. can the cells of those array
+				// store null values? 
+			};
 		}
 		else
 		{
 			connectorCls.ownedAttribute += p;
 		};
-		
 	};
 	
 	
-	
-	elementsToRemove += connectorBehaviorActivity;
-	
-	
+	//elementsToRemove += connectorBehaviorOpaqueBehavior;
 	
 	// Assumption: The connector behavior activity consists of:
 	// - Initial node 
@@ -367,25 +437,25 @@ helper transformEcConnector(ec : Connector, conf : String)
 	// - Final node
 	// - Transitions in between
 
-	// Copy the connector behavior activity as an OpaqueBehavior into the connector class
-	var opaqueAction : OpaqueAction := 
-		connectorBehaviorActivity.ownedElement->select(oa | oa.oclIsKindOf(OpaqueAction))
-			->oclAsType(OpaqueAction)->asSequence()->at(1);
-	assert fatal(opaqueAction <> null) with log("No OpaqueAction was found under connector behavior");
+	// Move the connector behavior into the connector class
+//	var opaqueAction : OpaqueAction := 
+//		connectorBehaviorActivity.ownedElement->select(oa | oa.oclIsKindOf(OpaqueAction))
+//			->oclAsType(OpaqueAction)->asSequence()->at(1);
+//	assert fatal(opaqueAction <> null) with log("No OpaqueAction was found under connector behavior");
 	
-	var opaqueActionBody : String := opaqueAction.body->asSequence()->at(1);
+	var opaqueBehaviorBody : String := connectorBehaviorOpaqueBehavior.body->asSequence()->at(1);
 	
-	var transformedOpaqueActionBody : String:= opaqueActionBody
+	var transformedOpaqueActionBody : String:= opaqueBehaviorBody
 		->replaceAll("PRV_CNT", inOutPortMultiplicity.toString())
 		->replaceAll("REQ_CNT", inOutPortMultiplicity.toString())
 		->asSequence()->at(1);
 	
-	var connectorOpaqueBehavior : OpaqueBehavior := 
-		new OpaqueBehavior(connectorBehaviorActivity.name);
-	
-	connectorOpaqueBehavior.body := transformedOpaqueActionBody;
-	connectorCls.ownedBehavior += connectorOpaqueBehavior;
-	newOperation.method += connectorOpaqueBehavior;
+//	var connectorOpaqueBehavior : OpaqueBehavior +=  
+//		new OpaqueBehavior(connectorBehaviorActivity.name);
+//	
+	connectorBehaviorOpaqueBehavior.body := transformedOpaqueActionBody;
+	connectorCls.ownedBehavior += connectorBehaviorOpaqueBehavior;
+	newOperation.method += connectorBehaviorOpaqueBehavior;
 	
 	// Delete elements to remove in reverse direction
 	elementsToRemove := elementsToRemove->reverse();
@@ -396,27 +466,26 @@ helper transformEcConnector(ec : Connector, conf : String)
 		e1Model.removeElement(elt);
 	};
 	
+	CreateConnectorClsConstructor(
+		connectorCls, 
+		inOutPortMultiplicity);
 	
-	if (conf = "MultipleRequesterSingleProvider")
-	{
-		CreateConnectorClsConstructorForMultipleRequesterSingleProvider(
-			connectorCls, 
-			inOutPortMultiplicity);
+	CreateRequestClassConstructor(
+		requestPortCls,
+		connectorCls, 
+		requestBufferExists, 
+		requestBufferType);
 		
-		CreateRequestClassConstructorForMultipleRequesterSingleProvider(
-			requestPortCls,
-			connectorCls);
-			
-		CreateRequestPortClsRequestHandlerOperation(
-			requestPortCls, 
-			theOperation);
-	};
-		
+	CreateRequestPortClsRequestHandlerOperation(
+		requestPortCls, 
+		theOperation, 
+		requestBufferExists, 
+		requestBufferType);
 		
 	endLog("Done");
 }
 
-helper CreateConnectorClsConstructorForMultipleRequesterSingleProvider(
+helper CreateConnectorClsConstructor(
 	inout connectorCls:Class, 
 	in inPortMultiplicity: Integer)
 {
@@ -444,9 +513,11 @@ helper CreateConnectorClsConstructorForMultipleRequesterSingleProvider(
 }
 
 
-helper CreateRequestClassConstructorForMultipleRequesterSingleProvider(
+helper CreateRequestClassConstructor(
 	inout requestPortCls:Class, 
-	in connectorCls : Class)
+	in connectorCls : Class, 
+	in requestBufferExists : Boolean,
+	in requestBufferType : String)
 {
 	var connClsAsAttribute : Property := new Property("ownerConnector");
 	connClsAsAttribute.type := connectorCls;
@@ -468,6 +539,12 @@ helper CreateRequestClassConstructorForMultipleRequesterSingleProvider(
 	
 	var constructorBehaviorStr : String = "";	
 	constructorBehaviorStr := "this.ownerConnector  = c;" + "\n";
+
+	if (requestBufferExists and requestBufferType = "Fifo")
+	{
+		constructorBehaviorStr := constructorBehaviorStr + 
+			"this.RequestBuffer = new Queue<Integer>();" + "\n";
+	};
 	
 	constructorBehavior.body += constructorBehaviorStr;
 
@@ -478,9 +555,10 @@ helper CreateRequestClassConstructorForMultipleRequesterSingleProvider(
 
 helper CreateRequestPortClsRequestHandlerOperation(
 	inout requestPortCls:Class, 
-	in otherRequestOperation: Operation)
+	in otherRequestOperation: Operation, 
+	in requestBufferExists : Boolean,
+	in requestBufferType : String)
 {
-
 	var requestOperation := new Operation(otherRequestOperation);
 	requestPortCls.ownedOperation += requestOperation;		
 
@@ -496,10 +574,25 @@ helper CreateRequestPortClsRequestHandlerOperation(
 	
 	var paramName : String := otherRequestOperation.ownedParameter->asSequence()->at(1).name;
 	
-	behaviorStr := 
-		"// Store incoming request in request buffer" + "\n" +
-		"this.RequestBuffer[1] = " + paramName + ";" + "\n" +
-		"\n" +
+	if (requestBufferExists)
+	{
+		if (requestBufferType = "SingleCopy")
+		{
+			behaviorStr := behaviorStr + 
+				"// Store incoming request in request buffer" + "\n" +
+				"this.RequestBuffer = " + paramName + ";" + "\n" +
+				"\n";
+		}
+		else
+		{
+			behaviorStr := behaviorStr +
+				"// Store incoming request in request buffer" + "\n" +
+				"this.RequestBuffer.add(" + paramName + ");" + "\n" +
+				"\n";	
+		}
+	};
+	
+	behaviorStr := behaviorStr + 
 		"// Let connector object process the request" + "\n" +
         "return this.ownerConnector." + otherRequestOperation.name + 
         		"(" + paramName + ");" + "\n";
@@ -514,11 +607,6 @@ constructor OpaqueBehavior::OpaqueBehavior(nameArg:String) {
 	name := nameArg;
 }
 
-
-query Element::hasStereotype(stereotypeName : String): Boolean {
-
-	return self.getAppliedStereotypes()->select(name = stereotypeName)->size() <> 0;	
-} 
 
 
 helper transformSingleRequesterMultipleProviderPrimaryEnhancedConnector(ec : Connector)

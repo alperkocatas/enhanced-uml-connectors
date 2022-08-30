@@ -91,9 +91,9 @@ helper transformE2toE3()  {
 	beginLog("Locating fUML model elements");
 	
 	// locate fUML model elements: ConnectorClass should be under the package named in alf 
-	var fUmlModel : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
+	var fUmlModelElt : Model := fUmlModel.rootObjects()[Model]->asSequence()->at(1);
 	
-	var fUmlPkg : Package := fUmlModel.packagedElement
+	var fUmlPkg : Package := fUmlModelElt.packagedElement
 		->select(name = ALF_PKG_NAME)
 		->oclAsType(Package)->asSequence()->at(1);
 						      
@@ -106,6 +106,58 @@ helper transformE2toE3()  {
 	var resolverSet : Set(NamedElement) := buildResolverSet(e2ConCls, e2xIfc);
 	
 	importClassBehaviorsFromFumlModel(e2ConCls, fUmlConCls, resolverSet);
+	
+	
+	moveAlfLibraryReferencesFromFumlModel(fUmlModelElt, e2ModelElt, fUmlPkg);
+}
+
+helper moveAlfLibraryReferencesFromFumlModel(inout fUmlModelElement: Model, 
+	inout e2ModelElement : Model,  inout fUmlConnectorImplPackage : Package)
+{
+	
+	// Populate a set which contains original contents of e2Model elements before moving in the 
+	// fUML model lib references: 
+	var origE2ModelEltContents : Set(Element);
+	
+	e2ModelElement.ownedElement->forEach(e)
+	{
+		origE2ModelEltContents += e;
+	};
+
+	fUmlModelElement.packagedElement->forEach(e)
+	
+	{
+		if (e <> fUmlConnectorImplPackage)
+		{
+			if (e.oclIsKindOf(PackageableElement) = true)
+			{
+				e2ModelElement.packagedElement += e.oclAsType(PackageableElement);
+			}
+		} 
+	};
+	
+	// Now, make a final resolution here to fix the broken redefined operation references:
+	e2ModelElement.ownedElement->forEach(elt)
+	{
+		if (origE2ModelEltContents->includes(elt) = false)
+		{	
+			if (elt.oclIsTypeOf(Class) = true)
+			{
+				var cls : Class := elt.oclAsType(Class);
+				
+				cls.ownedOperation->forEach(op) 
+				{
+					op.redefinedOperation->forEach(redOp)
+					{
+						if (redOp.qualifiedName = null)
+						{
+							e2Model.removeElement(redOp);
+						}
+					}	
+				};
+			};
+		};
+	};
 }
 
 helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: Class, 

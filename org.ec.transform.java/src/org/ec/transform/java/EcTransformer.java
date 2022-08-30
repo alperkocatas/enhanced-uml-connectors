@@ -31,32 +31,33 @@ import org.eclipse.m2m.qvt.oml.util.WriterLog;
 import org.eclipse.uml2.uml.UMLPackage;
 import org.eclipse.uml2.uml.resource.UMLResource;
 
+
 public class EcTransformer {
 	
 	private static final Logger logger = Logger.getLogger(EcTransformer.class);
 	
-	private String workspacePath = "/Users/akocatas/Dropbox/payprus-workspace/"; 
+	private String e1ToE2TxPath = "org.ec.transform.qvto" + File.separator +  
+			"transforms" + File.separator + "E1toE2Transformation.qvto";
 	
-	private String e1ToE2TxPath = workspacePath + "org.ec.transform.qvto/" + 
-			"transforms/E1toE2Transformation.qvto";
+	private String e2ToAlfTxPath = "org.ec.transform.qvto" + File.separator +  
+			"transforms"+File.separator+"E2ToAlfTransformation.qvto";
 	
-	private String e2ToAlfTxPath = workspacePath + "org.ec.transform.qvto/" + 
-			"transforms/E2ToAlfTransformation.qvto";
+	private String e2Toe3TxPath = "org.ec.transform.qvto" + File.separator +  
+			"transforms" + File.separator + "E2toE3Transformation.qvto";
 	
-	private String e2Toe3TxPath = workspacePath + "org.ec.transform.qvto/" + 
-			"transforms/E2toE3Transformation.qvto";
-	
-	private String fUMLOutputDir = workspacePath + "org.ec.connectors/alf_output/";	
+	private String fUMLOutputDir = "org.ec.connectors" + File.separator + "alf_output" + 
+			File.separator;	
 	
 	private String AlfWsPath = "/Users/akocatas/Documents/Alf-Reference-Implementation-master/";
 	
 	private String e1ModelDir; 
 	
 	
-	private String e1ModelPath = workspacePath + "org.ec.connectors/" + 
-			"RoundRobinRequester/RoundRobinRequester_E1.uml";
-//			"MultiDestRequester/MultiDestRequester_E1.uml";
-//			"RequestBarrier/RequestBarrier_E1.uml";
+	private String e1ModelPath = "org.ec.connectors" + File.separator + 
+//			"RoundRobinRequester" + File.separator + "RoundRobinRequester_E1.uml";
+//			"MultiDestRequester" + File.separator + "MultiDestRequester_E1.uml";
+//			"RequestBarrier" + File.separator + "RequestBarrier_E1.uml";
+			"LessFrequentRequester" + File.separator + "LessFrequentRequester_E1.uml";
 	
 	
 	
@@ -77,6 +78,8 @@ public class EcTransformer {
 	private String AlfPkgName = null;
 	private String EcConfiguration = null;
 	
+	private enum PlatformKind {Windows, Other};
+	private PlatformKind platform;
 	
 	public static void main(String[]args)
 	{
@@ -96,10 +99,7 @@ public class EcTransformer {
 			
 			EcTransformer tx = new EcTransformer();
 			
-			if (args.length == 1)
-				tx.e1ModelPath  = args[0].trim();
-			
-			tx.CalculateFilePaths();
+			tx.CalculateFilePaths(args);
 			tx.initializeUMLResources();
 			tx.runE1ToE2Transformation(); 
 			tx.runE2ToAlfTransformation();
@@ -118,8 +118,56 @@ public class EcTransformer {
 		}
 	}	
 	
-	private void CalculateFilePaths()
+	private String getCmdLineArg(String [] args, String argname)
 	{
+		String argVal = null;
+		for (int i = 0; i < args.length; i++)
+		{
+			if (args[i].equals(argname))
+			{
+				if (i < args.length - 1)
+					argVal = args[i+1];
+			}
+		}
+		
+		return argVal;
+	}
+	
+	
+	private void CalculateFilePaths(String [] args)
+	{
+		if (File.separator.equals("\\"))
+			this.platform = PlatformKind.Windows;
+		else 
+			this.platform = PlatformKind.Other;
+		
+		String wsDir = "/Users/akocatas/Dropbox/payprus-workspace";
+		String wsDirArg = getCmdLineArg(args, "-wsDir");
+		if (wsDirArg != null)
+			wsDir = wsDirArg;
+		if (!wsDir.endsWith(File.separator))
+			wsDir += File.separator;
+		
+		e1ModelPath = wsDir + e1ModelPath;
+		
+		String e1ModelArg = getCmdLineArg(args, "-e1model");
+		if (e1ModelArg != null)
+			e1ModelPath  = e1ModelArg;
+
+		String alfWsPathArg = getCmdLineArg(args, "-alfWsDir");
+		if (alfWsPathArg != null)
+			AlfWsPath = alfWsPathArg;
+		
+		if (!AlfWsPath.endsWith(File.separator))
+			AlfWsPath += File.separator;		
+				
+		e1ToE2TxPath = wsDir + e1ToE2TxPath; 
+		
+		e2ToAlfTxPath = wsDir + e2ToAlfTxPath;
+		
+		e2Toe3TxPath = wsDir + e2Toe3TxPath;
+		
+		fUMLOutputDir = wsDir + fUMLOutputDir;	
 		
 		File e1File = new File(e1ModelPath);
 		
@@ -128,9 +176,9 @@ public class EcTransformer {
 		
 		String e1FileName = e1File.getName();
 		
-		e2ModelPath = e1ModelDir +  "/" + e1FileName.replace(".uml", "_E2.uml");
+		e2ModelPath = e1ModelDir + File.separator + e1FileName.replace(".uml", "_E2.uml");
 		
-		e3ModelPath = e1ModelDir +  "/" + e1FileName.replace(".uml", "_E3.uml");
+		e3ModelPath = e1ModelDir +  File.separator + e1FileName.replace(".uml", "_E3.uml");
 		
 		AlfPkgName = e1FileName.replace(".uml", "");
 	}
@@ -155,16 +203,32 @@ public class EcTransformer {
 		return null;
 	}
 	
-	public void initializeUMLResources()
+	public void initializeUMLResources() throws Exception
 	{
 		resourceSet = new ResourceSetImpl();
 		resourceSet.getPackageRegistry().put(UMLPackage.eNS_URI, UMLPackage.eINSTANCE);
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().
 			put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
 		Map uriMap = resourceSet.getURIConverter().getURIMap();
-		URI uri = URI.createURI(
-				"jar:file:/Users/akocatas/Applications/Papyrus.app/Contents/" + 
-				"Eclipse/plugins/org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
+		
+		URI uri;
+		if (this.platform == PlatformKind.Other)
+		{
+			uri = URI.createURI(
+					"jar:file:/Users/akocatas/Applications/Papyrus.app/Contents/" + 
+					"Eclipse/plugins/org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
+		}
+		else if (this.platform == PlatformKind.Windows)
+		{
+			uri = URI.createURI(
+				"jar:file:/D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins/" + 
+				"org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
+		}
+		else
+		{
+			throw new Exception("Unknown platform kind: " + this.platform.toString());
+		}
+		
 		uriMap.put(URI.createURI(UMLResource.LIBRARIES_PATHMAP), 
 				uri.appendSegment("libraries").appendSegment(""));
 		uriMap.put(URI.createURI(UMLResource.METAMODELS_PATHMAP), 
@@ -195,7 +259,7 @@ public class EcTransformer {
 		E1toE2TransformationLog log = new E1toE2TransformationLog();
 		context.setLog(log);
 	    
-	    
+		
 		URI transformationURI = URI.createFileURI(e1ToE2TxPath);
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, input);
@@ -219,7 +283,7 @@ public class EcTransformer {
 		}
 		
 		List<EObject> outObjects = input.getContents();
-        URI outUri = URI.createURI("file:" + e2ModelPath);
+        URI outUri = URI.createFileURI(e2ModelPath);
         Resource res = resourceSet.createResource(outUri);
         res.getContents().addAll(outObjects);
         try {
@@ -297,10 +361,13 @@ public class EcTransformer {
 		logger.info("Compiling alf file using alfc");
 		
 		// Compile Alf File using alfc
-		String alfcPath = alfPrjPath + "alfc";
+		String alfc = "alfc";
+		if (this.platform == PlatformKind.Windows)
+			alfc += ".bat";
+		String alfcPath = alfPrjPath + alfc;
 		String modelsDirPath = alfPrjPath + "Models";
 		String librariesDirPath = alfPrjPath + "Libraries";
-				
+		
 		ProcessBuilder pb = new ProcessBuilder(alfcPath,
 				"-l", librariesDirPath, 
 				"-m", modelsDirPath,
@@ -344,16 +411,14 @@ public class EcTransformer {
 			
 			throw new Exception("Error occurred while compiling Alf file");
 		}
-		else
-		{
-			logger.info("Alf code compiled successfully");
-		}
 		
 		// actual alf compilation result is determined here. 
 		if (alfCompilationIsSuccessful == false)
 		{
 			throw new Exception("Error occurred while compiling Alf file");
 		}
+		
+		logger.info("Alf code compiled successfully");
 		
 		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + "/" + AlfPkgName + ".uml";
 		printLogSeparator();
@@ -419,7 +484,7 @@ public class EcTransformer {
 		}
 		
 		List<EObject> outObjects = e2Input.getContents();
-        URI outUri = URI.createURI("file:" + e3ModelPath);
+        URI outUri = URI.createFileURI(e3ModelPath);
         Resource res = resourceSet.createResource(outUri);
         res.getContents().addAll(outObjects);
         try {

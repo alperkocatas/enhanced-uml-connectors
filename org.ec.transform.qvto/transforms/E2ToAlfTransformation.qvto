@@ -177,7 +177,34 @@ helper generateClassAttributes(cls: Class)
 					inlog("WARNING: type name of attribute " + attrName + " seems to be null");
 				};
 				
-				var attrType : String := attr.type.name.toString();
+				var attrType : String := attr.type.name.toString();		
+				
+				// Set the attribute type to Queue<attrType> if this is a request or reply buffer
+				if (attr.hasStereotype("RequestBuffer"))
+				{
+					var st : Stereotype := attr.getAppliedStereotypes()->
+						select(name = "RequestBuffer")
+						->asSequence()->at(1);
+		
+					var bufferTypeLiteral : EnumerationLiteral := attr.getValue(st, "type")
+						.oclAsType(EnumerationLiteral);
+					
+					if (bufferTypeLiteral.name = "Fifo")
+						attrType := "Queue<" + attrType + ">";
+				}
+				else if (attr.hasStereotype("ReplyBuffer"))
+				{
+					var st : Stereotype := attr.getAppliedStereotypes()->
+						select(name = "ReplyBuffer")
+						->asSequence()->at(1);
+		
+					var bufferTypeLiteral : EnumerationLiteral := attr.getValue(st, "type")
+						.oclAsType(EnumerationLiteral);
+					
+					if (bufferTypeLiteral.name = "Fifo")
+						attrType := "Queue<" + attrType + ">";
+				};
+				
 				attrCode := attrCode + attrName + " : " + attrType;
 				
 				var multiplicityStr : String := "[" + attr.lower.toString() + ".." +
@@ -393,41 +420,6 @@ helper generateClassCode(cls:Class)
 		if (nestedCls->oclIsTypeOf(Class)->asSequence()->at(1) = true)
 		generateClassCode(nestedCls->oclAsType(Class)->asSequence()->at(1));	
 	};
-	
-	AlfIndentLevel := AlfIndentLevel - 1;
-	appendAlfCodeLine("}"); 
-	appendAlfCodeLine("");
-}
-
-helper __generateRequestPortClass(reqPortCls:Class, connectorCls: Class, ifc : Interface)
-{
-	appendAlfCodeLine("public class RequestPortCls specializes " + ifc.name);
-	appendAlfCodeLine("{");
-	AlfIndentLevel := AlfIndentLevel + 1;
-	
-	generateClassAttributes(reqPortCls);
-	appendAlfCodeLine("");
-	
-	// Generate Constructor
-	appendAlfCodeLine("@Create");
-	appendAlfCodeLine("public RequestPortCls(in c: " + connectorCls.name + ") {");
-	appendAlfCodeLine("    this.ownerConnector = c;");
-	appendAlfCodeLine("{");
-	appendAlfCodeLine("");
-	
-	// Generate interface operation
-	appendAlfCodeLine(getInterfaceOperationSignature(ifc) + " {");
-	appendAlfCodeLine("    // Store incoming request in request buffer");
-	appendAlfCodeLine("    this.RequestBuffer[1] = arg;");
-	appendAlfCodeLine("    ");
-	appendAlfCodeLine("    // Let the connector object process the request");
-	
-	var interfaceOperation : Operation := ifc.ownedOperation->asSequence()->at(1);
-	var param : Parameter := interfaceOperation.ownedParameter->asSequence()->at(1);
-	
-	appendAlfCodeLine("    return this.ownerConnector." + interfaceOperation.name + "(" +
-		param.name + ");");
-	appendAlfCodeLine("}"); 
 	
 	AlfIndentLevel := AlfIndentLevel - 1;
 	appendAlfCodeLine("}"); 
