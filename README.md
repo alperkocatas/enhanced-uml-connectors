@@ -31,6 +31,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - Install Eclipse Papyrus and make sure that QVT Operational SDK plugin is also included. If not, use Help->Install new software and use the update site: https://download.eclipse.org/releases/2021-03/ to download and install the QVT Operational SDK plugin, 
 - Open Eclipse Papyrus and choose the root directory of this repository as your workspace. 
 - Use the run-configurations provided below to run the model transformations for the example ehanced connectors. 
+- On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
 
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
@@ -44,7 +45,13 @@ Output E3 models are saved under the same directory as the E1 input models. Thes
 
 ## Command-line arguments for EcTransformer.java: 
 To use the run configurations, please update the values of the following command line arguments in run-configurations with the specific installation path on your workstation: 
-- ***-wsDir:*** Directory of the repository. 
-- ***-eclipsePluginsDir:*** directory of the "plugins" directory under Eclipse Papyrus installation. 
+- ***-wsDir:*** Directory of the repository. This is provided as "${project_loc}/.." in the run configurations to unify the definition across platforms. 
+- ***-eclipsePluginsDir:*** directory of the "plugins" directory under Eclipse Papyrus installation. This is provided as "${eclipse_home}plugins" in the run configurations to unify the definition across platforms. 
 - ***-e1Model:*** A choice of the example connectors defined in the study. Valid options are: *RoundRobinRequester, MultiDestRequester, RequestBarrier, LessFrequentSender.*
 - ***-e1ModelPath:*** If -e1Model option is not provided, this option can be used to provide the path of a specific E1 model file as input. Note that the path should be relative to the -wsDir argument. 
+
+
+## Trouble Shooting
+- We use the *project_loc* variable to get the location of the E1 models. If eclipse complains that *project_loc* is not set, please select the org.ec.transform.java project from the Project Explorer in eclipse. When no project or resource is selected, this environment variable is not set. 
+
+Please e-mail me at: alperkocatas@gmail.com, tolga.kocatas@metu.edu.tr for any other problems. 
