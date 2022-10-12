@@ -9,7 +9,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 
 ## Directory Descriptions: 
 - **AlfRefImp-1.1.0k:** A copy of the Alf reference implementation. 
-- **org.ec.connectors:** UML Model files for example connectors: 
+- **org.ec.connectors:** E1 level UML Model files for example connectors presented in the article: 
   - *Round Robin Requester:* RoundRobinRequester/RoundRobinRequester_E1.uml
   - *Multiple Destination Sender:* MultiDestRequester/MultiDestRequester_E1.uml
   - *Less Frequent Sender:* LessFrequentRequester/LessFrequentRequester_E1.uml
@@ -19,7 +19,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
   - *E2toAlf:* Model transformation rules for generating Alf code from E2 model
   - *E2toE3:* Model transformation rules from E3 model into E3 model
 - **org.ec.profile:** The enhanced connector profile (Papyrus profile project)
-- **org.ec.transform.java:** Java project which contains the EcTransformer. This application automatically runs the model transformations in required order. Input is an E1 level model. Output is an E3 level model saved under org.ec.connectors. 
+- **org.ec.transform.java:** Java project which contains the EcTransformer. This application automatically runs the model transformations in required order. Input is an E1 level model. Output is an E3 level model saved under org.ec.connectors in the same directory as the input E1 models. 
 
 ## Prerequisites
 - Eclipse Papyrus version 2021-09 (4.21.0) or higher, with QVT Operational SDK 3.10.3.v20210309-1855 installed. 
@@ -38,6 +38,8 @@ There are four run configurations under the directory /org.ec.transform.java whi
 - **EcTransformer_MultipleDestinationSender.launch:** Run configuration for transforming the Multiple Destination Sender Connector E1 Model. 
 - **EcTransformer_LessFrequentSender.launch:** Run configuration for transforming the Less Frequent Sender Connector E1 Model. 
 - **EcTransformer_RequestBarrier.launch:** Run configuration for transforming the Request Barrier Connector E1 Model. 
+
+Output E3 models are saved under the same directory as the E1 input models. These directories are: 
 
 ## Command-line arguments for EcTransformer.java: 
 To use the run configurations, please update the values of the following command line arguments in run-configurations with the specific installation path on your workstation: 
