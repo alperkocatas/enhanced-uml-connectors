@@ -38,3 +38,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 java EcTransformer.java -wsDir C:\Users\akocatas\Dropbox\payprus-workspace -eclipsePluginsDir D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins -e1Model MultiDestRequester
 ```
 **Note:** EcTransformer.launch includes an example run configuration. 
+
+
+# Example Outputs from Transformations: 
+## Multiple Destination Requester
