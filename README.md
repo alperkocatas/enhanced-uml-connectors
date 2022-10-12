@@ -34,12 +34,13 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
-- **EcTransformer_RoundRobinRequester.launch:** Run configuration for transforming the Round Robin Requester Connector E1 Model. 
-- **EcTransformer_MultipleDestinationSender.launch:** Run configuration for transforming the Multiple Destination Sender Connector E1 Model. 
-- **EcTransformer_LessFrequentSender.launch:** Run configuration for transforming the Less Frequent Sender Connector E1 Model. 
-- **EcTransformer_RequestBarrier.launch:** Run configuration for transforming the Request Barrier Connector E1 Model. 
+- **EcTransformer_RoundRobinRequester.launch:** Run configuration for transforming the Round Robin Requester Connector E1 Model. [Click here for sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_RoundRobinRequester.md).
+- **EcTransformer_MultipleDestinationSender.launch:** Run configuration for transforming the Multiple Destination Sender Connector E1 Model.  [Click here for sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_MultipleDestinationSender.md).
+- **EcTransformer_LessFrequentSender.launch:** Run configuration for transforming the Less Frequent Sender Connector E1 Model. [Click here for sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_LessFrequentSender.md).
+- **EcTransformer_RequestBarrier.launch:** Run configuration for transforming the Request Barrier Connector E1 Model. [Click here for sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_RequestBarrier.md).
 
 Output E3 models are saved under the same directory as the E1 input models. These directories are: 
+
 
 ## Command-line arguments for EcTransformer.java: 
 To use the run configurations, please update the values of the following command line arguments in run-configurations with the specific installation path on your workstation: 
