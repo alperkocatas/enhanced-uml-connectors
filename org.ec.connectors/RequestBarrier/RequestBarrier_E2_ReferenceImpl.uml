@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_R97NgBr_Ee2E585YUOTS5w/12" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_R97NgBr_Ee2E585YUOTS5w/12 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_R99pwBr_Ee2E585YUOTS5w">
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg">
   <uml:Model xmi:id="_PReF0JPdEeylaYbT_zyPXg" name="RequestBarrierExample1">
     <packageImport xmi:type="uml:PackageImport" xmi:id="_PVC-QJPdEeylaYbT_zyPXg">
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
@@ -142,19 +142,19 @@
     </packagedElement>
     <packagedElement xmi:type="uml:Usage" xmi:id="_iEKBYJPgEeylaYbT_zyPXg" client="_cJJbgJPgEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg"/>
     <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_CCeuMAJ5Ee2EMb2arhAsgw">
-      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_gj2k0AKEEe2aMaqzaVbu7g" source="PapyrusVersion">
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_gj3L4AKEEe2aMaqzaVbu7g" key="Version" value="0.0.8"/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_gj3L4QKEEe2aMaqzaVbu7g" key="Comment" value=""/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_gj3L4gKEEe2aMaqzaVbu7g" key="Copyright" value=""/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_gj3L4wKEEe2aMaqzaVbu7g" key="Date" value="2022-07-13"/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_gj3L5AKEEe2aMaqzaVbu7g" key="Author" value=""/>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_AN6boCwuEe2Cds-4L53svA" source="PapyrusVersion">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AN6boSwuEe2Cds-4L53svA" key="Version" value="0.0.21"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AN6boiwuEe2Cds-4L53svA" key="Comment" value="Added stereotype &quot;Enhanced Connector&quot;"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AN6boywuEe2Cds-4L53svA" key="Copyright" value=""/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AN6bpCwuEe2Cds-4L53svA" key="Date" value="2022-09-02"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AN6bpSwuEe2Cds-4L53svA" key="Author" value=""/>
       </eAnnotations>
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_CCptUAJ5Ee2EMb2arhAsgw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_R99pwBr_Ee2E585YUOTS5w"/>
+        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg"/>
       </eAnnotations>
       <appliedProfile xmi:type="uml:Profile" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_KFphgABXEe2YN9T4mQKmwQ"/>
     </profileApplication>
   </uml:Model>
-  <EnhancedConnectorProfile:ConnectorBehavior xmi:id="_KHqFkAJ5Ee2EMb2arhAsgw" base_Activity="_310xEMYsEeyq_sNlgGY9og"/>
+  <EnhancedConnectorProfile:ConnectorBehavior_Deprecated xmi:id="_KHqFkAJ5Ee2EMb2arhAsgw" base_Activity="_310xEMYsEeyq_sNlgGY9og"/>
   <EnhancedConnectorProfile:RequestBuffer xmi:id="_xj0mwBsLEe2E585YUOTS5w" base_Property="_2zPNkAKDEe2EMb2arhAsgw"/>
 </xmi:XMI>

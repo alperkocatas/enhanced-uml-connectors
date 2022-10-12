@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_-ym-wChdEe2Cds-4L53svA/19" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_-ym-wChdEe2Cds-4L53svA/19 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_-yqpIChdEe2Cds-4L53svA">
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg">
   <uml:Model xmi:id="_PReF0JPdEeylaYbT_zyPXg" name="EnhancedConnectorTestPkg">
     <packageImport xmi:type="uml:PackageImport" xmi:id="_PVC-QJPdEeylaYbT_zyPXg">
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
@@ -15,11 +15,11 @@
       </ownedConnector>
       <ownedConnector xmi:type="uml:Connector" xmi:id="_Z16woBfiEe2UAvjETmpzzg" name="Connector2">
         <end xmi:type="uml:ConnectorEnd" xmi:id="_Z2GW0BfiEe2UAvjETmpzzg" partWithPort="_xwpg4BfhEe2UAvjETmpzzg" role="_ifENMRfhEe2UAvjETmpzzg"/>
-        <end xmi:type="uml:ConnectorEnd" xmi:id="_Z2G94BfiEe2UAvjETmpzzg" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
+        <end xmi:type="uml:ConnectorEnd" xmi:id="_Z2G94BfiEe2UAvjETmpzzg" role="_mahPkJPeEeylaYbT_zyPXg"/>
       </ownedConnector>
       <ownedConnector xmi:type="uml:Connector" xmi:id="_a0bnUBfiEe2UAvjETmpzzg" name="Connector3">
         <end xmi:type="uml:ConnectorEnd" xmi:id="_a0dcgBfiEe2UAvjETmpzzg" partWithPort="_3opPABfhEe2UAvjETmpzzg" role="_t4AbYRfhEe2UAvjETmpzzg"/>
-        <end xmi:type="uml:ConnectorEnd" xmi:id="_a0dcgRfiEe2UAvjETmpzzg" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
+        <end xmi:type="uml:ConnectorEnd" xmi:id="_a0dcgRfiEe2UAvjETmpzzg" role="_mahPkJPeEeylaYbT_zyPXg"/>
       </ownedConnector>
       <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_TNfxwChiEe2Cds-4L53svA" name="RequestBarrierConnectorBehavior">
         <ownedAttribute xmi:type="uml:Property" xmi:id="_bYYxcABTEe2YN9T4mQKmwQ" name="BarrierOn" visibility="public">
@@ -32,42 +32,42 @@
           <defaultValue xmi:type="uml:LiteralInteger" xmi:id="_-nbxMB0zEe216rVAtvZZ3Q"/>
         </ownedAttribute>
         <language>Alf</language>
-        <body>Integer i = 1;
-
-this.BarrierOn = false;
-
-while (i &lt;= 3)
-{
-    Integer request = this.InPort[i].RequestBuffer;
-    if (request == null)
-    {
-        this.BarrierOn = true;
-    }
-    i++;
-}
-
-Integer returnValue = this.DefaultReply;
-if (this.BarrierOn == false)
-{
-    // Merge requests
-    Integer mergedRequest = 0;
-    i = 1;
-    while (i &lt;= 3)
-    {
-        request = this.InPort[i].RequestBuffer;
-        if (request != null)
-        {
-            mergedRequest += request;
-             // Invalidate consumed request
-            this.InPort[i].RequestBuffer = null;    
-        }
-        i++;
-    }
-
-    returnValue = this.OutPort[1].xOp(mergedRequest);
-    this.BarrierOn = true;
-}
-
+        <body>Integer i = 1;&#xD;
+&#xD;
+this.BarrierOn = false;&#xD;
+&#xD;
+while (i &lt;= 3)&#xD;
+{&#xD;
+    Integer request = this.InPort[i].RequestBuffer;&#xD;
+    if (request == null)&#xD;
+    {&#xD;
+        this.BarrierOn = true;&#xD;
+    }&#xD;
+    i++;&#xD;
+}&#xD;
+&#xD;
+Integer returnValue = this.DefaultReply;&#xD;
+if (this.BarrierOn == false)&#xD;
+{&#xD;
+    // Merge requests&#xD;
+    Integer mergedRequest = 0;&#xD;
+    i = 1;&#xD;
+    while (i &lt;= 3)&#xD;
+    {&#xD;
+        request = this.InPort[i].RequestBuffer;&#xD;
+        if (request != null)&#xD;
+        {&#xD;
+            mergedRequest += request;&#xD;
+             // Invalidate consumed request&#xD;
+            this.InPort[i].RequestBuffer = null;    &#xD;
+        }&#xD;
+        i++;&#xD;
+    }&#xD;
+&#xD;
+    returnValue = this.OutPort[1].xOp(mergedRequest);&#xD;
+    this.BarrierOn = true;&#xD;
+}&#xD;
+&#xD;
 return returnValue;</body>
       </ownedBehavior>
       <nestedClassifier xmi:type="uml:Class" xmi:id="_TTKZoJPdEeylaYbT_zyPXg" name="ACls">
@@ -101,15 +101,15 @@ return returnValue;</body>
     <packagedElement xmi:type="uml:Dependency" xmi:id="_pWeUcBfiEe2UAvjETmpzzg" client="_qrwbQJPeEeylaYbT_zyPXg" supplier="_Z16woBfiEe2UAvjETmpzzg"/>
     <packagedElement xmi:type="uml:Dependency" xmi:id="_rZIvwBfiEe2UAvjETmpzzg" client="_qrwbQJPeEeylaYbT_zyPXg" supplier="_a0bnUBfiEe2UAvjETmpzzg"/>
     <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_NVDvUB-9Ee2HYY6mAISfnw">
-      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_OHsVkChiEe2Cds-4L53svA" source="PapyrusVersion">
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_OHsVkShiEe2Cds-4L53svA" key="Version" value="0.0.20"/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_OHsVkihiEe2Cds-4L53svA" key="Comment" value="arranged graph"/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_OHsVkyhiEe2Cds-4L53svA" key="Copyright" value=""/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_OHsVlChiEe2Cds-4L53svA" key="Date" value="2022-08-30"/>
-        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_OHsVlShiEe2Cds-4L53svA" key="Author" value=""/>
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_mcg24iztEe2uAdst3UBrWQ" source="PapyrusVersion">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg24yztEe2uAdst3UBrWQ" key="Version" value="0.0.21"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg25CztEe2uAdst3UBrWQ" key="Comment" value="Added stereotype &quot;Enhanced Connector&quot;"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg25SztEe2uAdst3UBrWQ" key="Copyright" value=""/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg25iztEe2uAdst3UBrWQ" key="Date" value="2022-09-02"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg25yztEe2uAdst3UBrWQ" key="Author" value=""/>
       </eAnnotations>
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_NVPVgB-9Ee2HYY6mAISfnw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_-yqpIChdEe2Cds-4L53svA"/>
+        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg"/>
       </eAnnotations>
       <appliedProfile xmi:type="uml:Profile" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_KFphgABXEe2YN9T4mQKmwQ"/>
     </profileApplication>

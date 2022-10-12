@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<uml:Profile xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_KFphgABXEe2YN9T4mQKmwQ" name="EnhancedConnectorProfile" metaclassReference="_PoQ1gABXEe2YN9T4mQKmwQ _PYSGIAKDEe2EMb2arhAsgw _HbsNkAKEEe2EMb2arhAsgw _m-hegChdEe2Cds-4L53svA">
+<uml:Profile xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_KFphgABXEe2YN9T4mQKmwQ" name="EnhancedConnectorProfile" metaclassReference="_PoQ1gABXEe2YN9T4mQKmwQ _PYSGIAKDEe2EMb2arhAsgw _HbsNkAKEEe2EMb2arhAsgw _m-hegChdEe2Cds-4L53svA _G5ncwCq8Ee24GeFhuH3XFg">
   <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_TKbUsABXEe2YN9T4mQKmwQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
     <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_HdMCwABdEe2YN9T4mQKmwQ" source="PapyrusVersion">
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HdMCwQBdEe2YN9T4mQKmwQ" key="Version" value="0.0.0"/>
@@ -8,6 +8,52 @@
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HdMCxABdEe2YN9T4mQKmwQ" key="Date" value=""/>
       <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_HdMCxQBdEe2YN9T4mQKmwQ" key="Author" value="&lt;undefined>"/>
     </eAnnotations>
+    <contents xmi:type="ecore:EPackage" xmi:id="_QCr6ESq8Ee24GeFhuH3XFg" name="EnhancedConnectorProfile" nsURI="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20" nsPrefix="EnhancedConnectorProfile">
+      <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6Myq8Ee24GeFhuH3XFg" source="PapyrusVersion">
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QCr6NCq8Ee24GeFhuH3XFg" key="Version" value="0.0.21"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QCr6NSq8Ee24GeFhuH3XFg" key="Comment" value="Added stereotype &quot;Enhanced Connector&quot;"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QCr6Niq8Ee24GeFhuH3XFg" key="Copyright" value=""/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QCr6Nyq8Ee24GeFhuH3XFg" key="Date" value="2022-09-02"/>
+        <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_QCr6OCq8Ee24GeFhuH3XFg" key="Author" value=""/>
+      </eAnnotations>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6Eiq8Ee24GeFhuH3XFg" name="ConnectorBehavior_Deprecated">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6Eyq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_Lr-mIABXEe2YN9T4mQKmwQ"/>
+        <eStructuralFeatures xmi:type="ecore:EReference" xmi:id="_QCr6FCq8Ee24GeFhuH3XFg" name="base_Activity" ordered="false">
+          <eType xmi:type="ecore:EClass" href="http://www.eclipse.org/uml2/5.0.0/UML#//Activity"/>
+        </eStructuralFeatures>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6Fiq8Ee24GeFhuH3XFg" name="ReplyBuffer" eSuperTypes="_QCr6GSq8Ee24GeFhuH3XFg">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6Fyq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_Gpxd4AKDEe2EMb2arhAsgw"/>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6GSq8Ee24GeFhuH3XFg" name="Buffer" abstract="true">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6Giq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_SdEAYB-8Ee2HYY6mAISfnw"/>
+        <eStructuralFeatures xmi:type="ecore:EReference" xmi:id="_QCr6Gyq8Ee24GeFhuH3XFg" name="base_Property" ordered="false" lowerBound="1">
+          <eType xmi:type="ecore:EClass" href="http://www.eclipse.org/uml2/5.0.0/UML#//Property"/>
+        </eStructuralFeatures>
+        <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="_QCr6HSq8Ee24GeFhuH3XFg" name="type" ordered="false" lowerBound="1" eType="_QCr6Hyq8Ee24GeFhuH3XFg" defaultValueLiteral="SingleCopy"/>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EEnum" xmi:id="_QCr6Hyq8Ee24GeFhuH3XFg" name="BufferType">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6ICq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_JKvl0AKDEe2EMb2arhAsgw"/>
+        <eLiterals xmi:type="ecore:EEnumLiteral" xmi:id="_QCr6ISq8Ee24GeFhuH3XFg" name="Fifo"/>
+        <eLiterals xmi:type="ecore:EEnumLiteral" xmi:id="_QCr6Iiq8Ee24GeFhuH3XFg" name="FIFON" value="1"/>
+        <eLiterals xmi:type="ecore:EEnumLiteral" xmi:id="_QCr6Iyq8Ee24GeFhuH3XFg" name="SingleCopy" value="2"/>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6JCq8Ee24GeFhuH3XFg" name="RequestBuffer" eSuperTypes="_QCr6GSq8Ee24GeFhuH3XFg">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6JSq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_DVXBoBr_Ee2E585YUOTS5w"/>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6Jyq8Ee24GeFhuH3XFg" name="ConnectorBehavior">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6KCq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_sfWCwChdEe2Cds-4L53svA"/>
+        <eStructuralFeatures xmi:type="ecore:EReference" xmi:id="_QCr6KSq8Ee24GeFhuH3XFg" name="base_OpaqueBehavior" ordered="false">
+          <eType xmi:type="ecore:EClass" href="http://www.eclipse.org/uml2/5.0.0/UML#//OpaqueBehavior"/>
+        </eStructuralFeatures>
+      </eClassifiers>
+      <eClassifiers xmi:type="ecore:EClass" xmi:id="_QCr6Kyq8Ee24GeFhuH3XFg" name="EnhancedConnector">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_QCr6LCq8Ee24GeFhuH3XFg" source="http://www.eclipse.org/uml2/2.0.0/UML" references="_JDghcCq8Ee24GeFhuH3XFg"/>
+        <eStructuralFeatures xmi:type="ecore:EReference" xmi:id="_QCr6LSq8Ee24GeFhuH3XFg" name="base_Connector" ordered="false">
+          <eType xmi:type="ecore:EClass" href="http://www.eclipse.org/uml2/5.0.0/UML#//Connector"/>
+        </eStructuralFeatures>
+      </eClassifiers>
+    </contents>
     <contents xmi:type="ecore:EPackage" xmi:id="_-yqpIChdEe2Cds-4L53svA" name="EnhancedConnectorProfile" nsURI="http:///schemas/EnhancedConnectorProfile/_-ym-wChdEe2Cds-4L53svA/19" nsPrefix="EnhancedConnectorProfile">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_-ywvwShdEe2Cds-4L53svA" source="PapyrusVersion">
         <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_-ywvwihdEe2Cds-4L53svA" key="Version" value="0.0.20"/>
@@ -630,6 +676,9 @@
   <elementImport xmi:type="uml:ElementImport" xmi:id="_m-hegChdEe2Cds-4L53svA" alias="OpaqueBehavior">
     <importedElement xmi:type="uml:Class" href="pathmap://UML_METAMODELS/UML.metamodel.uml#OpaqueBehavior"/>
   </elementImport>
+  <elementImport xmi:type="uml:ElementImport" xmi:id="_G5ncwCq8Ee24GeFhuH3XFg" alias="Connector">
+    <importedElement xmi:type="uml:Class" href="pathmap://UML_METAMODELS/UML.metamodel.uml#Connector"/>
+  </elementImport>
   <packageImport xmi:type="uml:PackageImport" xmi:id="_KIrnYABXEe2YN9T4mQKmwQ">
     <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
   </packageImport>
@@ -678,5 +727,14 @@
   </packagedElement>
   <packagedElement xmi:type="uml:Extension" xmi:id="_vbgR4ChdEe2Cds-4L53svA" name="E_ConnectorBehavior_OpaqueBehavior1" memberEnd="_vbvicChdEe2Cds-4L53svA _vbylwChdEe2Cds-4L53svA">
     <ownedEnd xmi:type="uml:ExtensionEnd" xmi:id="_vbvicChdEe2Cds-4L53svA" name="extension_ConnectorBehavior" type="_sfWCwChdEe2Cds-4L53svA" aggregation="composite" association="_vbgR4ChdEe2Cds-4L53svA"/>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Stereotype" xmi:id="_JDghcCq8Ee24GeFhuH3XFg" name="EnhancedConnector">
+    <ownedAttribute xmi:type="uml:Property" xmi:id="_M18RQiq8Ee24GeFhuH3XFg" name="base_Connector" association="_M18RQCq8Ee24GeFhuH3XFg">
+      <type xmi:type="uml:Class" href="pathmap://UML_METAMODELS/UML.metamodel.uml#Connector"/>
+      <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_M18RQyq8Ee24GeFhuH3XFg"/>
+    </ownedAttribute>
+  </packagedElement>
+  <packagedElement xmi:type="uml:Extension" xmi:id="_M18RQCq8Ee24GeFhuH3XFg" name="E_EnhancedConnector_Connector19" memberEnd="_M18RQSq8Ee24GeFhuH3XFg _M18RQiq8Ee24GeFhuH3XFg">
+    <ownedEnd xmi:type="uml:ExtensionEnd" xmi:id="_M18RQSq8Ee24GeFhuH3XFg" name="extension_EnhancedConnector" type="_JDghcCq8Ee24GeFhuH3XFg" aggregation="composite" association="_M18RQCq8Ee24GeFhuH3XFg"/>
   </packagedElement>
 </uml:Profile>

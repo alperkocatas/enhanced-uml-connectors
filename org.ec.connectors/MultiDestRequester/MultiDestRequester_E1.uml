@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_-ym-wChdEe2Cds-4L53svA/19" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_-ym-wChdEe2Cds-4L53svA/19 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_-yqpIChdEe2Cds-4L53svA">
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:EnhancedConnectorProfile="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///schemas/EnhancedConnectorProfile/_QCr6ECq8Ee24GeFhuH3XFg/20 ../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg">
   <uml:Model xmi:id="_PReF0JPdEeylaYbT_zyPXg" name="EnhancedConnectorTestPkg">
     <packageImport xmi:type="uml:PackageImport" xmi:id="_PVC-QJPdEeylaYbT_zyPXg">
       <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
@@ -19,34 +19,34 @@
         <end xmi:type="uml:ConnectorEnd" xmi:id="_qrwbQZPeEeylaYbT_zyPXg" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
         <end xmi:type="uml:ConnectorEnd" xmi:id="_qrwbQpPeEeylaYbT_zyPXg" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
       </ownedConnector>
-      <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_2LVDEChhEe2Cds-4L53svA" name="MultiDestRequesterConnectorBehavior">
+      <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_2LVDEChhEe2Cds-4L53svA" name="MultiDestConnectorBehavior">
         <ownedAttribute xmi:type="uml:Property" xmi:id="_2zPNkAKDEe2EMb2arhAsgw" name="ReplyBuffer" visibility="package" isOrdered="true" isUnique="false" aggregation="composite"/>
         <language>Alf</language>
-        <body>Integer i = 1; 
-for (ifc in this.OutPort)  
-{
-    this.ReplyBuffer[i] = ifc.xOp(arg);
-    i++; 
-}
-
-// Reply merge strategy:         
-i = 1;
-Integer sum = 0;
-while (i&lt;=PRV_CNT)
-{
-    Integer intval = this.ReplyBuffer[i];
-    
-    if (intval != null)
-    {
-        sum = sum + intval;
-         
-        // Invalidate value in the single copy buffer
-        this.ReplyBuffer[i] = null;        
-    }
-    i++;
-}
-
-return sum;
+        <body>Integer i = 1; &#xD;
+for (ifc in this.OutPort)  &#xD;
+{&#xD;
+    this.ReplyBuffer[i] = ifc.xOp(arg);&#xD;
+    i++; &#xD;
+}&#xD;
+&#xD;
+// Reply merge strategy:         &#xD;
+i = 1;&#xD;
+Integer sum = 0;&#xD;
+while (i&lt;=PRV_CNT)&#xD;
+{&#xD;
+    Integer intval = this.ReplyBuffer[i];&#xD;
+    &#xD;
+    if (intval != null)&#xD;
+    {&#xD;
+        sum = sum + intval;&#xD;
+         &#xD;
+        // Invalidate value in the single copy buffer&#xD;
+        this.ReplyBuffer[i] = null;        &#xD;
+    }&#xD;
+    i++;&#xD;
+}&#xD;
+&#xD;
+return sum;&#xD;
 </body>
       </ownedBehavior>
       <nestedClassifier xmi:type="uml:Class" xmi:id="_TTKZoJPdEeylaYbT_zyPXg" name="ACls">
@@ -84,11 +84,13 @@ return sum;
         <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_xV0FpShhEe2Cds-4L53svA" key="Author" value=""/>
       </eAnnotations>
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_Ax3UgB-9Ee2HYY6mAISfnw" source="http://www.eclipse.org/uml2/2.0.0/UML">
-        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_-yqpIChdEe2Cds-4L53svA"/>
+        <references xmi:type="ecore:EPackage" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_QCr6ESq8Ee24GeFhuH3XFg"/>
       </eAnnotations>
       <appliedProfile xmi:type="uml:Profile" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_KFphgABXEe2YN9T4mQKmwQ"/>
     </profileApplication>
   </uml:Model>
   <EnhancedConnectorProfile:ReplyBuffer xmi:id="_cg6ZAB--Ee2HYY6mAISfnw" base_Property="_2zPNkAKDEe2EMb2arhAsgw"/>
   <EnhancedConnectorProfile:ConnectorBehavior xmi:id="_ArNiUChiEe2Cds-4L53svA" base_OpaqueBehavior="_2LVDEChhEe2Cds-4L53svA"/>
+  <EnhancedConnectorProfile:EnhancedConnector xmi:id="_V9qqwCq8Ee24GeFhuH3XFg" base_Connector="_qDsVsJPeEeylaYbT_zyPXg"/>
+  <EnhancedConnectorProfile:EnhancedConnector xmi:id="_Wy1_QCq8Ee24GeFhuH3XFg" base_Connector="_qrwbQJPeEeylaYbT_zyPXg"/>
 </xmi:XMI>

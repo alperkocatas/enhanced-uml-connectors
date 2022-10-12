@@ -54,10 +54,10 @@ public class EcTransformer {
 	
 	
 	private String e1ModelPath = "org.ec.connectors" + File.separator + 
-//			"RoundRobinRequester" + File.separator + "RoundRobinRequester_E1.uml";
+			"RoundRobinRequester" + File.separator + "RoundRobinRequester_E1.uml";
 //			"MultiDestRequester" + File.separator + "MultiDestRequester_E1.uml";
 //			"RequestBarrier" + File.separator + "RequestBarrier_E1.uml";
-			"LessFrequentRequester" + File.separator + "LessFrequentRequester_E1.uml";
+//			"LessFrequentRequester" + File.separator + "LessFrequentRequester_E1.uml";
 	
 	
 	

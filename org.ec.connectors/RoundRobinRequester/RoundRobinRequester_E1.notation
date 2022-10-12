@@ -30,7 +30,7 @@
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_ys7WIQArEe2YN9T4mQKmwQ" x="91" y="30"/>
         </children>
         <element xmi:type="uml:Property" href="RoundRobinRequester_E1.uml#_Dfl9wJPeEeylaYbT_zyPXg"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_js5sgAArEe2YN9T4mQKmwQ" x="14" y="154" width="101" height="81"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_js5sgAArEe2YN9T4mQKmwQ" x="14" y="74" width="101" height="81"/>
       </children>
       <children xmi:type="notation:Shape" xmi:id="_kahngAArEe2YN9T4mQKmwQ" type="Property_Shape">
         <children xmi:type="notation:DecorationNode" xmi:id="_kakDwAArEe2YN9T4mQKmwQ" type="Property_NameLabel"/>
@@ -56,7 +56,7 @@
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2-US0QArEe2YN9T4mQKmwQ" x="-10" y="25"/>
         </children>
         <element xmi:type="uml:Property" href="RoundRobinRequester_E1.uml#_SjHAQJPeEeylaYbT_zyPXg"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_kaiOkAArEe2YN9T4mQKmwQ" x="454" y="34" width="161" height="61"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_kaiOkAArEe2YN9T4mQKmwQ" x="454" y="14" width="161" height="61"/>
       </children>
       <children xmi:type="notation:Shape" xmi:id="_k9WAsAArEe2YN9T4mQKmwQ" type="Property_Shape">
         <children xmi:type="notation:DecorationNode" xmi:id="_k9WAsgArEe2YN9T4mQKmwQ" type="Property_NameLabel"/>
@@ -82,13 +82,13 @@
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_4NZVEQArEe2YN9T4mQKmwQ" x="-10" y="21"/>
         </children>
         <element xmi:type="uml:Property" href="RoundRobinRequester_E1.uml#_kFFpQJPeEeylaYbT_zyPXg"/>
-        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_k9WAsQArEe2YN9T4mQKmwQ" x="454" y="274" width="161" height="61"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_k9WAsQArEe2YN9T4mQKmwQ" x="454" y="134" width="161" height="61"/>
       </children>
       <styles xmi:type="notation:TitleStyle" xmi:id="_iY9_cQArEe2YN9T4mQKmwQ"/>
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_iY9_cgArEe2YN9T4mQKmwQ"/>
     </children>
     <element xmi:type="uml:Class" href="RoundRobinRequester_E1.uml#_RWVgkJPdEeylaYbT_zyPXg"/>
-    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_iY6VEQArEe2YN9T4mQKmwQ" x="20" y="120" width="641" height="423"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_iY6VEQArEe2YN9T4mQKmwQ" x="20" y="200" width="641" height="241"/>
   </children>
   <styles xmi:type="notation:StringValueStyle" xmi:id="_fY-ZMQArEe2YN9T4mQKmwQ" name="diagram_compatibility_version" stringValue="1.4.0"/>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_fY-ZMgArEe2YN9T4mQKmwQ"/>
@@ -115,7 +115,7 @@
     </children>
     <styles xmi:type="notation:FontStyle" xmi:id="_5X9DsQArEe2YN9T4mQKmwQ"/>
     <element xmi:type="uml:Connector" href="RoundRobinRequester_E1.uml#_qDsVsJPeEeylaYbT_zyPXg"/>
-    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_5X9DsgArEe2YN9T4mQKmwQ" points="[151, 340, -643984, -643984]$[280, 340, -643984, -643984]$[280, 215, -643984, -643984]$[300, 215, -643984, -643984]$[470, 215, -643984, -643984]"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_5X9DsgArEe2YN9T4mQKmwQ" points="[151, 340, -643984, -643984]$[300, 340, -643984, -643984]$[300, 275, -643984, -643984]$[470, 275, -643984, -643984]"/>
     <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_BiajsAAsEe2YN9T4mQKmwQ" id="(1.0,0.5)"/>
     <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_BidnAAAsEe2YN9T4mQKmwQ" id="(0.0,0.5)"/>
   </edges>
@@ -134,11 +134,11 @@
     </children>
     <children xmi:type="notation:DecorationNode" xmi:id="_56VYBgArEe2YN9T4mQKmwQ" type="Connector_TargetMultiplicityLabel">
       <styles xmi:type="notation:BooleanValueStyle" xmi:id="_Dov-EAAsEe2YN9T4mQKmwQ" name="IS_UPDATED_POSITION" booleanValue="true"/>
-      <layoutConstraint xmi:type="notation:Location" xmi:id="_56VYBwArEe2YN9T4mQKmwQ" x="44" y="18"/>
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_56VYBwArEe2YN9T4mQKmwQ" x="32" y="23"/>
     </children>
     <styles xmi:type="notation:FontStyle" xmi:id="_56Uw8QArEe2YN9T4mQKmwQ"/>
     <element xmi:type="uml:Connector" href="RoundRobinRequester_E1.uml#_qrwbQJPeEeylaYbT_zyPXg"/>
-    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_56Uw8gArEe2YN9T4mQKmwQ" points="[151, 344, -643984, -643984]$[280, 344, -643984, -643984]$[280, 460, -643984, -643984]$[470, 460, -643984, -643984]"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_56Uw8gArEe2YN9T4mQKmwQ" points="[151, 344, -643984, -643984]$[300, 344, -643984, -643984]$[300, 400, -643984, -643984]$[470, 400, -643984, -643984]"/>
     <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Dn0xAAAsEe2YN9T4mQKmwQ" id="(1.0,0.7)"/>
     <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_Dn3NQAAsEe2YN9T4mQKmwQ" id="(0.0,0.95)"/>
   </edges>
