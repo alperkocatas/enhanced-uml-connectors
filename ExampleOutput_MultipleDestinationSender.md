@@ -1,4 +1,4 @@
-## Example Output from running EcTransformer.jave for Multiple Destination Sender
+## Example Output from running EcTransformer.java for Multiple Destination Sender
 
 ```
 0    INFO  EcTransformer      - Starting...
