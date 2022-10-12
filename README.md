@@ -31,6 +31,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - Install Eclipse Papyrus and make sure that QVT Operational SDK plugin is also included. If not, use Help->Install new software and use the update site: https://download.eclipse.org/releases/2021-03/ to download and install the QVT Operational SDK plugin, 
 - Open Eclipse Papyrus and choose the root directory of this repository as your workspace. 
 - Use the run-configurations provided below to run the model transformations for the example ehanced connectors. 
+- On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
 
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
