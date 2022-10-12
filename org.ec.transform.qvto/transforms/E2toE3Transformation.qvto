@@ -1,9 +1,7 @@
 import EcTransformationLibrary;
 
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
-
-
-// The plan is to take as input two uml models, and output another uml model 
+ 
 transformation E2toE3Transformation(inout e2Model:uml, in fUmlModel:uml) 
 	access EcTransformationLibrary;
 
@@ -33,8 +31,7 @@ helper checkConfigurationPropertyValues() {
 main() {
 	initializeLogger();
 	beginLog('Starting E2 to E3 transformation');
-
-	// can we just write a huge helper function which will do all the manipulation? 
+ 
 	transformE2toE3();
 	
 	endLog('Done');	

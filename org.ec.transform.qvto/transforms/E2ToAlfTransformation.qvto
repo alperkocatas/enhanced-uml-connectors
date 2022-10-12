@@ -132,9 +132,9 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 	appendAlfCodeLine(operationSignatureStr);
 	AlfIndentLevel := AlfIndentLevel + 1;
 	
-	// TODO: Transform request(args, Index) definition to
+	// We can transform request(args, Index) definition to
 	// ItsIfcPtr[Index]->xOp(args)
-	// or.. just use the actual notation there. 
+	// or, we can just use the actual notation there. 
 	// For now, lets just use a common notation:
 	// OutPort->xOp(request...)
 	var opaqueAction := connectorBehavior.ownedElement
@@ -449,7 +449,6 @@ helper endAlfPackage()
 
 helper appendAlfCodeLine(line : String)
 {
-	//log(">>>>appending line: " + line);
 	alfCode := alfCode + getAlfIndent() + line + "\n";
 }
 

@@ -31,48 +31,78 @@ import org.eclipse.m2m.qvt.oml.util.WriterLog;
 import org.eclipse.uml2.uml.UMLPackage;
 import org.eclipse.uml2.uml.resource.UMLResource;
 
-
+/**
+ * Runs the enhanced connector model transformation workflow which consists of QVTo transformations
+ * and compilation of the Alf code into fUML using the alfc compiler. 
+ * 
+ * @author Alper Tolga Kocatas
+ *
+ */
 public class EcTransformer {
 	
 	private static final Logger logger = Logger.getLogger(EcTransformer.class);
 	
+	/**
+	 * Path of E1toE2 Qvto transformation 
+	 */
 	private String e1ToE2TxPath = "org.ec.transform.qvto" + File.separator +  
 			"transforms" + File.separator + "E1toE2Transformation.qvto";
 	
+	/**
+	 * Path of E2toAlf Qvto transformation 
+	 */
 	private String e2ToAlfTxPath = "org.ec.transform.qvto" + File.separator +  
 			"transforms"+File.separator+"E2ToAlfTransformation.qvto";
 	
+	/**
+	 * Path of E2toE3 Qvto transformation 
+	 */
 	private String e2Toe3TxPath = "org.ec.transform.qvto" + File.separator +  
 			"transforms" + File.separator + "E2toE3Transformation.qvto";
 	
-	private String fUMLOutputDir = "org.ec.connectors" + File.separator + "alf_output" + 
-			File.separator;	
+	/**
+	 * Path of directory where intermediate fUML models are stored.  
+	 */
+	private String fUMLOutputDir = "org.ec.connectors" + File.separator + "alf_output";	
 	
-	private String AlfWsPath = "/Users/akocatas/Documents/Alf-Reference-Implementation-master/";
+	/**
+	 * Path of Alf reference implementation Example: 
+	 *    C:\Users\akocatas\Documents\AlfRefImp-1.1.0k 
+	 */
+	private String AlfWsPath;
 	
-	private String e1ModelDir; 
+	/**
+	 * Path of plugins directory under eclipse installation. For example: 
+	 *      D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins
+	 */
+	private String EclipsePluginsDir;
+	
+	/**
+	 * Worspace directory. This is the path to the directory where the repository resides. 
+	 * Example: C:\Users\akocatas\payprus-workspace 
+	 */
+	private String wsDir = "";
 	
 	
-	private String e1ModelPath = "org.ec.connectors" + File.separator + 
-			"RoundRobinRequester" + File.separator + "RoundRobinRequester_E1.uml";
-//			"MultiDestRequester" + File.separator + "MultiDestRequester_E1.uml";
-//			"RequestBarrier" + File.separator + "RequestBarrier_E1.uml";
-//			"LessFrequentRequester" + File.separator + "LessFrequentRequester_E1.uml";
+	/**
+	 * Input E1 model kind. Following e1 models are provided as preset models. Switching
+	 * between these input models are performed using the -e1Model argument. 
+	 * 
+	 * If you want to use a custom e1 model file, you should use the -e1ModelPath argument
+	 */
+	private enum E1ModelKind {
+		RoundRobinRequester, MultiDestRequester, RequestBarrier, LessFrequentSender};
 	
 	
-	
-	
+	/**
+	 * Intermediate variables to store data in between transformations
+	 */
+	private String e1ModelPath;
 	private String e2ModelPath;
-	
 	private String e3ModelPath;
-	
-	
 	private ResourceSet resourceSet;
-	
 	private String ConnectorBehaviorAlfCode;
-	
 	private String ConnectorBehaviorFumlFilePath;
-	
 	private String ConnectorClsModelPath = null;
 	private String InOutportMultiplicity = null;
 	private String AlfPkgName = null;
@@ -80,6 +110,7 @@ public class EcTransformer {
 	
 	private enum PlatformKind {Windows, Other};
 	private PlatformKind platform;
+	
 	
 	public static void main(String[]args)
 	{
@@ -91,14 +122,11 @@ public class EcTransformer {
 		//   or previous transformation
 		// - run alfc to compile the alf code into fUML model, 
 		// - run E2toE3Transformation to pull back the connector behavior activity 
-		//   into the E2 model, to get the E3 model. 
-		
+		//   into the E2 model, to get the E3 model. 		
 		try
 		{
 			logger.info("Starting...");
-			
 			EcTransformer tx = new EcTransformer();
-			
 			tx.CalculateFilePaths(args);
 			tx.initializeUMLResources();
 			tx.runE1ToE2Transformation(); 
@@ -106,7 +134,6 @@ public class EcTransformer {
 			tx.compileAlfCode();
 			tx.reformatFUmlConnectorBehaviorFile();
 			tx.runE2toE3Transformation();
-			
 			logger.info("Process completed successfully");
 		}
 		catch (Exception err)
@@ -134,32 +161,69 @@ public class EcTransformer {
 	}
 	
 	
-	private void CalculateFilePaths(String [] args)
+	private void CalculateFilePaths(String [] args) throws Exception
 	{
 		if (File.separator.equals("\\"))
 			this.platform = PlatformKind.Windows;
 		else 
 			this.platform = PlatformKind.Other;
 		
-		String wsDir = "/Users/akocatas/Dropbox/payprus-workspace";
+		wsDir = "";
 		String wsDirArg = getCmdLineArg(args, "-wsDir");
 		if (wsDirArg != null)
+		{
 			wsDir = wsDirArg;
+		}
+		else
+		{
+			throw new Exception("Argument -wsDir is mandatory");
+		}
+		
 		if (!wsDir.endsWith(File.separator))
 			wsDir += File.separator;
 		
-		e1ModelPath = wsDir + e1ModelPath;
 		
-		String e1ModelArg = getCmdLineArg(args, "-e1model");
+		
+		e1ModelPath = wsDir + "org.ec.connectors" + File.separator;
+		String e1ModelArg = getCmdLineArg(args, "-e1Model");
 		if (e1ModelArg != null)
-			e1ModelPath  = e1ModelArg;
-
-		String alfWsPathArg = getCmdLineArg(args, "-alfWsDir");
-		if (alfWsPathArg != null)
-			AlfWsPath = alfWsPathArg;
+		{
+			if (e1ModelArg.equals(E1ModelKind.RoundRobinRequester.toString()))
+			{
+				e1ModelPath += "RoundRobinRequester" + File.separator + "RoundRobinRequester_E1.uml"; 
+			}
+			else if (e1ModelArg.equals(E1ModelKind.MultiDestRequester.toString()))
+			{
+				e1ModelPath += "MultiDestRequester" + File.separator + "MultiDestRequester_E1.uml"; 
+			}
+			else if (e1ModelArg.equals(E1ModelKind.RequestBarrier.toString()))
+			{
+				e1ModelPath += "RequestBarrier" + File.separator + "RequestBarrier_E1.uml"; 
+			}
+			else if (e1ModelArg.equals(E1ModelKind.LessFrequentSender.toString()))
+			{
+				e1ModelPath += "LessFrequentRequester" + File.separator + "LessFrequentRequester_E1.uml"; 
+			}
+			else 
+			{
+				throw new Exception("Unknown E1 model type: " + e1ModelArg + 
+						". Please use the -e1ModelPath argument to specify a custom path" + 
+						" relative to the workspace dir. e.g. " + 
+						"org.ec.connectors/RoundRobinRequester/RoundRobinRequester_E1.uml");
+			}
+		}
+		else
+		{
+			String e1ModelPathArg = getCmdLineArg(args, "-e1ModelPath");
+			if (e1ModelPathArg != null)
+			{
+				e1ModelPath = wsDir + File.separator + e1ModelPathArg; 
+			}
+		}
 		
-		if (!AlfWsPath.endsWith(File.separator))
-			AlfWsPath += File.separator;		
+		logger.info("Using e1Model at path: " + e1ModelPath);
+		
+		AlfWsPath = wsDir + File.separator + "AlfRefImp-1.1.0k" + File.separator;
 				
 		e1ToE2TxPath = wsDir + e1ToE2TxPath; 
 		
@@ -172,7 +236,7 @@ public class EcTransformer {
 		File e1File = new File(e1ModelPath);
 		
 		// Calculate model dir
-		e1ModelDir = getDirectory(e1File);
+		String e1ModelDir = getDirectory(e1File);
 		
 		String e1FileName = e1File.getName();
 		
@@ -181,6 +245,12 @@ public class EcTransformer {
 		e3ModelPath = e1ModelDir +  File.separator + e1FileName.replace(".uml", "_E3.uml");
 		
 		AlfPkgName = e1FileName.replace(".uml", "");
+		
+		EclipsePluginsDir = getCmdLineArg(args, "-eclipsePluginsDir");
+		if (EclipsePluginsDir == null)
+		{
+			throw new Exception("Argument -eclipsePluginsDir is mandatory");
+		}
 	}
 	
 	/**
@@ -212,22 +282,8 @@ public class EcTransformer {
 		Map uriMap = resourceSet.getURIConverter().getURIMap();
 		
 		URI uri;
-		if (this.platform == PlatformKind.Other)
-		{
-			uri = URI.createURI(
-					"jar:file:/Users/akocatas/Applications/Papyrus.app/Contents/" + 
-					"Eclipse/plugins/org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
-		}
-		else if (this.platform == PlatformKind.Windows)
-		{
-			uri = URI.createURI(
-				"jar:file:/D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins/" + 
-				"org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
-		}
-		else
-		{
-			throw new Exception("Unknown platform kind: " + this.platform.toString());
-		}
+		uri = URI.createURI("jar:file:/" + EclipsePluginsDir +
+				"/org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
 		
 		uriMap.put(URI.createURI(UMLResource.LIBRARIES_PATHMAP), 
 				uri.appendSegment("libraries").appendSegment(""));
@@ -246,12 +302,8 @@ public class EcTransformer {
 		resourceSet.createResource(e1ModelUri);
 		Resource r = resourceSet.getResource(e1ModelUri, true);
 		EList<EObject> inObjects = r.getContents();
-//		for (EObject temp : inObjects) {
-//			System.out.println(temp.toString());
-//		}
 		
 		ModelExtent input = new BasicModelExtent(inObjects);	
-		//ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 5);
 		
@@ -259,7 +311,6 @@ public class EcTransformer {
 		E1toE2TransformationLog log = new E1toE2TransformationLog();
 		context.setLog(log);
 	    
-		
 		URI transformationURI = URI.createFileURI(e1ToE2TxPath);
 		TransformationExecutor executor = new TransformationExecutor(transformationURI);
 		ExecutionDiagnostic result = executor.execute(context, input);
@@ -304,10 +355,7 @@ public class EcTransformer {
 		resourceSet.createResource(e1ModelUri);
 		Resource r = resourceSet.getResource(e1ModelUri, true);
 		EList<EObject> inObjects = r.getContents();
-//		for (EObject temp : inObjects) {
-//			System.out.println(temp.toString());
-//		}
-		
+
 		ModelExtent input = new BasicModelExtent(inObjects);	
 		ModelExtent output = new BasicModelExtent();
 		ExecutionContextImpl context = new ExecutionContextImpl();		
@@ -371,7 +419,7 @@ public class EcTransformer {
 		ProcessBuilder pb = new ProcessBuilder(alfcPath,
 				"-l", librariesDirPath, 
 				"-m", modelsDirPath,
-				"-u", fUMLOutputDir, 
+				"-u", "file:/" + fUMLOutputDir, 
 				"-f", 
 				"-v", 
 				alfFilePath
@@ -398,7 +446,7 @@ public class EcTransformer {
 
 		process.waitFor();
 		
-		// Unfortunately, alfc does not exit with error code if the code doest not compile
+		// Alfc does not exit with error code if the code doest not compile
 		// so this is just left as a defensive code. 
 		if (process.exitValue() != 0) {
 			InputStream eis = process.getErrorStream();
@@ -412,7 +460,7 @@ public class EcTransformer {
 			throw new Exception("Error occurred while compiling Alf file");
 		}
 		
-		// actual alf compilation result is determined here. 
+		// Actual alf compilation result is determined here. 
 		if (alfCompilationIsSuccessful == false)
 		{
 			throw new Exception("Error occurred while compiling Alf file");
@@ -420,7 +468,7 @@ public class EcTransformer {
 		
 		logger.info("Alf code compiled successfully");
 		
-		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + "/" + AlfPkgName + ".uml";
+		this.ConnectorBehaviorFumlFilePath = fUMLOutputDir + File.separator + AlfPkgName + ".uml";
 		printLogSeparator();
 	}
 	
