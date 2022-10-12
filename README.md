@@ -1,4 +1,4 @@
-#enhanced-uml-connectors
+# enhanced-uml-connectors
 
 This repository contains the related model and source files for the study "Enhancing UML Connectors with Precise Behavioral Specifications", submitted to IEEE Access. 
 
@@ -7,7 +7,7 @@ Enhanced UML Connectors​ are UML connectors with additional associated behavio
 Action Language for Foundational UML (ALF) has been used to specify connector behaviors. A series of model transformations are developed using QVT Operational Mappings Language (QVTo). The model transformations transform UML models including connector behaviors in terms of ALF specifications into UML models which include fUML activities as connector behavior specifications. Resulting UML models are platform-independent models which can be transformed into code using model-to-text transformation methods, or into another model for different purposes. 
 
 
-##Directory Descriptions: 
+## Directory Descriptions: 
 - AlfRefImp-1.1.0k: A copy of the Alf reference implementation. 
 - org.ec.connectors: UML Model files for example connectors: 
          - Round Robin Requester
