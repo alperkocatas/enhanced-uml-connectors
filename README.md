@@ -25,20 +25,23 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - Eclipse Papyrus version 2021-09 (4.21.0) or higher, with QVT Operational SDK 3.10.3.v20210309-1855 installed. 
 - Java 11.0.13 or higher
 
+## Installation of Execution Environment
+- Clone this repository in a folder on your workstation,
+- Install Java 11.0.13 or higher if not already installed, 
+- Install Eclipse Papyrus and make sure that QVT Operational SDK plugin is also included. If not, use Help->Install new software and use the update site: https://download.eclipse.org/releases/2021-03/ to download and install the QVT Operational SDK plugin, 
+- Open Eclipse Papyrus and choose the root directory of this repository as your workspace. 
+- Use the run-configurations provided below to run the model transformations for the example ehanced connectors. 
 
+## Run configurations for EcTransformer.java
+There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
+- **EcTransformer_RoundRobinRequester.launch:** Run configuration for transforming the Round Robin Requester Connector E1 Model. 
+- **EcTransformer_MultipleDestinationSender.launch:** Run configuration for transforming the Multiple Destination Sender Connector E1 Model. 
+- **EcTransformer_LessFrequentSender.launch:** Run configuration for transforming the Less Frequent Sender Connector E1 Model. 
+- **EcTransformer_RequestBarrier.launch:** Run configuration for transforming the Request Barrier Connector E1 Model. 
 
 ## Command-line arguments for EcTransformer.java: 
+To use the run configurations, please update the values of the following command line arguments in run-configurations with the specific installation path on your workstation: 
 - ***-wsDir:*** Directory of the repository. 
 - ***-eclipsePluginsDir:*** directory of the "plugins" directory under Eclipse Papyrus installation. 
 - ***-e1Model:*** A choice of the example connectors defined in the study. Valid options are: *RoundRobinRequester, MultiDestRequester, RequestBarrier, LessFrequentSender.*
 - ***-e1ModelPath:*** If -e1Model option is not provided, this option can be used to provide the path of a specific E1 model file as input. Note that the path should be relative to the -wsDir argument. 
-
-**Example command-line usage for the EcTransformer.java:**
-```
-java EcTransformer.java -wsDir C:\Users\akocatas\Dropbox\payprus-workspace -eclipsePluginsDir D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins -e1Model MultiDestRequester
-```
-**Note:** EcTransformer.launch includes an example run configuration. 
-
-
-# Example Outputs from Transformations: 
-## Multiple Destination Requester
