@@ -10,16 +10,21 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 ## Directory Descriptions: 
 - **AlfRefImp-1.1.0k:** A copy of the Alf reference implementation. 
 - **org.ec.connectors:** UML Model files for example connectors: 
-         - Round Robin Requester
-         - Multiple Destination Sender
-         - Less Frequent Sender
-         - Request Barrier
+  - *Round Robin Requester:* RoundRobinRequester/RoundRobinRequester_E1.uml
+  - *Multiple Destination Sender:* MultiDestRequester/MultiDestRequester_E1.uml
+  - *Less Frequent Sender:* LessFrequentRequester/LessFrequentRequester_E1.uml
+  - *Request Barrier:* RequestBarrier/RequestBarrier_E1.uml
 - **org.ec.transform.qvto:** QVTo transformations source files for: 
-         - **E1toE2:** Model transformation rules from E1 model into E2 model
-         - **E2toAlf:** Model transformation rules for generating Alf code from E2 model
-         - **E2toE3:** Model transformation rules from E3 model into E3 model
+  - *E1toE2:* Model transformation rules from E1 model into E2 model
+  - *E2toAlf:* Model transformation rules for generating Alf code from E2 model
+  - *E2toE3:* Model transformation rules from E3 model into E3 model
 - **org.ec.profile:** The enhanced connector profile (Papyrus profile project)
 - **org.ec.transform.java:** Java project which contains the EcTransformer. This application automatically runs the model transformations in required order. Input is an E1 level model. Output is an E3 level model saved under org.ec.connectors. 
+
+## Prerequisites
+- Eclipse Papyrus version 2021-09 (4.21.0) or higher, with QVT Operational SDK 3.10.3.v20210309-1855 installed. 
+- Java 11.0.13 or higher
+
 
 
 ## Command-line arguments for EcTransformer.java: 
@@ -32,3 +37,4 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 ```
 java EcTransformer.java -wsDir C:\Users\akocatas\Dropbox\payprus-workspace -eclipsePluginsDir D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins -e1Model MultiDestRequester
 ```
+**Note:** EcTransformer.launch includes an example run configuration. 
