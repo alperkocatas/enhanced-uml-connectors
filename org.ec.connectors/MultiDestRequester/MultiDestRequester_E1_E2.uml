@@ -11,21 +11,21 @@
       </ownedAttribute>
       <ownedAttribute xmi:id="_SjHAQJPeEeylaYbT_zyPXg" name="b" type="_nLpnAJPdEeylaYbT_zyPXg"/>
       <ownedAttribute xmi:id="_kFFpQJPeEeylaYbT_zyPXg" name="c" type="_pbVKoJPdEeylaYbT_zyPXg"/>
-      <ownedAttribute xmi:id="_iIJi7UoyEe2UgOgBkxGzOw" name="ConnectorObj" type="_iIJi4EoyEe2UgOgBkxGzOw">
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_iIJi7koyEe2UgOgBkxGzOw" value="1"/>
-        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_iIJi70oyEe2UgOgBkxGzOw" value="1"/>
+      <ownedAttribute xmi:id="_BlUOPEpQEe2YkLyuHeDaUQ" name="ConnectorObj" type="_BlTAEEpQEe2YkLyuHeDaUQ">
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BlUOPUpQEe2YkLyuHeDaUQ" value="1"/>
+        <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BlUOPkpQEe2YkLyuHeDaUQ" value="1"/>
       </ownedAttribute>
-      <ownedConnector xmi:id="_iIJi8EoyEe2UgOgBkxGzOw" name="Connector1_reqEndCon">
-        <end xmi:id="_iIJi8UoyEe2UgOgBkxGzOw" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
-        <end xmi:id="_iIJi8koyEe2UgOgBkxGzOw" partWithPort="_iIJi7UoyEe2UgOgBkxGzOw" role="_iIJi4UoyEe2UgOgBkxGzOw"/>
+      <ownedConnector xmi:id="_BlUOP0pQEe2YkLyuHeDaUQ" name="Connector1_reqEndCon">
+        <end xmi:id="_BlUOQEpQEe2YkLyuHeDaUQ" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
+        <end xmi:id="_BlUOQUpQEe2YkLyuHeDaUQ" partWithPort="_BlUOPEpQEe2YkLyuHeDaUQ" role="_BlUOMEpQEe2YkLyuHeDaUQ"/>
       </ownedConnector>
-      <ownedConnector xmi:id="_iIJi80oyEe2UgOgBkxGzOw" name="Connector1_prvEndCon">
-        <end xmi:id="_iIJi9EoyEe2UgOgBkxGzOw" partWithPort="_iIJi7UoyEe2UgOgBkxGzOw" role="_iIJi4koyEe2UgOgBkxGzOw"/>
-        <end xmi:id="_iIJi9UoyEe2UgOgBkxGzOw" partWithPort="_SjHAQJPeEeylaYbT_zyPXg" role="_dM9T0JPeEeylaYbT_zyPXg"/>
+      <ownedConnector xmi:id="_BlUOQkpQEe2YkLyuHeDaUQ" name="Connector1_prvEndCon">
+        <end xmi:id="_BlUOQ0pQEe2YkLyuHeDaUQ" partWithPort="_BlUOPEpQEe2YkLyuHeDaUQ" role="_BlUOMUpQEe2YkLyuHeDaUQ"/>
+        <end xmi:id="_BlUOREpQEe2YkLyuHeDaUQ" partWithPort="_SjHAQJPeEeylaYbT_zyPXg" role="_dM9T0JPeEeylaYbT_zyPXg"/>
       </ownedConnector>
-      <ownedConnector xmi:id="_iIJi-UoyEe2UgOgBkxGzOw" name="Connector2_prvEndCon">
-        <end xmi:id="_iIJi-koyEe2UgOgBkxGzOw" partWithPort="_iIJi7UoyEe2UgOgBkxGzOw" role="_iIJi4koyEe2UgOgBkxGzOw"/>
-        <end xmi:id="_iIJi-0oyEe2UgOgBkxGzOw" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
+      <ownedConnector xmi:id="_BlU1QkpQEe2YkLyuHeDaUQ" name="Connector2_prvEndCon">
+        <end xmi:id="_BlU1Q0pQEe2YkLyuHeDaUQ" partWithPort="_BlUOPEpQEe2YkLyuHeDaUQ" role="_BlUOMUpQEe2YkLyuHeDaUQ"/>
+        <end xmi:id="_BlU1REpQEe2YkLyuHeDaUQ" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
       </ownedConnector>
       <nestedClassifier xmi:type="uml:Class" xmi:id="_TTKZoJPdEeylaYbT_zyPXg" name="ACls">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_THFQAJPeEeylaYbT_zyPXg" name="pA" visibility="public" type="_cJJbgJPgEeylaYbT_zyPXg" aggregation="composite"/>
@@ -40,30 +40,30 @@
         <interfaceRealization xmi:id="_p55EAJPfEeylaYbT_zyPXg" client="_f86dgJPfEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg" contract="_y7DX8JPeEeylaYbT_zyPXg"/>
       </nestedClassifier>
       <nestedClassifier xmi:type="uml:Class" xmi:id="_cJJbgJPgEeylaYbT_zyPXg" name="RequesterPortType"/>
-      <nestedClassifier xmi:type="uml:Class" xmi:id="_iIJi4EoyEe2UgOgBkxGzOw" name="Connector1_ConnectorCls">
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_iIJi4UoyEe2UgOgBkxGzOw" name="prvPort" type="_f86dgJPfEeylaYbT_zyPXg"/>
-        <ownedAttribute xmi:type="uml:Port" xmi:id="_iIJi4koyEe2UgOgBkxGzOw" name="reqPort" type="_cJJbgJPgEeylaYbT_zyPXg">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_iIJi40oyEe2UgOgBkxGzOw" value="2"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_iIJi5EoyEe2UgOgBkxGzOw" value="2"/>
+      <nestedClassifier xmi:type="uml:Class" xmi:id="_BlTAEEpQEe2YkLyuHeDaUQ" name="Connector1_ConnectorCls">
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_BlUOMEpQEe2YkLyuHeDaUQ" name="prvPort" type="_f86dgJPfEeylaYbT_zyPXg"/>
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_BlUOMUpQEe2YkLyuHeDaUQ" name="reqPort" type="_cJJbgJPgEeylaYbT_zyPXg">
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BlUOMkpQEe2YkLyuHeDaUQ" value="2"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BlUOM0pQEe2YkLyuHeDaUQ" value="2"/>
         </ownedAttribute>
-        <ownedAttribute xmi:id="_iIJi50oyEe2UgOgBkxGzOw" name="InPort" type="_iIJi5UoyEe2UgOgBkxGzOw" isOrdered="true" isUnique="false">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_iIJi6EoyEe2UgOgBkxGzOw" value="1"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_iIJi6UoyEe2UgOgBkxGzOw" value="1"/>
+        <ownedAttribute xmi:id="_BlUONkpQEe2YkLyuHeDaUQ" name="InPort" type="_BlUONEpQEe2YkLyuHeDaUQ" isOrdered="true" isUnique="false">
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BlUON0pQEe2YkLyuHeDaUQ" value="1"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BlUOOEpQEe2YkLyuHeDaUQ" value="1"/>
         </ownedAttribute>
-        <ownedAttribute xmi:id="_iIJi_EoyEe2UgOgBkxGzOw" name="OutPort" type="_y7DX8JPeEeylaYbT_zyPXg" isOrdered="true" isUnique="false">
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_iIJi_UoyEe2UgOgBkxGzOw" value="2"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_iIJi_koyEe2UgOgBkxGzOw" value="2"/>
+        <ownedAttribute xmi:id="_BlU1RUpQEe2YkLyuHeDaUQ" name="OutPort" type="_y7DX8JPeEeylaYbT_zyPXg" isOrdered="true" isUnique="false">
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BlU1RkpQEe2YkLyuHeDaUQ" value="2"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BlU1R0pQEe2YkLyuHeDaUQ" value="2"/>
         </ownedAttribute>
         <ownedAttribute xmi:id="_2zPNkAKDEe2EMb2arhAsgw" name="ReplyBuffer" visibility="package" isOrdered="true" isUnique="false" aggregation="composite">
           <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
-          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_h_hyYEoyEe2UgOgBkxGzOw" value="2"/>
-          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_h_hyYUoyEe2UgOgBkxGzOw" value="2"/>
+          <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BeAFQEpQEe2YkLyuHeDaUQ" value="2"/>
+          <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BeAsUEpQEe2YkLyuHeDaUQ" value="2"/>
         </ownedAttribute>
-        <ownedConnector xmi:id="_iIJi6koyEe2UgOgBkxGzOw" name="InPortConnector">
-          <end xmi:id="_iIJi60oyEe2UgOgBkxGzOw" role="_iIJi4UoyEe2UgOgBkxGzOw"/>
-          <end xmi:id="_iIJi7EoyEe2UgOgBkxGzOw" partWithPort="_iIJi50oyEe2UgOgBkxGzOw" role="_iIJi5koyEe2UgOgBkxGzOw"/>
+        <ownedConnector xmi:id="_BlUOOUpQEe2YkLyuHeDaUQ" name="InPortConnector">
+          <end xmi:id="_BlUOOkpQEe2YkLyuHeDaUQ" role="_BlUOMEpQEe2YkLyuHeDaUQ"/>
+          <end xmi:id="_BlUOO0pQEe2YkLyuHeDaUQ" partWithPort="_BlUONkpQEe2YkLyuHeDaUQ" role="_BlUONUpQEe2YkLyuHeDaUQ"/>
         </ownedConnector>
-        <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_2LVDEChhEe2Cds-4L53svA" name="MultiDestConnectorBehavior" specification="_iIJi9koyEe2UgOgBkxGzOw">
+        <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_2LVDEChhEe2Cds-4L53svA" name="MultiDestConnectorBehavior" specification="_BlUORUpQEe2YkLyuHeDaUQ">
           <language>Alf</language>
           <body>Integer i = 1; &#xD;
 for (ifc in this.OutPort)  &#xD;
@@ -92,7 +92,7 @@ while (i&lt;=2)&#xD;
 return sum;&#xD;
 </body>
         </ownedBehavior>
-        <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_iIsVcUoyEe2UgOgBkxGzOw" name="Connector1_ConnectorClsBehavior" specification="_iIsVcEoyEe2UgOgBkxGzOw">
+        <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_BmTFoUpQEe2YkLyuHeDaUQ" name="Connector1_ConnectorClsBehavior" specification="_BmTFoEpQEe2YkLyuHeDaUQ">
           <language>Alf</language>
           <body>Integer i = 1;
 while (i &lt;= 2) 
@@ -102,41 +102,41 @@ while (i &lt;= 2)
 }
 </body>
         </ownedBehavior>
-        <ownedOperation xmi:id="_iIJi9koyEe2UgOgBkxGzOw" name="xOp" method="_2LVDEChhEe2Cds-4L53svA">
-          <ownedParameter xmi:id="_iIJi90oyEe2UgOgBkxGzOw" name="arg">
+        <ownedOperation xmi:id="_BlUORUpQEe2YkLyuHeDaUQ" name="xOp" method="_2LVDEChhEe2Cds-4L53svA">
+          <ownedParameter xmi:id="_BlU1QEpQEe2YkLyuHeDaUQ" name="arg">
             <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
           </ownedParameter>
-          <ownedParameter xmi:id="_iIJi-EoyEe2UgOgBkxGzOw" name="returnVal" direction="return">
+          <ownedParameter xmi:id="_BlU1QUpQEe2YkLyuHeDaUQ" name="returnVal" direction="return">
             <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
           </ownedParameter>
         </ownedOperation>
-        <ownedOperation xmi:id="_iIsVcEoyEe2UgOgBkxGzOw" name="Connector1_ConnectorCls" method="_iIsVcUoyEe2UgOgBkxGzOw"/>
-        <nestedClassifier xmi:type="uml:Class" xmi:id="_iIJi5UoyEe2UgOgBkxGzOw" name="RequestPortCls">
-          <ownedAttribute xmi:type="uml:Port" xmi:id="_iIJi5koyEe2UgOgBkxGzOw" name="prvPort" type="_f86dgJPfEeylaYbT_zyPXg"/>
-          <ownedAttribute xmi:id="_iIsVckoyEe2UgOgBkxGzOw" name="ownerConnector" type="_iIJi4EoyEe2UgOgBkxGzOw">
-            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_iIsVc0oyEe2UgOgBkxGzOw" value="1"/>
-            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_iIsVdEoyEe2UgOgBkxGzOw" value="1"/>
+        <ownedOperation xmi:id="_BmTFoEpQEe2YkLyuHeDaUQ" name="Connector1_ConnectorCls" method="_BmTFoUpQEe2YkLyuHeDaUQ"/>
+        <nestedClassifier xmi:type="uml:Class" xmi:id="_BlUONEpQEe2YkLyuHeDaUQ" name="RequestPortCls">
+          <ownedAttribute xmi:type="uml:Port" xmi:id="_BlUONUpQEe2YkLyuHeDaUQ" name="prvPort" type="_f86dgJPfEeylaYbT_zyPXg"/>
+          <ownedAttribute xmi:id="_BmTFokpQEe2YkLyuHeDaUQ" name="ownerConnector" type="_BlTAEEpQEe2YkLyuHeDaUQ">
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_BmTFo0pQEe2YkLyuHeDaUQ" value="1"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_BmTFpEpQEe2YkLyuHeDaUQ" value="1"/>
           </ownedAttribute>
-          <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_iIsVd0oyEe2UgOgBkxGzOw" name="RequestPortClsBehavior" specification="_iIsVdUoyEe2UgOgBkxGzOw">
-            <ownedParameter xmi:id="_iIsVeEoyEe2UgOgBkxGzOw" name="c" type="_iIJi4EoyEe2UgOgBkxGzOw"/>
+          <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_BmTFp0pQEe2YkLyuHeDaUQ" name="RequestPortClsBehavior" specification="_BmTFpUpQEe2YkLyuHeDaUQ">
+            <ownedParameter xmi:id="_BmTFqEpQEe2YkLyuHeDaUQ" name="c" type="_BlTAEEpQEe2YkLyuHeDaUQ"/>
             <language>Alf</language>
             <body>this.ownerConnector  = c;
 </body>
           </ownedBehavior>
-          <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_iIsVfEoyEe2UgOgBkxGzOw" name="xOpBehavior" specification="_iIsVeUoyEe2UgOgBkxGzOw">
+          <ownedBehavior xmi:type="uml:OpaqueBehavior" xmi:id="_BmTFrEpQEe2YkLyuHeDaUQ" name="xOpBehavior" specification="_BmTFqUpQEe2YkLyuHeDaUQ">
             <language>Alf</language>
             <body>// Let connector object process the request
 return this.ownerConnector.xOp(arg);
 </body>
           </ownedBehavior>
-          <ownedOperation xmi:id="_iIsVdUoyEe2UgOgBkxGzOw" name="RequestPortCls" method="_iIsVd0oyEe2UgOgBkxGzOw">
-            <ownedParameter xmi:id="_iIsVdkoyEe2UgOgBkxGzOw" name="c" type="_iIJi4EoyEe2UgOgBkxGzOw"/>
+          <ownedOperation xmi:id="_BmTFpUpQEe2YkLyuHeDaUQ" name="RequestPortCls" method="_BmTFp0pQEe2YkLyuHeDaUQ">
+            <ownedParameter xmi:id="_BmTFpkpQEe2YkLyuHeDaUQ" name="c" type="_BlTAEEpQEe2YkLyuHeDaUQ"/>
           </ownedOperation>
-          <ownedOperation xmi:id="_iIsVeUoyEe2UgOgBkxGzOw" name="xOp" method="_iIsVfEoyEe2UgOgBkxGzOw">
-            <ownedParameter xmi:id="_iIsVekoyEe2UgOgBkxGzOw" name="arg">
+          <ownedOperation xmi:id="_BmTFqUpQEe2YkLyuHeDaUQ" name="xOp" method="_BmTFrEpQEe2YkLyuHeDaUQ">
+            <ownedParameter xmi:id="_BmTFqkpQEe2YkLyuHeDaUQ" name="arg">
               <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
             </ownedParameter>
-            <ownedParameter xmi:id="_iIsVe0oyEe2UgOgBkxGzOw" name="returnVal" direction="return">
+            <ownedParameter xmi:id="_BmTFq0pQEe2YkLyuHeDaUQ" name="returnVal" direction="return">
               <type xmi:type="uml:PrimitiveType" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer"/>
             </ownedParameter>
           </ownedOperation>

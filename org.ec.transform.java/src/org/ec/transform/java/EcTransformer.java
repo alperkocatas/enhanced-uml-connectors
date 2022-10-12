@@ -282,7 +282,11 @@ public class EcTransformer {
 		Map uriMap = resourceSet.getURIConverter().getURIMap();
 		
 		URI uri;
-		uri = URI.createURI("jar:file:/" + EclipsePluginsDir +
+		String prefix = "jar:file:";
+		if (!EclipsePluginsDir.startsWith(File.separator))
+			prefix += File.separator;
+		
+		uri = URI.createURI(prefix + EclipsePluginsDir +
 				"/org.eclipse.uml2.uml.resources_5.5.0.v20210228-1829.jar!/");
 		
 		uriMap.put(URI.createURI(UMLResource.LIBRARIES_PATHMAP), 

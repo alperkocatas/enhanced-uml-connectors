@@ -14,9 +14,9 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
-    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk-17.0.2/"/>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.ec.transform.java.EcTransformer"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="org.ec.transform.java"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-wsDir C:\Users\akocatas\Dropbox\payprus-workspace -eclipsePluginsDir D:/Apps/papyrus-2021-09-5.2.0-win64/Papyrus/plugins -e1Model LessFrequentSender"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-wsDir ${project_loc}/.. -eclipsePluginsDir ${eclipse_home}plugins -e1Model LessFrequentSender"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.ec.transform.java"/>
 </launchConfiguration>
