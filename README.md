@@ -33,6 +33,11 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - Use the run-configurations provided below to run the model transformations for the example ehanced connectors. 
 - On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
 
+## Importing Projects into Workspace
+- Open Eclipse Papyrus, then select File->Import. Then select "Existing projects into workspace". 
+- Select the root directory of this repository in the field "Select root directory". 
+- Select all the projects and click Finish. 
+
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
 - **EcTransformer_RoundRobinRequester.launch:** Run configuration for transforming the Round Robin Requester Connector E1 Model. [Sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_RoundRobinRequester.md).
@@ -41,6 +46,14 @@ There are four run configurations under the directory /org.ec.transform.java whi
 - **EcTransformer_RequestBarrier.launch:** Run configuration for transforming the Request Barrier Connector E1 Model. [Sample output](https://github.com/alperkocatas/enhanced-uml-connectors/blob/main/ExampleOutput_RequestBarrier.md).
 
 Output E3 models are saved under the same directory as the E1 input models. These directories are: 
+
+## Detailed information for org.ec.connectors project
+- Directory *RoundRobinRequester* contains the E1 model files for the *Round Robin Requester* connector. 
+- When the *Papyrus perspective* is used by selecting *Window-> Perspective -> Open Perspective -> Other -> Papyrus*, Papyrus groups the model files as: "di, notation and uml", under *RoundRobinRequester_E1* model file. 
+- You can double click on the *RoundRobinRequester_E1* model file open it. You can then click on the *Composite Structure Diagram* link under the *Notation Views* section in the *Welcome* tab for the model file to view the structure diagram for the connector. 
+- Under the *RoundRobinRequester* directory, the UML model file *RoundRobinRequester_E1.uml* is the E1 level input UML model file. The files *RoundRobinRequester_E1_E2.uml* and *RoundRobinRequester_E1_E3.uml* are the outputs of the E1toE2 and E2toE3 transformations. You can view the UML model files by right clicking on them and then choosing *"Open with -> UML Model Editor"*. 
+- Directories *MultiDestRequester, LessFrequentSender* and *RequestBarrier* are for the other example connectors, and they are organized similarly. 
+- Directory *alf_output* is the directory where fUML model output of the alfc compiler is stored. 
 
 
 ## Command-line arguments for EcTransformer.java: 
@@ -54,4 +67,4 @@ To use the run configurations, please update the values of the following command
 ## Trouble Shooting
 - We use the *project_loc* variable to get the location of the E1 models. If eclipse complains that *project_loc* is not set, please select the org.ec.transform.java project from the Project Explorer in eclipse. When no project or resource is selected, this environment variable is not set. 
 
-Please e-mail me at: alperkocatas@gmail.com, tolga.kocatas@metu.edu.tr for any other problems. 
+Please e-mail me at: alperkocatas@gmail.com, tolga.kocatas@metu.edu.tr for further problems. 
