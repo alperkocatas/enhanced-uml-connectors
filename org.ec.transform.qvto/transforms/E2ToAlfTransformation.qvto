@@ -1,20 +1,50 @@
+// Defines the transformation rules for generating Alf code from E2 model. Generated Alf code
+// includes enough information to generate fUML activities which precisely define the coordination
+// behavior for the enhanced connector. 
+ 
+// This transformation is defined as an in-place transformation. When it is ran from inside Eclipse,
+// it will modify the input model. However, we normally run this using the EcTransformer, which is 
+// a java application. EcTransformer uses the java API of QVTo to run the transformation, and after
+// the transformation is complete, it saves the in-memory representation of the model into a 
+// different UML file. 
+// By defining the transformation as an in-place transformation but using Java API to save results
+// into a different UML file, we can get a functionality which is equivalent to the "refining mode"
+// of ATL transformation language. This functionality is useful when the transformation wants to 
+// change a part of the input model, but leave the rest of the input model as unchanged.
+
+// This transformation requires some input configuration properties, which should be set before
+// running the transformation. This information is normally provided by the previous transformation
+// in the transformation chain, which is the transformation from the E1 model into the E2 model. 
+
 import EcTransformationLibrary;
 
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
 transformation E2ToAlfTransformation(in e2Model:uml) access EcTransformationLibrary;
 
-// properties that should be set from outside: 
+// Configuration Properties that should be set from outside: 
+
+// The path of the connector class generated for the enhanced connector 
 configuration property CONNECTOR_CLS_MODEL_PATH : String;
+
+// The number of providers connected to the enhanced connector
 configuration property OUTPORT_MULTIPLICITY : Integer;
+
+// The name of the association end generated for calling operations from the providers
 configuration property IFC_ASSOC_NAME : String;
+
+// The name of the Alf unit which will be generated for the enhanced connector
 configuration property ALF_PKG_NAME : String;
 
+
+// Internal configuration properties used as global variables: 
 configuration property alfCode : String;
 configuration property AlfIndentLevel : Integer;
 
+// Checks if required configuration properties are provided correctly to the transformation: 
 helper checkConfigurationPropertyValues() {
 	
+	// If not provided, use the name "OutPort"
 	if (IFC_ASSOC_NAME = null)
 		IFC_ASSOC_NAME := "OutPort";
 		
@@ -34,6 +64,7 @@ helper checkConfigurationPropertyValues() {
 		
 }
 
+
 main() {
 	initializeLogger();
 	beginLog("Starting E2 to Alf Transformation...");
@@ -43,6 +74,8 @@ main() {
 	endLog("Done");
 }
 
+
+// Main helper function which generates Alf code
 helper generateAlfCodeFromE2Model() {
 	checkConfigurationPropertyValues();
 
@@ -80,6 +113,7 @@ helper generateAlfCodeFromE2Model() {
 	log(alfCode);
 	inlog("<end> Alf Code");
 }
+
 
 helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: Activity) {
 		
@@ -146,6 +180,7 @@ helper generateConnectorBehaviorOperation(e2xOp: Operation, connectorBehavior: A
 	appendAlfCodeLine("}");  
 	
 }
+
 
 helper generateClassAttributes(cls: Class)
 {
@@ -240,11 +275,13 @@ helper generateClassAttributes(cls: Class)
 	}; //end: forEach	
 }
 
+
 helper endConnectorClass()
 {
 	AlfIndentLevel := AlfIndentLevel - 1;
 	appendAlfCodeLine("}");
 }
+
 
 helper generateInterfaceCode(ifc : Interface)
 {
@@ -291,6 +328,7 @@ helper getInterfaceOperationSignature(ifc: Interface) : String
 	return operationSignature;
 }
 
+
 helper getOperationSignature(operation: Operation, generateAsAbstract: Boolean) : String
 {
 	// Now, we should iterate through parameters, and extract the single parameter, 
@@ -331,6 +369,7 @@ helper getOperationSignature(operation: Operation, generateAsAbstract: Boolean) 
 	return signatureStr;
 }
 
+
 helper getOperationCode(operation: Operation, method: OpaqueBehavior) : String
 {
 	var operationCode : String := "";
@@ -354,6 +393,7 @@ helper getOperationCode(operation: Operation, method: OpaqueBehavior) : String
 	operationCode := operationCode + "\n" + getAlfIndent() + "}\n";
 	return operationCode;
 }
+
 
 helper generateClassCode(cls:Class)
 {
@@ -426,6 +466,7 @@ helper generateClassCode(cls:Class)
 	appendAlfCodeLine("");
 }
 
+
 helper generateAlfCodeImports()
 {
 	appendAlfCodeLine( 
@@ -435,11 +476,13 @@ helper generateAlfCodeImports()
 	appendAlfCodeLine("");
 }
 
+
 helper beginAlfPackage(packageName : String)
 {
 	appendAlfCodeLine("package " + packageName + " {");
 	AlfIndentLevel := AlfIndentLevel + 1;
 }
+
 
 helper endAlfPackage()
 {
@@ -447,10 +490,12 @@ helper endAlfPackage()
 	appendAlfCodeLine("}");
 }
 
+
 helper appendAlfCodeLine(line : String)
 {
 	alfCode := alfCode + getAlfIndent() + line + "\n";
 }
+
 
 helper getAlfIndent() : String {
 	var indentStr : String := '';

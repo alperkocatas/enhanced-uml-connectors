@@ -1,3 +1,20 @@
+// Defines the transformation rules from E2 model into E3 model.
+ 
+// This transformation is defined as an in-place transformation. When it is ran from inside Eclipse,
+// it will modify the input model. However, we normally run this using the EcTransformer, which is 
+// a java application. EcTransformer uses the java API of QVTo to run the transformation, and after
+// the transformation is complete, it saves the in-memory representation of the model into a 
+// different UML file. 
+// By defining the transformation as an in-place transformation but using Java API to save results
+// into a different UML file, we can get a functionality which is equivalent to the "refining mode"
+// of ATL transformation language. This functionality is useful when the transformation wants to 
+// change a part of the input model, but leave the rest of the input model as unchanged.
+
+// This transformation requires some input configuration properties, which should be set before
+// running the transformation. This information is normally provided by the previous transformations
+// in the transformation chain, which is the transformation from the E1 model into the E2 model and 
+// the transformation from E2 model into Alf code. 
+
 import EcTransformationLibrary;
 
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
@@ -5,13 +22,21 @@ modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 transformation E2toE3Transformation(inout e2Model:uml, in fUmlModel:uml) 
 	access EcTransformationLibrary;
 
+// Configuration Properties that should be set from outside: 
+
+// The path of the connector class generated for the enhanced connector 
 configuration property CONNECTOR_CLS_MODEL_PATH : String;
+
+// The number of providers connected to the enhanced connector
 configuration property OUTPORT_MULTIPLICITY : Integer;
+
+// The name of the Alf unit which will be generated for the enhanced connector
 configuration property ALF_PKG_NAME : String;
 
+// The name of the association end generated for calling operations from the providers
 configuration property IFC_ASSOC_NAME : String;
-configuration property LogIndentLevel : Integer;
 
+// Checks if required configuration properties are provided correctly to the transformation: 
 helper checkConfigurationPropertyValues() {
 			
 	if (IFC_ASSOC_NAME = null)
@@ -28,6 +53,7 @@ helper checkConfigurationPropertyValues() {
 }
 
 
+// Main transformation function
 main() {
 	initializeLogger();
 	beginLog('Starting E2 to E3 transformation');
@@ -37,35 +63,7 @@ main() {
 	endLog('Done');	
 }
 
-constructor Property::Property(nameArg:String, typeArg : Interface, 
-							  lowerArg: Integer, upperArg: Integer) {
-	name := nameArg;
-	type := typeArg;
-	lower := lowerArg;
-	upper := upperArg;
-}
-
-
-// We are searching for an activity like name "xOp$method$1";
-// and we want to skip names like destroy$method$1, ConnectorCls$method$1, 
-// ConnectorCls$initialization$1... 
-helper findConnectorBehaviorActivity(fUmlConCls: Class) : Activity {
-														
-	var behaviorSet : Set(Behavior) := fUmlConCls.ownedBehavior
-		->select(name.indexOf(fUmlConCls.name +"$") <= 0 and 
-				 name.indexOf("destroy" + "$") <= 0);
-		
-	assert fatal (behaviorSet->size() = 1) with 
-		log("fUML class " + fUmlConCls.name + " has more than one activities for connector " + 
-		    "behavior candidate!");	
-		
-	var fUmlConnectorBehaviorActivity : Activity := 
-		behaviorSet->oclAsType(Activity)->asSequence()->at(1);
-	
-	return fUmlConnectorBehaviorActivity;
-}
-
-
+// Transformation steps from E2 model to E3 model
 helper transformE2toE3()  {
 
 	checkConfigurationPropertyValues();
@@ -74,13 +72,12 @@ helper transformE2toE3()  {
 	
 	// now, let's locate the connector class inside the e2 model: 
 	var e2ModelElt : Model := e2Model.rootObjects()[Model]->asSequence()->at(1);
-	var allObjects : Set(Element) := e2Model.rootObjects()->oclAsType(Element)->asSet();
-		
 	var e2ConCls : Class := getModelElement(CONNECTOR_CLS_MODEL_PATH, e2Model)
 		->oclAsType(Class)->asSequence()->at(1);
+	
 	assert fatal (e2ConCls <> null) with
 		log("Could not find class " + CONNECTOR_CLS_MODEL_PATH + " in input model");
-	
+		
 	var e2xIfc : Interface := getInterfaceFromConnectorCls(e2ConCls);
 		
 	endLog("Done");
@@ -96,7 +93,6 @@ helper transformE2toE3()  {
 						      
 	var fUmlConCls : Class := fUmlPkg.packagedElement
 		->select(name = e2ConCls.name)->oclAsType(Class)->asSequence()->at(1);
-														
 	
 	endLog("Done");
 
@@ -104,14 +100,13 @@ helper transformE2toE3()  {
 	
 	importClassBehaviorsFromFumlModel(e2ConCls, fUmlConCls, resolverSet);
 	
-	
 	moveAlfLibraryReferencesFromFumlModel(fUmlModelElt, e2ModelElt, fUmlPkg);
 }
+
 
 helper moveAlfLibraryReferencesFromFumlModel(inout fUmlModelElement: Model, 
 	inout e2ModelElement : Model,  inout fUmlConnectorImplPackage : Package)
 {
-	
 	// Populate a set which contains original contents of e2Model elements before moving in the 
 	// fUML model lib references: 
 	var origE2ModelEltContents : Set(Element);
@@ -156,6 +151,7 @@ helper moveAlfLibraryReferencesFromFumlModel(inout fUmlModelElement: Model,
 		};
 	};
 }
+
 
 helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: Class, 
 	in resolverSet : Set(NamedElement) )
@@ -220,6 +216,7 @@ helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: C
 	};
 }
 
+
 helper buildResolverSet(e2Cls : Class, e2Ifc : Interface) : Set(NamedElement)
 {
 	var resolverSet : Set(NamedElement);
@@ -247,6 +244,7 @@ helper buildResolverSet(e2Cls : Class, e2Ifc : Interface) : Set(NamedElement)
 	 
 	return resolverSet;
 }
+
 
 helper resolveUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
 	NamedElement
@@ -285,6 +283,7 @@ helper resolveUsingSet(resolverSet : Set(NamedElement), queryElement: NamedEleme
 	return null;
 }
 
+
 helper resolveTypeUsingSet(resolverSet : Set(NamedElement),	queryElement: NamedElement) : 
 	Type
 {
@@ -299,6 +298,7 @@ helper resolveTypeUsingSet(resolverSet : Set(NamedElement),	queryElement: NamedE
 		return null;
 	}
 }
+
 
 helper resolveClassUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
 	Class
@@ -330,6 +330,7 @@ helper resolvePropertyUsingSet(resolverSet : Set(NamedElement),	queryElement: Na
 		return null;
 	}
 }
+
 
 helper resolveOperationUsingSet(resolverSet : Set(NamedElement), queryElement: NamedElement) : 
 	Operation

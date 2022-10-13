@@ -1,11 +1,35 @@
-// This is an inplace transformation, which is ran from inside Java to save outputs as a different
-// model file. 
+// Defines the transformation rules from E1 model into E2 model. 
+// This transformation is defined as an in-place transformation. When it is ran from inside Eclipse,
+// it will modify the input model. However, we normally run this using the EcTransformer, which is 
+// a java application. EcTransformer uses the java API of QVTo to run the transformation, and after
+// the transformation is complete, it saves the in-memory representation of the model into a 
+// different UML file. 
+// By defining the transformation as an in-place transformation but using Java API to save results
+// into a different UML file, we can get a functionality which is equivalent to the "refining mode"
+// of ATL transformation language. This functionality is useful when the transformation wants to 
+// change a part of the input model, but leave the rest of the input model as unchanged.   
+
+// As this is a proof of concept implementation for the Enhanced Connector concept, the 
+// transformations make the following specific assumptions to simplify implementation:  
+// 1 - Although there is no design limitation for the transformation to handle multiple 
+//     enhanced connectors in the input model, we assume that there will be at most one enhanced
+//     connector in the model. Therefore, if we find one, we transform it and we stop the process. 
+// 2 - We assume that the ports which are connected by the enhanced connectors provide or require
+//     a single interface. Normall, UML ports can provide/require multiple interfaces at the same 
+//     time. In that case, separate connector behaviors can be defined for coordinating each interface. 
+// 3 - We assume that the interfaces required/provided by the ports declare a single operation, 
+//     which has a return type and which has a single argument.
+// 4 - We assume that the primary enhanced connectors and secondary enhanced connectors grouped by
+//     dependencies form a connected group in the input E1 model, and therefore, we don't check 
+//     against this requirement.    
+
 import EcTransformationLibrary;
 
 modeltype uml "strict" uses uml('http://www.eclipse.org/uml2/5.0.0/UML');
 
 transformation E1toE2Transformation(inout e1Model:uml)
 	access EcTransformationLibrary;
+
 
 main() {
 	initializeLogger();
@@ -14,6 +38,8 @@ main() {
 	endLog("Done");
 }
 
+
+// Main helper function which transforms the E1 model into E2 model
 helper transformE1toE2()
 {
 	var model : Model := e1Model.rootObjects()[Model]->asSequence()->at(1);
@@ -58,16 +84,13 @@ helper transformE1toE2()
 }
 
 
-
 // Analyze the enhanced connector and decide if it is a single requester, multiple provider 
-// configuration
-//enum ConnectorConfigurationKind {
+// configuration. Returns one of the following: 
 //	"SingleRequesterMultipleProvider",
 //	"MultipleRequesterSingleProvider", 
 //	"SingleRequesterSingleProvider" 
 //  "UnknownConfiguration"
-//};
-// We will be using this configuration property as above enumeration
+// 
 query Connector::getEcConfiguration() : String {
 
 	var requesterPorts : Set(Port);
@@ -115,6 +138,8 @@ query Connector::getEcConfiguration() : String {
 }
 
 
+// Performs the transformation steps for the given enhanced connector ec, 
+// which has the given configuration conf. 
 helper transformEcConnector(ec : Connector, conf : String)
 {
 	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector..");
@@ -198,7 +223,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 	ownerClass.ownedConnector += prvEndCon;
 	
 	// Implement interface operation
-	// TODO: Assumption: We assume that there is only one operation defined in the interface. 
+	// Assumption: We assume that there is only one operation defined in the interface. 
 	var theInterface : Interface = providingPort.provided->asSequence()->at(1);
 	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
 	
@@ -207,7 +232,6 @@ helper transformEcConnector(ec : Connector, conf : String)
 	
 	// Now, let's check if there are any dependencies from this primary enhanced connector to 
 	// a secondary enhanced connector. 
-	
 	var elementsToRemove : List(Element);
 	elementsToRemove += ec;
 	
@@ -224,7 +248,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
 					->asSequence()->at(1);
 				
-				// TODO: Assumption: We assume that this secondary connector and primary connector
+				// Assumption: We assume that this secondary connector and primary connector
 				// form a connected group. 
 				assert fatal (secondaryEnhancedConnector.IsAssemblyPortConnector()) with 
 					log("Connector " + secondaryEnhancedConnector.name + " is not an assembly connector");
@@ -321,8 +345,6 @@ helper transformEcConnector(ec : Connector, conf : String)
 	
 	// Map the activity which defines the connector behavior into a method 
 	// of the connector class and its attributes, to attributes of the connector class. 
-	
-	// Let's locate the "contract" of the primary enhanced connector first: 
 	var connectorBehaviorOpaqueBehavior : OpaqueBehavior = 
 		ec.contract->oclAsType(OpaqueBehavior)->asSequence()->at(1);
 	
@@ -332,7 +354,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 	var replyBufferExists : Boolean := false;
 	var replyBufferType : String := "SingleCopy";
 	
-	// Foreach property of the activity, create an attribute in the connector class
+	// For each property of the activity, create an attribute in the connector class
 	// Since we are doing an inplace transformation, altering the owner of the attribute 
 	// will suffice: 
 	connectorBehaviorOpaqueBehavior.ownedAttribute->forEach(p) {
@@ -370,7 +392,6 @@ helper transformEcConnector(ec : Connector, conf : String)
 				// set lower multiplicity to 0 to allow empty buffer semantics.
 				p.lower := 0; 		
 			};
-	
 			
 			// Set the type of request buffer according to argument type of the operation
 			// declared in the coordinated interface:  
@@ -385,6 +406,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 		else if (p.hasStereotype("ReplyBuffer"))
 		{
 			inlog("Setting multiplicity and return type of the reply buffer");
+			
 			// Set multiplicity of the reply buffer according to number of providers: 
 			p.lower := inOutPortMultiplicity;
 			p.upper := inOutPortMultiplicity;
@@ -462,6 +484,8 @@ helper transformEcConnector(ec : Connector, conf : String)
 	endLog("Done");
 }
 
+
+// Creates the constructor for the connector class and specifies its behavior using Alf. 
 helper CreateConnectorClsConstructor(
 	inout connectorCls:Class, 
 	in inPortMultiplicity: Integer)
@@ -490,6 +514,7 @@ helper CreateConnectorClsConstructor(
 }
 
 
+// Creates the constructor of the RequestPortClass and specifies its behavior using Alf. 
 helper CreateRequestClassConstructor(
 	inout requestPortCls:Class, 
 	in connectorCls : Class, 
@@ -530,6 +555,9 @@ helper CreateRequestClassConstructor(
 }
 
 
+// Creates the request handling operation inside the RequestPortClass and 
+// specifies its behavior using Alf. This handler operation is called the first whenever a 
+// request has been made by one of the connected requesters.  
 helper CreateRequestPortClsRequestHandlerOperation(
 	inout requestPortCls:Class, 
 	in otherRequestOperation: Operation, 
@@ -546,7 +574,7 @@ helper CreateRequestPortClsRequestHandlerOperation(
 	
 	var behaviorStr : String = "";
 	
-	// TODO: Assumption: we assume that the request operation has a single argument 
+	// Assumption: we assume that the request operation has a single argument 
 	// and a return value.
 	var paramName : String := otherRequestOperation.ownedParameter->asSequence()->at(1).name;
 	
@@ -584,234 +612,27 @@ constructor OpaqueBehavior::OpaqueBehavior(nameArg:String) {
 }
 
 
-
-helper transformSingleRequesterMultipleProviderPrimaryEnhancedConnector(ec : Connector)
-{
-	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector");
-	
-	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
-	
-	var connectorCls : Class := new Class(ec.name + "_ConnectorCls");
-	
-	ownerClass.nestedClassifier += connectorCls;
-	
-	var connectorClsModelPath : String := getModelPath(connectorCls);
-	inlog("CONNECTOR_CLS_MODEL_PATH=" + connectorClsModelPath);
-	
-	// Make sure connector end is singular, and it is connected to a port.
-	inlog("Checking if the connector is an assembly connector..."); 
-	assert fatal (ec.IsAssemblyPortConnector()) with log("Connector " + ec.name + 
-		" is not an assembly connector");
-		
-	// Create providing and requiring ports of the connector class
-	inlog("Creating the connector class ports...");
-	var ports : List(Port) := ec.GetProvidingAndRequiringEndPorts();
-	var requiringPort: Port := ports->at(1);
-	var providingPort: Port := ports->at(2);
-	
-	var parts : List(Property) := ec.GetProvidingAndRequiringEndParts();
-	var requiringPart : Property := parts->at(1);
-	var providingPart : Property := parts->at(2);
-	
-	var providingPortConCls : Port := new Port("prvPort", 
-		providingPort.type->oclAsType(Class)->asSequence()->at(1));
-	connectorCls.ownedAttribute += providingPortConCls;
-	
-	var requiringPortConCls : Port := new Port("reqPort", 
-		requiringPort.type->oclAsType(Class)->asSequence()->at(1));
-	connectorCls.ownedAttribute += requiringPortConCls;
-	
-	// Create connector object
-	inlog("Creating the connector object...");  	
-	var conObj := new Property('ConnectorObj');
-	conObj.type := connectorCls;
-	conObj.lower := 1;
-	conObj.upper := 1;
-	ownerClass.ownedAttribute += conObj.oclAsType(Property);
-	
-	// Connect the providing port of the connector class to the 
-	// requiring port connected to the connector in the source model:
-	inlog("Creating connectors between connector object and connected parts...");
-	
-	// Create required and provided side connectors and add them to the parent class
-	var reqEndCon : Connector := new Connector(ec.name + "_reqEndCon", requiringPort, 
-									requiringPart, providingPortConCls, conObj); 
-	ownerClass.ownedConnector += reqEndCon;
-	
-	var prvEndCon : Connector := new Connector(ec.name + "_prvEndCon", requiringPortConCls, conObj, 
-												providingPort, providingPart); 
-	ownerClass.ownedConnector += prvEndCon;
-	
-	// Implement interface operation
-	// TODO: Assumption: We assume that there is only one operation defined in the interface. 
-	var theInterface : Interface = providingPort.provided->asSequence()->at(1);
-	var theOperation : Operation = theInterface.ownedOperation->asSequence()->at(1);
-	
-	var newOperation : Operation = new Operation(theOperation);
-	connectorCls.ownedOperation += newOperation;
-	
-	// Now, let's check if there are any dependencies from this primary enhanced connector to 
-	// a secondary enhanced connector. 
-	
-	var elementsToRemove : List(Element);
-	elementsToRemove += ec;
-	
-	var outPortMultiplicity : Integer := 1;
-	
-	if (ec.clientDependency->size() <> 0)
-	{
-		ec.clientDependency->forEach(e) 
-		{			
-			var target : Element = e.target->asSequence()->at(1);
-			
-			if (target->oclIsKindOf(Connector)->asSequence()->at(1))
-			{
-				var secondaryEnhancedConnector : Connector = e.target.oclAsType(Connector)
-					->asSequence()->at(1);
-				
-				// TODO: Assumption: We assume that this secondary connector and primary connector
-				// form a connected group. 
-				assert fatal (secondaryEnhancedConnector.IsAssemblyPortConnector()) with 
-					log("Connector " + ec.name + " is not an assembly connector");
-				
-				inlog("Processing secondary enhanced connector: " + secondaryEnhancedConnector.name);
-					
-				ports := secondaryEnhancedConnector.GetProvidingAndRequiringEndPorts();
-				var requiringPortSecondary : Port := ports->at(1);
-				var providingPortSecondary : Port := ports->at(2);
-	
-				parts := secondaryEnhancedConnector.GetProvidingAndRequiringEndParts();
-				var requiringPartSecondary : Property := parts->at(1);
-				var providingPartSecondary : Property := parts->at(2);
-				
-				// make sure requiring part is the same as requiring part of the primary enhanced 
-				// connector: 
-				// TODO: This is specific.. only for one to many configurations. 
-				assert fatal (requiringPart = requiringPartSecondary) with
-					log("Requiring parts of primary enhanced connector " + ec.name + " and " + 
-						"secondary enhanced connector " + secondaryEnhancedConnector.name + 
-						" are not same!");
-				
-				// Increase multiplicity of the requiring port of connector object by one. 
-				requiringPortConCls.lower := requiringPortConCls.lower + 1;
-				requiringPortConCls.upper := requiringPortConCls.upper + 1;
-	
-				// Now, create another reqEnd connector from connector object to the providing part. 
-				var prvEndConSec : Connector := new Connector(secondaryEnhancedConnector.name + 
-					"_prvEndCon", requiringPortConCls, conObj, 
-					providingPortSecondary, providingPartSecondary);
-				ownerClass.ownedConnector += prvEndConSec;
-				
-				elementsToRemove += secondaryEnhancedConnector;
-				
-				outPortMultiplicity := outPortMultiplicity + 1;
-			};
-			
-			elementsToRemove += e;
-		}
-	};
-	
-	inlog("OUTPORT_MULTIPLICITY=" + outPortMultiplicity.toString());
-	
-	// Map the activity which defines the connector behavior into a method 
-	// of the connector class and its attributes, to attributes of the connector class. 
-	
-	// Let's locate the "contract" of the primary enhanced connector first: 
-	var connectorBehaviorActivity : Activity = ec.contract->oclAsType(Activity)->asSequence()->at(1);
-	
-	// Foreach property of the activity, create an attribute in the connector class
-	connectorBehaviorActivity.ownedAttribute->forEach(p) {
-	
-		var newProperty : Property = new Property(p.name);
-		// TODO: Assumption: we assume that the type of the property is a primitive type, 
-		// otherwise, this will require a deeper copy.
-		newProperty.type := p.type;
-		connectorCls.ownedAttribute += newProperty;
-		
-		newProperty.isUnique := p.isUnique;
-		newProperty.isOrdered := p.isOrdered; 
-		newProperty.lower := p.lower;
-		newProperty.upper := p.upper;
-	};
-	
-	elementsToRemove += connectorBehaviorActivity;
-	
-	// Assumption: The connector behavior activity consists of:
-	// - Initial node 
-	// - Opaque action
-	// - Final node
-	// - Transitions in between
-
-	// Copy the connector behavior activity 
-	// TODO: Revise: Since we are doing an inplace transformation now, We may not have to make 
-	// this duplication. We can just move existing activity
-	// inside the connector class, and move the attributes to the connector class. 
-	var newConnectorBehaviorActivity : Activity = new Activity(connectorBehaviorActivity.name);
-	newConnectorBehaviorActivity.visibility := VisibilityKind::package;
-	
-	// Find the opaque action inside the activity and create a copy of it 
-	var opaqueAction : OpaqueAction := 
-		connectorBehaviorActivity.ownedElement->select(oa | oa.oclIsKindOf(OpaqueAction))
-			->oclAsType(OpaqueAction)->asSequence()->at(1);
-	assert fatal(opaqueAction <> null) with log("No OpaqueAction was found under connector behavior");
-	var newOpaqueAction : OpaqueAction = new OpaqueAction(opaqueAction);
-	newConnectorBehaviorActivity.ownedNode += newOpaqueAction;
-	
-	 
-	var opaqueActionBody : String := newOpaqueAction.body->asSequence()->at(1);
-	var transformedOpaqueActionBody : String:= opaqueActionBody
-		->replaceAll("PRV_CNT", outPortMultiplicity.toString())
-		->asSequence()->at(1);
-	
-	newOpaqueAction.body := transformedOpaqueActionBody;
-	
-	// create initial node and final nodes
-	var newInitialNode : InitialNode = new InitialNode("initialNode");
-	newConnectorBehaviorActivity.ownedNode += newInitialNode;
-	
-	var newActivityFinalNode : ActivityFinalNode = new ActivityFinalNode("finalNode");
-	newConnectorBehaviorActivity.ownedNode += newActivityFinalNode;
-	
-	// create control flows between initial node, opaque action and activity final nodes:
-	var controlFlow1 : ControlFlow = new ControlFlow(newInitialNode, newOpaqueAction);
-	newConnectorBehaviorActivity.edge += controlFlow1;
-	var controlFlow2 : ControlFlow = new ControlFlow(newOpaqueAction, newActivityFinalNode);
-	newConnectorBehaviorActivity.edge += controlFlow2;
-	
-	connectorCls.ownedBehavior += newConnectorBehaviorActivity;
-	
-	newOperation.method += newConnectorBehaviorActivity;
-	
-	
-	// Delete elements to remove in reverse direction
-	elementsToRemove := elementsToRemove->reverse();
-	elementsToRemove->forEach(elt)
-	{
-		// Strangely, debugger has a problem here, and after the first deletion, it does not
-		// iterate over other elements, however, all elements in the list gets deleted. 
-		e1Model.removeElement(elt);
-	};
-		
-	endLog("Done");
-}
-
-
+// A plain class in our terms is a class which has no nesterd classifiers and no ports. 
 query Class::IsPlainClass() : Boolean =
 	self.nestedClassifier->size() = 0 and self.ownedPort->size() = 0;
+
 
 constructor Class::Class(nameArg:String)
 {
 	name := nameArg; 
 }
 
+
 constructor Property::Property(nameArg:String) {
 	name := nameArg;
 }
+
 
 constructor Port::Port(nameArg:String, typeArg:Class) {
 	name := nameArg;
 	type := typeArg;
 }
+
 
 constructor ConnectorEnd::ConnectorEnd(portArg: Port, partWithPortArg: Property)
 {
@@ -819,12 +640,14 @@ constructor ConnectorEnd::ConnectorEnd(portArg: Port, partWithPortArg: Property)
 	partWithPort := partWithPortArg;	
 }
 
+
 constructor Connector::Connector(nameArg: String, port1: Port, partWithPort1: Property, 
 								 port2: Port, partWithPort2: Property) {
 	name := nameArg;
 	_end += new ConnectorEnd(port1, partWithPort1);
 	_end += new ConnectorEnd(port2, partWithPort2);	
 }
+
 
 constructor Operation::Operation(otherOperation: Operation) {
 	name := otherOperation.name;
@@ -835,7 +658,7 @@ constructor Operation::Operation(otherOperation: Operation) {
 	}
 }
 
-	
+
 constructor Operation::Operation(nameArg : String) {
 	name := nameArg;
 }
@@ -854,23 +677,28 @@ constructor Parameter::Parameter(nameArg: String, typeArg : Type) {
 	type := typeArg;
 }
 
+
 // Create a new activity using the connector behavior activity
 constructor Activity::Activity(nameArg: String) {
 	name := nameArg;
 }
+
 
 constructor OpaqueAction ::OpaqueAction(otherOpaqueAction: OpaqueAction) {
 	name := otherOpaqueAction.name;
 	body := otherOpaqueAction.body;
 }
 
+
 constructor InitialNode:: InitialNode(argName : String) {
 	name := argName;
 }
 
+
 constructor ActivityFinalNode :: ActivityFinalNode(argName : String) {
 	name := argName;
 }
+
 
 constructor ControlFlow :: ControlFlow(sourceArg : ActivityNode, targetArg : ActivityNode) {
 	source := sourceArg;
@@ -880,7 +708,8 @@ constructor ControlFlow :: ControlFlow(sourceArg : ActivityNode, targetArg : Act
 
 // check if connector has two ends, 
 // and both ends are connected to ports 
-// and partWithPort fields are populated as well  
+// and partWithPort fields are populated as well. Also checks our assumptions related to 
+// number of provided/required interfaces. 
 query Connector::IsAssemblyPortConnector() : Boolean = 
 	self._end->size() = 2 and 
 	self._end->at(1)->role->size() = 1 and 
@@ -906,6 +735,7 @@ query Connector::IsAssemblyPortConnector() : Boolean =
  	   self._end->at(2)->role->asSequence()->at(1)->oclAsType(Port)->provided->asSequence()->at(1) ) );  
 
 
+
 // Precond: self.IsAssemblyPortConnector
 query Connector::GetProvidingAndRequiringEndPorts() : List(Port) {
 	var port1 : Port := self._end->at(1)->role->oclAsType(Port)->asSequence()->at(1);
@@ -918,6 +748,7 @@ query Connector::GetProvidingAndRequiringEndPorts() : List(Port) {
 		return List {port2, port1};
 	};
 }
+
 
 // Precond: self.IsAssemblyPortConnector
 // returns two element set {RequiringPort, ProvidingPort}
@@ -936,8 +767,10 @@ query Connector::GetProvidingAndRequiringEndParts() : List(Property) {
 	};
 }
 
+
 // If the connector has "contract", this should return true. 
 query Connector::isPrimaryEnhancedConnector() : Boolean = (self.contract->size() = 1);
+
 
 // If a primary connector has a dependency to this connector, this should return true. 
 query Connector::isSecondaryEnhancedConnector() : Boolean {

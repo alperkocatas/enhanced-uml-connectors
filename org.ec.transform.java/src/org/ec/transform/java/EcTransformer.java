@@ -30,14 +30,14 @@ import org.eclipse.m2m.qvt.oml.util.Log;
 import org.eclipse.m2m.qvt.oml.util.WriterLog;
 import org.eclipse.uml2.uml.UMLPackage;
 import org.eclipse.uml2.uml.resource.UMLResource;
-
+ 
 /**
  * Runs the enhanced connector model transformation workflow which consists of QVTo transformations
  * and compilation of the Alf code into fUML using the alfc compiler. 
  * 
  * @author Alper Tolga Kocatas
- *
- */
+ * 
+ */ 
 public class EcTransformer {
 	
 	private static final Logger logger = Logger.getLogger(EcTransformer.class);
