@@ -1,0 +1,80 @@
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::ToString;
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::*;
+
+package LessFrequentRequester_E1 {
+    public abstract class XIfc
+    {
+        public abstract xOp(in arg:Integer) : Integer;
+    }
+    
+    public class Connector1_ConnectorCls
+    {
+        public InPort : RequestPortCls[1..1] ordered nonunique;
+        public OutPort : XIfc[1..1] ordered nonunique;
+        public MaxRequestCount : Integer[1..1] = 10;
+        public DefaultReply : Integer[1..1] = 0;
+        
+        public xOp(in arg:Integer) : Integer
+        {
+            Integer returnValue = this.DefaultReply;            
+                        
+            if (this.InPort[1].RequestBuffer.size() == this.MaxRequestCount)            
+            {            
+                // Merge requests:            
+                Integer sum = 0;            
+                while (this.InPort[1].RequestBuffer.size() != 0)            
+                {            
+                    Integer request = this.InPort[1].RequestBuffer.removeFirst();            
+                    if (request != null)            
+                    {            
+                        sum = sum + request;            
+                    }            
+                }            
+                            
+                returnValue = sum;            
+            }            
+                        
+            return returnValue;
+        }
+
+        @Create
+        public Connector1_ConnectorCls() 
+        {
+            Integer i = 1;            
+            while (i <= 1)             
+            {            
+                this.InPort[i] = new RequestPortCls(this);            
+                i = i + 1;            
+            }            
+
+        }
+
+        public class RequestPortCls
+        {
+            public RequestBuffer : Queue<Integer>[1..1];
+            public ownerConnector : Connector1_ConnectorCls[1..1];
+            
+            @Create
+            public RequestPortCls(in c:Connector1_ConnectorCls) 
+            {
+                this.ownerConnector  = c;                
+                this.RequestBuffer = new Queue<Integer>();                
+
+            }
+
+            public xOp(in arg:Integer) : Integer
+            {
+                // Store incoming request in request buffer                
+                this.RequestBuffer.add(arg);                
+                
+                // Let connector object process the request                
+                return this.ownerConnector.xOp(arg);                
+
+            }
+
+        }
+        
+    }
+    
+}
+

@@ -1,0 +1,31 @@
+namespace Alf::Library::PrimitiveBehaviors;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Neg;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Abs;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'+';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'-';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'*';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Div as '/';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Mod as '%';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Max;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::Min;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'<';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'>';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'<=';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'>=';
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::ToString;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::ToUnlimitedNatural;
+public import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::ToInteger;
+
+private import FoundationalModelLibrary::PrimitiveBehaviors::IntegerFunctions::'/' as Divide;
+
+package IntegerFunctions {
+
+  @primitive(IntegerToNaturalFunctionBehaviorExecution)
+  public activity ToNatural(in x: String): Integer[0..1] {}
+  
+  @primitive(IntegerToRealFunctionBehaviorExecution)
+  public activity ToReal(in x: Integer): Real {
+//  	return Divide(x, 1)??0.0;
+  }
+  
+}

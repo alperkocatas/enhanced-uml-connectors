@@ -1,0 +1,81 @@
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::ToString;
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::*;
+
+package MultiDestRequester_E1 {
+    public abstract class XIfc
+    {
+        public abstract xOp(in arg:Integer) : Integer;
+    }
+    
+    public class Connector1_ConnectorCls
+    {
+        public InPort : RequestPortCls[1..1] ordered nonunique;
+        public OutPort : XIfc[2..2] ordered nonunique;
+        ReplyBuffer : Integer[2..2] ordered nonunique;
+        
+        public xOp(in arg:Integer) : Integer
+        {
+            Integer i = 1;             
+            for (ifc in this.OutPort)              
+            {            
+                this.ReplyBuffer[i] = ifc.xOp(arg);            
+                i++;             
+            }            
+                        
+            // Reply merge strategy:                     
+            i = 1;            
+            Integer sum = 0;            
+            while (i<=2)            
+            {            
+                Integer intval = this.ReplyBuffer[i];            
+                            
+                if (intval != null)            
+                {            
+                    sum = sum + intval;            
+                                 
+                    // Invalidate value in the single copy buffer            
+                    this.ReplyBuffer[i] = null;                    
+                }            
+                i++;            
+            }            
+                        
+            return sum;            
+
+        }
+
+        @Create
+        public Connector1_ConnectorCls() 
+        {
+            Integer i = 1;            
+            while (i <= 2)             
+            {            
+                this.InPort[i] = new RequestPortCls(this);            
+                i = i + 1;            
+            }            
+
+        }
+
+        public class RequestPortCls
+        {
+            public ownerConnector : Connector1_ConnectorCls[1..1];
+            
+            @Create
+            public RequestPortCls(in c:Connector1_ConnectorCls) 
+            {
+                this.ownerConnector  = c;                
+
+            }
+
+            public xOp(in arg:Integer) : Integer
+            {
+                // Let connector object process the request                
+                return this.ownerConnector.xOp(arg);                
+
+            }
+
+        }
+        
+    }
+    
+}
+

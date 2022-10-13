@@ -1,0 +1,10 @@
+@ModelLibrary
+package PrimitiveTypes {
+
+  @primitive public datatype Boolean {}
+  @primitive public datatype Integer {}
+  @primitive public datatype String {}
+  @primitive public datatype UnlimitedNatural {}
+  @primitive public datatype Real {}
+  
+}

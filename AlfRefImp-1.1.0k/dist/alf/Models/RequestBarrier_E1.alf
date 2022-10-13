@@ -1,0 +1,97 @@
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::ToString;
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::*;
+
+package RequestBarrier_E1 {
+    public abstract class XIfc
+    {
+        public abstract xOp(in arg:Integer) : Integer;
+    }
+    
+    public class Connector1_ConnectorCls
+    {
+        public InPort : RequestPortCls[1..1] ordered nonunique;
+        public OutPort : XIfc[1..1] ordered nonunique;
+        public BarrierOn : Boolean[1..1] = true;
+        public DefaultReply : Integer[1..1] = 0;
+        
+        public xOp(in arg:Integer) : Integer
+        {
+            Integer i = 1;            
+                        
+            this.BarrierOn = false;            
+                        
+            while (i <= 3)            
+            {            
+                Integer request = this.InPort[i].RequestBuffer;            
+                if (request == null)            
+                {            
+                    this.BarrierOn = true;            
+                }            
+                i++;            
+            }            
+                        
+            Integer returnValue = this.DefaultReply;            
+            if (this.BarrierOn == false)            
+            {            
+                // Merge requests            
+                Integer mergedRequest = 0;            
+                i = 1;            
+                while (i <= 3)            
+                {            
+                    request = this.InPort[i].RequestBuffer;            
+                    if (request != null)            
+                    {            
+                        mergedRequest += request;            
+                         // Invalidate consumed request            
+                        this.InPort[i].RequestBuffer = null;                
+                    }            
+                    i++;            
+                }            
+                        
+                returnValue = this.OutPort[1].xOp(mergedRequest);            
+                this.BarrierOn = true;            
+            }            
+                        
+            return returnValue;
+        }
+
+        @Create
+        public Connector1_ConnectorCls() 
+        {
+            Integer i = 1;            
+            while (i <= 1)             
+            {            
+                this.InPort[i] = new RequestPortCls(this);            
+                i = i + 1;            
+            }            
+
+        }
+
+        public class RequestPortCls
+        {
+            public RequestBuffer : Integer[0..1];
+            public ownerConnector : Connector1_ConnectorCls[1..1];
+            
+            @Create
+            public RequestPortCls(in c:Connector1_ConnectorCls) 
+            {
+                this.ownerConnector  = c;                
+
+            }
+
+            public xOp(in arg:Integer) : Integer
+            {
+                // Store incoming request in request buffer                
+                this.RequestBuffer = arg;                
+                
+                // Let connector object process the request                
+                return this.ownerConnector.xOp(arg);                
+
+            }
+
+        }
+        
+    }
+    
+}
+

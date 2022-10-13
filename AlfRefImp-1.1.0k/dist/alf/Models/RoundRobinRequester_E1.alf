@@ -1,0 +1,60 @@
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::ToString;
+private import Alf::Library::PrimitiveBehaviors::IntegerFunctions::*;
+
+package RoundRobinRequester_E1 {
+    public abstract class XIfc
+    {
+        public abstract xOp(in arg:Integer) : Integer;
+    }
+    
+    public class Connector1_ConnectorCls
+    {
+        public InPort : RequestPortCls[1..1] ordered nonunique;
+        public OutPort : XIfc[2..2] ordered nonunique;
+        public Index : Integer[1..1] = 1;
+        ReplyBuffer : Integer[2..2];
+        
+        public xOp(in arg:Integer) : Integer
+        {
+            Integer result = this.OutPort[this.Index].xOp(arg);            
+            this.Index = this.Index + 1;            
+            this.Index = this.Index % 2;               
+            return result;
+        }
+
+        @Create
+        public Connector1_ConnectorCls() 
+        {
+            Integer i = 1;            
+            while (i <= 2)             
+            {            
+                this.InPort[i] = new RequestPortCls(this);            
+                i = i + 1;            
+            }            
+
+        }
+
+        public class RequestPortCls
+        {
+            public ownerConnector : Connector1_ConnectorCls[1..1];
+            
+            @Create
+            public RequestPortCls(in c:Connector1_ConnectorCls) 
+            {
+                this.ownerConnector  = c;                
+
+            }
+
+            public xOp(in arg:Integer) : Integer
+            {
+                // Let connector object process the request                
+                return this.ownerConnector.xOp(arg);                
+
+            }
+
+        }
+        
+    }
+    
+}
+
