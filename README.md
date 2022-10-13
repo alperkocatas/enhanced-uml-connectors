@@ -22,21 +22,35 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - **org.ec.transform.java:** Java project which contains the EcTransformer. This application automatically runs the model transformations in required order. Input is an E1 level model. Output is an E3 level model saved under org.ec.connectors in the same directory as the input E1 models. 
 
 ## Prerequisites
-- Eclipse Papyrus version 2021-09 (4.21.0) or higher, with QVT Operational SDK 3.10.3.v20210309-1855 installed. 
-- Java 11.0.13 or higher
+- git configuration management system
+- Eclipse Papyrus 2021-09 or higher. The tools were developed using Eclipse Papyrus version 2021-09, but they were also tested with the latest version of Eclipse Papyrus (Version 2022-03 as of October 2022). Therefore, a version later than 2021-09 should work. 
+- QVT Operational SDK 3.10.3 or higher. 
+- Java 11.0.13 or higher. 
 
 ## Installation of Execution Environment
-- Clone this repository in a folder on your workstation,
-- Install Java 11.0.13 or higher if not already installed, 
-- Install Eclipse Papyrus and make sure that QVT Operational SDK plugin is also included. If not, use Help->Install new software and use the update site: https://download.eclipse.org/releases/2021-03/ to download and install the QVT Operational SDK plugin, 
-- Open Eclipse Papyrus and choose the root directory of this repository as your workspace. 
-- Use the run-configurations provided below to run the model transformations for the example ehanced connectors. 
-- On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
-
-## Importing Projects into Workspace
-- Open Eclipse Papyrus, then select File->Import. Then select "Existing projects into workspace". 
-- Select the root directory of this repository in the field "Select root directory". 
-- Select all the projects and click Finish. 
+- Clone this repository in a folder on your workstation using the command: 
+```
+    git clone https://github.com/alperkocatas/enhanced-uml-connectors.git
+```
+- **Linux and MacOS only**: On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
+- Install Java 11.0.13 or higher if not already installed. 
+- Download and install Eclipse Papyrus from https://www.eclipse.org/papyrus/download.html
+- Start Eclipse Papyrus and choose the root directory of this repository as your workspace 
+- Install QVT Operational SDK plugin: 
+  - Choose *Help->Install new software*, 
+  - Select the default update site for the version (e.g. Eclipse Repository - https://download.eclipse.org/releases/2022-03/ for version 2022-03). 
+  - Enter *QVT* to filter field, 
+  - Select *QVT Operational SDK* from the list, 
+  - Click Finish. 
+  - Papyrus will request a restart when installation completes. Confirm to restart Papyrus
+- Import projects into workspace: 
+  - Select File->Import. Then select "Existing projects into workspace". 
+  - Select the root directory of this repository in the field "Select root directory". 
+  - Select all the projects and click Finish. 
+- Run the transformations:
+  - Expand the org.ec.transforma.java project, 
+  - Right click on the launch configuration file "EcTransformer_RoundRobinRequester.launch", choose "Run As -> EcTransformer_RoundRobinRequester". 
+  - This will run all the model transformations for the Round Robin Requester enhanced connector. You can run the transformations for the other example connectors by right clicking on them.
 
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
