@@ -1,11 +1,10 @@
 # Enhanced Uml Connectors
 
-This repository contains the related model and source files for the study **"Enhancing UML Connectors with Precise Behavioral Specifications"**, submitted to **IEEE Access**. 
+This repository contains the related model and source files for the study **"Enhancing UML Connectors with Precise Behavioral Specifications,"** submitted to **IEEE Access**. 
 
-Enhanced UML Connectors​ are UML connectors with additional associated behaviors. Associating behaviors with connectors solve the following problems: First, as a result of the coordination logic being pushed outside of the connected components, designs of the components are simplified. Since the components have more focused responsibilities, their reusability increases. Second, the behaviors associated with connectors help resolve ambiguities when n-ary connectors are used to coordinate more than two entities. Finally, a specific connector behavior can be reused in different cases. 
+Enhanced UML Connectors are UML connectors with associated behaviors. Associating behaviors with connectors solves the following problems: First, as the result of pushing the coordination logic outside of the connected components, the designs of the components are simplified, and reusability increases since the responsibilities of the components decrease. Second, the behaviors associated with connectors help resolve ambiguities when n-ary connectors are used to coordinate more than two entities. Finally, a specific connector behavior can be reused in different cases.
 
-Action Language for Foundational UML (ALF) has been used to specify connector behaviors. A series of model transformations are developed using QVT Operational Mappings Language (QVTo). The model transformations transform UML models including connector behaviors in terms of ALF specifications into UML models which include fUML activities as connector behavior specifications. Resulting UML models are platform-independent models which can be transformed into code using model-to-text transformation methods, or into another model for different purposes. 
-
+Action Language for Foundational UML (ALF) is used to specify connector behaviors. A series of model transformations are developed using QVT Operational Mappings Language (QVTo). The model transformations transform UML models that include connector behaviors in terms of ALF specifications into UML models which include fUML activities as connector behavior specifications. Resulting UML models are platform-independent models that can be transformed into code or another model for different purposes. 
 
 ## Directory Descriptions: 
 - **AlfRefImp-1.1.0k:** A copy of the Alf reference implementation. 
@@ -36,22 +35,22 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - **Linux and MacOS only**: On MacOS or Linux, cd into directory AlfRefImp-1.1.0k/dist/alf and Use "chmod +x alfc" command to grant execute permissions for the alfc Alf compiler. 
 - Install Java 11.0.13 or higher if not already installed. 
 - Download and install Eclipse Papyrus from https://www.eclipse.org/papyrus/download.html
-- Start Eclipse Papyrus and choose the root directory of this repository as your workspace 
+- Start Eclipse Papyrus and choose the root directory of this repository as your workspace. 
 - Install QVT Operational SDK plugin: 
   - Choose *Help->Install new software*, 
   - Select the default update site for the version (e.g. Eclipse Repository - https://download.eclipse.org/releases/2022-03/ for version 2022-03). 
   - Enter *QVT* to filter field, 
   - Select *QVT Operational SDK* from the list, 
   - Click Finish. 
-  - Papyrus will request a restart when installation completes. Confirm to restart Papyrus
-- Import projects into workspace: 
+  - Papyrus will request a restart when the installation completes. Confirm to restart Papyrus
+- Import projects into the workspace: 
   - Select File->Import. Then select "Existing projects into workspace". 
   - Select the root directory of this repository in the field "Select root directory". 
   - Select all the projects and click Finish. 
 - Run the transformations:
   - Expand the org.ec.transforma.java project, 
   - Right click on the launch configuration file "EcTransformer_RoundRobinRequester.launch", choose "Run As -> EcTransformer_RoundRobinRequester". 
-  - This will run all the model transformations for the Round Robin Requester enhanced connector. You can run the transformations for the other example connectors by right clicking on them.
+  - This will run all the model transformations for the Round Robin Requester enhanced connector. You can run the transformations for the other example connectors by right-clicking on them.
 
 ## Run configurations for EcTransformer.java
 There are four run configurations under the directory /org.ec.transform.java which can be used to transform each of the example connectors presented in the article: 
@@ -65,8 +64,8 @@ Output E3 models are saved under the same directory as the E1 input models. Thes
 ## Detailed information for org.ec.connectors project
 - Directory *RoundRobinRequester* contains the E1 model files for the *Round Robin Requester* connector. 
 - When the *Papyrus perspective* is used by selecting *Window-> Perspective -> Open Perspective -> Other -> Papyrus*, Papyrus groups the model files as: "di, notation and uml", under *RoundRobinRequester_E1* model file. 
-- You can double click on the *RoundRobinRequester_E1* model file open it. You can then click on the *Composite Structure Diagram* link under the *Notation Views* section in the *Welcome* tab for the model file to view the structure diagram for the connector. 
-- Under the *RoundRobinRequester* directory, the UML model file *RoundRobinRequester_E1.uml* is the E1 level input UML model file. The files *RoundRobinRequester_E1_E2.uml* and *RoundRobinRequester_E1_E3.uml* are the outputs of the E1toE2 and E2toE3 transformations. You can view the UML model files by right clicking on them and then choosing *"Open with -> UML Model Editor"*. 
+- You can double-click on the *RoundRobinRequester_E1* model file to open it. You can then click on the *Composite Structure Diagram* link under the *Notation Views* section in the *Welcome* tab for the model file to view the structure diagram for the connector. 
+- Under the *RoundRobinRequester* directory, the UML model file *RoundRobinRequester_E1.uml* is the E1 level input UML model file. The files *RoundRobinRequester_E1_E2.uml* and *RoundRobinRequester_E1_E3.uml* are the outputs of the E1toE2 and E2toE3 transformations. You can view the UML model files by right-clicking on them and then choosing *"Open with -> UML Model Editor"*. 
 - Directories *MultiDestRequester, LessFrequentSender* and *RequestBarrier* are for the other example connectors, and they are organized similarly. 
 - Directory *alf_output* is the directory where fUML model output of the alfc compiler is stored. 
 
