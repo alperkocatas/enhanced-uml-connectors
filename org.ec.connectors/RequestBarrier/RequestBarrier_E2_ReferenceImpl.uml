@@ -155,6 +155,5 @@
       <appliedProfile xmi:type="uml:Profile" href="../../org.ec.profile/EnhancedConnectorProfile.profile.uml#_KFphgABXEe2YN9T4mQKmwQ"/>
     </profileApplication>
   </uml:Model>
-  <EnhancedConnectorProfile:ConnectorBehavior_Deprecated xmi:id="_KHqFkAJ5Ee2EMb2arhAsgw" base_Activity="_310xEMYsEeyq_sNlgGY9og"/>
   <EnhancedConnectorProfile:RequestBuffer xmi:id="_xj0mwBsLEe2E585YUOTS5w" base_Property="_2zPNkAKDEe2EMb2arhAsgw"/>
 </xmi:XMI>

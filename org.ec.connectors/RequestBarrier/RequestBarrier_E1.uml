@@ -13,11 +13,11 @@
         <end xmi:type="uml:ConnectorEnd" xmi:id="_r0JpwEoUEe2hx6X2e2jcAA" partWithPort="_Dfl9wJPeEeylaYbT_zyPXg" role="_THFQAJPeEeylaYbT_zyPXg"/>
         <end xmi:type="uml:ConnectorEnd" xmi:id="_r0JpwUoUEe2hx6X2e2jcAA" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
       </ownedConnector>
-      <ownedConnector xmi:type="uml:Connector" xmi:id="_qKSeEEoWEe2hx6X2e2jcAA" name="Connector14">
+      <ownedConnector xmi:type="uml:Connector" xmi:id="_qKSeEEoWEe2hx6X2e2jcAA" name="Connector2">
         <end xmi:type="uml:ConnectorEnd" xmi:id="_qKSeEUoWEe2hx6X2e2jcAA" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
         <end xmi:type="uml:ConnectorEnd" xmi:id="_qKSeEkoWEe2hx6X2e2jcAA" partWithPort="_3opPABfhEe2UAvjETmpzzg" role="_t4AbYRfhEe2UAvjETmpzzg"/>
       </ownedConnector>
-      <ownedConnector xmi:type="uml:Connector" xmi:id="_rvxOIEoWEe2hx6X2e2jcAA" name="Connector14">
+      <ownedConnector xmi:type="uml:Connector" xmi:id="_rvxOIEoWEe2hx6X2e2jcAA" name="Connector3">
         <end xmi:type="uml:ConnectorEnd" xmi:id="_rvxOIUoWEe2hx6X2e2jcAA" partWithPort="_kFFpQJPeEeylaYbT_zyPXg" role="_mahPkJPeEeylaYbT_zyPXg"/>
         <end xmi:type="uml:ConnectorEnd" xmi:id="_rvxOIkoWEe2hx6X2e2jcAA" partWithPort="_xwpg4BfhEe2UAvjETmpzzg" role="_ifENMRfhEe2UAvjETmpzzg"/>
       </ownedConnector>
@@ -98,6 +98,8 @@ return returnValue;</body>
       </ownedOperation>
     </packagedElement>
     <packagedElement xmi:type="uml:Usage" xmi:id="_iEKBYJPgEeylaYbT_zyPXg" client="_cJJbgJPgEeylaYbT_zyPXg" supplier="_y7DX8JPeEeylaYbT_zyPXg"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_XJ6nkFSiEe2sXe-ObLqHaQ" client="_r0Af0EoUEe2hx6X2e2jcAA" supplier="_rvxOIEoWEe2hx6X2e2jcAA"/>
+    <packagedElement xmi:type="uml:Dependency" xmi:id="_at1aQFSiEe2sXe-ObLqHaQ" client="_r0Af0EoUEe2hx6X2e2jcAA" supplier="_qKSeEEoWEe2hx6X2e2jcAA"/>
     <profileApplication xmi:type="uml:ProfileApplication" xmi:id="_NVDvUB-9Ee2HYY6mAISfnw">
       <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_mcg24iztEe2uAdst3UBrWQ" source="PapyrusVersion">
         <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_mcg24yztEe2uAdst3UBrWQ" key="Version" value="0.0.21"/>

@@ -9,7 +9,7 @@ package RequestBarrier_E1 {
     
     public class Connector1_ConnectorCls
     {
-        public InPort : RequestPortCls[1..1] ordered nonunique;
+        public InPort : RequestPortCls[3..3] ordered nonunique;
         public OutPort : XIfc[1..1] ordered nonunique;
         public BarrierOn : Boolean[1..1] = true;
         public DefaultReply : Integer[1..1] = 0;
@@ -59,7 +59,7 @@ package RequestBarrier_E1 {
         public Connector1_ConnectorCls() 
         {
             Integer i = 1;            
-            while (i <= 1)             
+            while (i <= 3)             
             {            
                 this.InPort[i] = new RequestPortCls(this);            
                 i = i + 1;            
