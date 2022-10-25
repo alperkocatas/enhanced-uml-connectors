@@ -26,6 +26,7 @@ Action Language for Foundational UML (ALF) has been used to specify connector be
 - Eclipse Papyrus 2021-09 or higher. The tools were developed using Eclipse Papyrus version 2021-09, but they were also tested with the latest version of Eclipse Papyrus (Version 2022-03 as of October 2022). Therefore, a version later than 2021-09 should work. 
 - QVT Operational SDK 3.10.3 or higher. 
 - Java 11.0.13 or higher. 
+- The tools were tested in Windows 10, MacOS Monterey and Ubuntu Linux. 
 
 ## Installation of Execution Environment
 - Clone this repository in a folder on your workstation using the command: 
@@ -78,7 +79,7 @@ To use the run configurations, please update the values of the following command
 - ***-e1ModelPath:*** If -e1Model option is not provided, this option can be used to provide the path of a specific E1 model file as input. Note that the path should be relative to the -wsDir argument. 
 
 
-## Trouble Shooting
+## Troubleshooting
 - We use the *project_loc* variable to get the location of the E1 models. If eclipse complains that *project_loc* is not set, please select the org.ec.transform.java project from the Project Explorer in eclipse. When no project or resource is selected, this environment variable is not set. 
 
 Please e-mail me at: alperkocatas@gmail.com, tolga.kocatas@metu.edu.tr for further problems. 
