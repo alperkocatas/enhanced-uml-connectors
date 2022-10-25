@@ -79,7 +79,7 @@ To use the run configurations, please update the values of the following command
 - ***-e1ModelPath:*** If -e1Model option is not provided, this option can be used to provide the path of a specific E1 model file as input. Note that the path should be relative to the -wsDir argument. 
 
 
-## Trouble Shooting
+## Troubleshooting
 - We use the *project_loc* variable to get the location of the E1 models. If eclipse complains that *project_loc* is not set, please select the org.ec.transform.java project from the Project Explorer in eclipse. When no project or resource is selected, this environment variable is not set. 
 
 Please e-mail me at: alperkocatas@gmail.com, tolga.kocatas@metu.edu.tr for further problems. 
