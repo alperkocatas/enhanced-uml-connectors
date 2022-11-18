@@ -1,6 +1,6 @@
 # Enhanced Uml Connectors
 
-This repository contains the related model and source files for the study **"Enhancing UML Connectors with Precise Behavioral Specifications,"** submitted to **IEEE Access**. 
+This repository contains the related model and source files for the study **"Enhancing UML Connectors with Behavioral ALF Specifications for Exogenous Coordination of Software Components"**. 
 
 Enhanced UML Connectors are UML connectors with associated behaviors. Associating behaviors with connectors solves the following problems: First, as the result of pushing the coordination logic outside of the connected components, the designs of the components are simplified, and reusability increases since the responsibilities of the components decrease. Second, the behaviors associated with connectors help resolve ambiguities when n-ary connectors are used to coordinate more than two entities. Finally, a specific connector behavior can be reused in different cases.
 
