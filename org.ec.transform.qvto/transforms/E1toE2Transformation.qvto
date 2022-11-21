@@ -143,7 +143,7 @@ query Connector::getEcConfiguration() : String {
 helper transformEcConnector(ec : Connector, conf : String)
 {
 	beginLog(">> begin: Processing " + ec.name + " as Primary Enhanced Connector..");
-	inlog("Connector configuration is: " + conf);
+	inlogDebug("Connector configuration is: " + conf);
 	
 	var ownerClass : Class := ec.owner->oclAsType(Class)->asSequence()->at(1);
 	
@@ -155,7 +155,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 	inlog("CONNECTOR_CLS_MODEL_PATH=" + connectorClsModelPath);
 	
 	// Make sure connector end is singular, and it is connected to a port.
-	inlog("Checking if the connector is an assembly connector..."); 
+	inlogDebug("Checking if the connector is an assembly connector..."); 
 	assert fatal (ec.IsAssemblyPortConnector()) with log("Connector " + ec.name + 
 		" is not an assembly connector");
 		
@@ -188,7 +188,7 @@ helper transformEcConnector(ec : Connector, conf : String)
 		providingPort.type->oclAsType(Class)->asSequence()->at(1));
 	requestPortCls.ownedAttribute += providingPortReqPortCls;
 					
-	inlog("Create Request Port object inside the connector class");
+	inlog("Creating Request Port object inside the connector class");
 	reqPortObj := new Property('InPort');
 	reqPortObj.type := requestPortCls;
 	reqPortObj.lower := 1;

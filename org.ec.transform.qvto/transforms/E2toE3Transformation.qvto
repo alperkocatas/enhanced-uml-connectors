@@ -156,6 +156,8 @@ helper moveAlfLibraryReferencesFromFumlModel(inout fUmlModelElement: Model,
 helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: Class, 
 	in resolverSet : Set(NamedElement) )
 {
+	beginLog("Importing behaviors of class " + e2Cls.name + " from the fUML model");
+
 	// Copy attributes of fUML class which does not exist in the e2 class:
 	fumlClass.ownedAttribute->forEach(fUmlAttr)
 	{
@@ -214,6 +216,8 @@ helper importClassBehaviorsFromFumlModel(inout e2Cls : Class, inout fumlClass: C
 	
 		importClassBehaviorsFromFumlModel(nesteE2Class, fUmlNestedClass, resolverSet);
 	};
+
+	endLog("Done");
 }
 
 
@@ -362,7 +366,7 @@ helper transformOperationBehavior(
 	var count : Integer := 0;
 	
 	beginLog("Fixing unresolved references of connector behavior activity " +  
-		fUmlActivity.qualifiedName);
+		fUmlActivity.name);
 	
 	e2xOp.ownedParameter->forEach(param) {
 	
@@ -370,13 +374,13 @@ helper transformOperationBehavior(
 		
 		if (qualName.indexOf(ALF_PKG_NAME) > 0)
 		{
-			inlog("Found parameter: " + param.name);
+			inlogDebug("Found parameter: " + param.name);
 			
 			var type : Type := resolveTypeUsingSet(resolverSet, param.type);
 			
 			if (type <> null)
 			{
-				inlog("Updating type field of parameter " + param.name + " as " + type.name);
+				inlogDebug("Updating type field of parameter " + param.name + " as " + type.name);
 				param.type := type;
 				count := count + 1;	
 			}
@@ -401,7 +405,7 @@ helper transformOperationBehavior(
 			var idx : Integer := sfqualifiedName.indexOf(ALF_PKG_NAME);  
 			if (idx > 0)
 			{
-				inlog("Found: StructuralFeatureAction: " + sfa.qualifiedName);
+				inlogDebug("Found: StructuralFeatureAction: " + sfa.qualifiedName);
 				count := count + 1; 	
 
 				var foundCount : Integer := 
@@ -421,7 +425,7 @@ helper transformOperationBehavior(
 					
 					// Now, let's alter the structural feature to this one. 
 					sfa.structuralFeature := e2Property;
-					inlog("Updated structuralFeature field of StructuralFeatureAction " + 
+					inlogDebug("Updated structuralFeature field of StructuralFeatureAction " + 
 						sfa.qualifiedName);
 					count := count + 1;
 				};
@@ -433,12 +437,12 @@ helper transformOperationBehavior(
 				idx := sfaObjectTypeQualName.indexOf(ALF_PKG_NAME);
 				if (idx > 0)
 				{
-					inlog("Found StructuralFeatureAction object: " + sfa._object.qualifiedName);
+					inlogDebug("Found StructuralFeatureAction object: " + sfa._object.qualifiedName);
 					var type : Type := resolveTypeUsingSet(resolverSet, sfa._object.type);
 						
 					if (type <> null)
 					{
-						inlog("Updating object.type field of StructuralFeatureAction " + 
+						inlogDebug("Updating object.type field of StructuralFeatureAction " + 
 							sfa.qualifiedName + " as " + type.name);
 						sfa._object.type := type;
 						count := count + 1;
@@ -497,13 +501,13 @@ helper transformOperationBehavior(
 				idx := sfaResultTypeQualName.indexOf(ALF_PKG_NAME);
 				if (idx > 0)
 				{
-					inlog("Found StructuralFeatureAction result: " + sfaResultTypeQualName);
+					inlogDebug("Found StructuralFeatureAction result: " + sfaResultTypeQualName);
 					
 					var type : Type := resolveTypeUsingSet(resolverSet, outputPin.type);
 
 					if (type <> null)
 					{
-						inlog("Updating result.type field of StructuralFeatureAction " + 
+						inlogDebug("Updating result.type field of StructuralFeatureAction " + 
 							sfa.name + " as " + type.name);
 						
 						if (sfa->oclIsTypeOf(ReadStructuralFeatureAction)->asSequence()->at(1))
@@ -563,7 +567,7 @@ helper transformOperationBehavior(
 					var type : Type := resolveTypeUsingSet(resolverSet, inputPin.type);
 					if (type <> null)
 					{
-						inlog("Updating inputPin.type field of StructuralFeatureAction " + 
+						inlogDebug("Updating inputPin.type field of StructuralFeatureAction " + 
 							sfa.name + " as " + type.name);
 						inputPin.type := type;
 						count := count + 1;
@@ -582,7 +586,7 @@ helper transformOperationBehavior(
 					var type : Type := resolveTypeUsingSet(resolverSet, outputPin.type);
 					if (type <> null)
 					{
-						inlog("Updating outputPin.type field of StructuralFeatureAction " + 
+						inlogDebug("Updating outputPin.type field of StructuralFeatureAction " + 
 							sfa.name + " as " + type.name);
 						outputPin.type := type;
 						count := count + 1;
@@ -601,7 +605,7 @@ helper transformOperationBehavior(
 			
 			if (rsaResultTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
+				inlogDebug("Found: ReadSelfAction result.type: " + rsaResultTypeQualifiedName);
 				count := count + 1; 
 				
 				var rsaResultTypeName : String := rsa.result.type.name;
@@ -609,7 +613,7 @@ helper transformOperationBehavior(
 				if (rsaResultTypeName = e2Cls.name)
 				{
 					rsa.result.type := e2Cls;
-					inlog("Updated result.type field of ReadSelfAction: " + rsa.name);
+					inlogDebug("Updated result.type field of ReadSelfAction: " + rsa.name);
 					count := count + 1;
 				}
 				else
@@ -626,13 +630,13 @@ helper transformOperationBehavior(
 			
 			if (coaOpQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: CallOperation operation: " + coaOpQualifiedName);
+				inlogDebug("Found: CallOperation operation: " + coaOpQualifiedName);
 				
 				var op := resolveOperationUsingSet(resolverSet, coa.operation);
 				
 				if (op <> null)
 				{
-					inlog("Updating operation field of CallOperationAction: " + coa.name);
+					inlogDebug("Updating operation field of CallOperationAction: " + coa.name);
 					coa.operation := op;
 					count := count + 1;
 				}
@@ -647,13 +651,13 @@ helper transformOperationBehavior(
 			 
 			if (coaTargetTypeQName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: CallOperation target type: " + coaTargetTypeQName);
+				inlogDebug("Found: CallOperation target type: " + coaTargetTypeQName);
 				
 				var type : Type := resolveTypeUsingSet(resolverSet, coa.target.type);
 				
 				if (type <> null)
 				{
-					inlog("Updating target.type field of CallOperationAction: " + coa.name +
+					inlogDebug("Updating target.type field of CallOperationAction: " + coa.name +
 						" as " + type.name);
 					coa.target.type := type;
 					count := count + 1;
@@ -669,12 +673,12 @@ helper transformOperationBehavior(
 				var coaArgumentTypeQName : String := arg.type.qualifiedName;
 				if (coaArgumentTypeQName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					inlog("Found: CallOperationAction argument type: " + coaArgumentTypeQName);
+					inlogDebug("Found: CallOperationAction argument type: " + coaArgumentTypeQName);
 					
 					var type : Type := resolveTypeUsingSet(resolverSet, arg.type);
 					if (type <> null)
 					{
-						inlog("Updating argument.type field of CallOperationAction: " + coa.name + 
+						inlogDebug("Updating argument.type field of CallOperationAction: " + coa.name + 
 							" as " + type.name);
 						arg.type := type;
 						count:= count +1;
@@ -691,12 +695,12 @@ helper transformOperationBehavior(
 				var coaResultTypeQName := res.type.qualifiedName;
 				if (coaResultTypeQName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					inlog("Found CallOperationAction result tyupe: " + coaResultTypeQName);
+					inlogDebug("Found CallOperationAction result tyupe: " + coaResultTypeQName);
 					
 					var type := resolveTypeUsingSet(resolverSet, res.type);
 					if (type <> null)
 					{
-						inlog("Updating result.type field of CallOperationAction: " + coa.name + 
+						inlogDebug("Updating result.type field of CallOperationAction: " + coa.name + 
 							" as " + type.name);
 						res.type := type;
 						count := count + 1;
@@ -713,12 +717,12 @@ helper transformOperationBehavior(
 			
 			if (apnTypeQualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: ActivityParameterNode type: " + apnTypeQualifiedName);
+				inlogDebug("Found: ActivityParameterNode type: " + apnTypeQualifiedName);
 				
 				var type : Type := resolveTypeUsingSet(resolverSet, activityParameterNode.type);
 				if (type <> null)
 				{
-					inlog("Updating type field of ActivityParameterNode: " + 
+					inlogDebug("Updating type field of ActivityParameterNode: " + 
 						activityParameterNode.name + " as " + type.name);
 					activityParameterNode.type := type;
 					count := count + 1;
@@ -738,12 +742,12 @@ helper transformOperationBehavior(
 				
 				if (qualName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					inlog("Found: ExpansionReqion structuredNodeInput type: " + qualName);
+					inlogDebug("Found: ExpansionReqion structuredNodeInput type: " + qualName);
 					
 					var type : Type := resolveTypeUsingSet(resolverSet, sni.type);
 					if (type <> null)
 					{
-						inlog("Updating type field of structured node input: " + sni.name + 
+						inlogDebug("Updating type field of structured node input: " + sni.name + 
 							" as " + type.name);
 						sni.type := type;
 						count := count + 1;					
@@ -761,13 +765,13 @@ helper transformOperationBehavior(
 			
 			if (coa.classifier.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: CreateObjectAction: classifier: " + coa.classifier.name);
+				inlogDebug("Found: CreateObjectAction: classifier: " + coa.classifier.name);
 				
 				var cls : Class := resolveClassUsingSet(resolverSet, coa.classifier);
 				
 				if (cls <> null)
 				{
-					inlog("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
+					inlogDebug("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
 						cls.name);
 					coa.classifier := cls;
 					count := count + 1;
@@ -780,13 +784,13 @@ helper transformOperationBehavior(
 			
 			if (coa._result.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found: CreateObjectAction: result type: " + coa._result.type.name);
+				inlogDebug("Found: CreateObjectAction: result type: " + coa._result.type.name);
 				
 				var type : Type := resolveTypeUsingSet(resolverSet, coa._result.type);
 				
 				if (type <> null)
 				{
-					inlog("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
+					inlogDebug("Updating classifier field of CreateObjectAction " + coa.name + " as " + 
 						type.name);
 					coa._result.type := type;
 					count := count + 1;
@@ -806,12 +810,12 @@ helper transformOperationBehavior(
 				
 				if (qualName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					inlog("Found: StructuredActivityNode structuredNodeInput type: " + qualName);
+					inlogDebug("Found: StructuredActivityNode structuredNodeInput type: " + qualName);
 					
 					var type : Type := resolveTypeUsingSet(resolverSet, sni.type);
 					if (type <> null)
 					{
-						inlog("Updating type field of structured node input: " + sni.name + 
+						inlogDebug("Updating type field of structured node input: " + sni.name + 
 							" as " + type.name);
 						sni.type := type;
 						count := count + 1;					
@@ -829,12 +833,12 @@ helper transformOperationBehavior(
 				
 				if (qualName.indexOf(ALF_PKG_NAME) > 0)
 				{
-					inlog("Found: StructuredActivityNode structuredNodeOutput type: " + qualName);
+					inlogDebug("Found: StructuredActivityNode structuredNodeOutput type: " + qualName);
 					
 					var type : Type := resolveTypeUsingSet(resolverSet, sno.type);
 					if (type <> null)
 					{
-						inlog("Updating type field of structured node output: " + sno.name + 
+						inlogDebug("Updating type field of structured node output: " + sno.name + 
 							" as " + type.name);
 						sno.type := type;
 						count := count + 1;					
@@ -855,12 +859,12 @@ helper transformOperationBehavior(
 				{
 					if (lv.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 					{
-						inlog("Found loop variable type: " + lv.name);
+						inlogDebug("Found loop variable type: " + lv.name);
 						
 						var type : Type := resolveTypeUsingSet(resolverSet, lv.type);
 						if (type <> null)
 						{
-							inlog("Updating type field of loop variable " + lv.name + " as " + 
+							inlogDebug("Updating type field of loop variable " + lv.name + " as " + 
 								type.name);
 							lv.type := type;
 							count := count + 1;
@@ -879,12 +883,12 @@ helper transformOperationBehavior(
 			
 			if (param.type.qualifiedName.indexOf(ALF_PKG_NAME) > 0)
 			{
-				inlog("Found Parameter type: " + param.name);
+				inlogDebug("Found Parameter type: " + param.name);
 				
 				var type : Type := resolveTypeUsingSet(resolverSet, param.type);
 				if (type <> null)
 				{
-					inlog("Updating type field of parameter: " + param.name);
+					inlogDebug("Updating type field of parameter: " + param.name);
 					param.type := type;
 					count := count + 1;
 				}
@@ -896,7 +900,7 @@ helper transformOperationBehavior(
 		};
 	};
 	
-	inlog("Replaced " + count.toString() + " references");
+	inlogDebug("Replaced " + count.toString() + " references");
 	endLog("Done");
 }
 

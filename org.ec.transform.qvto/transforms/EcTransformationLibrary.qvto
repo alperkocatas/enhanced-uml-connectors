@@ -6,6 +6,9 @@ library EcTransformationLibrary;
 
 configuration property LogIndentLevel : Integer;
 
+// 0: info 1: debug
+configuration property LogLevel : Integer;
+
 helper initializeLogger() {
 
 	if (LogIndentLevel = null)
@@ -80,6 +83,12 @@ helper inlog(arg: String) {
 	log(indentStr + " " + arg);
 }
 
+helper inlogDebug(arg: String) {
+	if (LogLevel = 1)
+	{
+		inlog(arg);
+	}
+}
 
 helper endLog(arg: String) {
 	LogIndentLevel := LogIndentLevel - 2;

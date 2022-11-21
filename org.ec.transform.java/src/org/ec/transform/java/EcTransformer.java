@@ -134,14 +134,14 @@ public class EcTransformer {
 			tx.compileAlfCode();
 			tx.reformatFUmlConnectorBehaviorFile();
 			tx.runE2toE3Transformation();
-			logger.info("Process completed successfully");
+			logger.info("Enhanced connector transformation completed successfully");
 		}
 		catch (Exception err)
 		{
 			System.out.println("Error: " + err.getMessage());
 			err.printStackTrace();
 			
-			System.out.println("Process completed with error(s)");
+			System.out.println("Enhanced connector transformation completed with error(s)");
 		}
 	}	
 	
@@ -179,9 +179,12 @@ public class EcTransformer {
 			throw new Exception("Argument -wsDir is mandatory");
 		}
 		
+		wsDir = (new File(wsDir).getAbsolutePath());
+
 		if (!wsDir.endsWith(File.separator))
 			wsDir += File.separator;
 		
+		logger.debug("wsDir is: " + wsDir);
 		
 		
 		e1ModelPath = wsDir + "org.ec.connectors" + File.separator;
@@ -223,7 +226,7 @@ public class EcTransformer {
 		
 		logger.info("Using e1Model at path: " + e1ModelPath);
 		
-		AlfWsPath = wsDir + File.separator + "AlfRefImp-1.1.0k" + File.separator;
+		AlfWsPath = wsDir + (wsDir.endsWith(File.separator)?"":File.separator) + "AlfRefImp-1.1.0k" + File.separator;
 				
 		e1ToE2TxPath = wsDir + e1ToE2TxPath; 
 		
@@ -251,6 +254,8 @@ public class EcTransformer {
 		{
 			throw new Exception("Argument -eclipsePluginsDir is mandatory");
 		}
+
+		logger.debug("EclipsePluginsDir: " + EclipsePluginsDir);
 	}
 	
 	/**
@@ -310,6 +315,7 @@ public class EcTransformer {
 		ModelExtent input = new BasicModelExtent(inObjects);	
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 5);
+		context.setConfigProperty("LogLevel", 0);
 		
 	    OutputStreamWriter outStream = new OutputStreamWriter(System.out);
 		E1toE2TransformationLog log = new E1toE2TransformationLog();
@@ -348,6 +354,7 @@ public class EcTransformer {
         }
         
         logger.info("E1 to E2 transformation ran successfully");
+		logger.info("E2 model is saved to: " + e2ModelPath);
         printLogSeparator();
 	}
 	
@@ -367,6 +374,7 @@ public class EcTransformer {
 		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.InOutportMultiplicity);
 		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName);
 		context.setConfigProperty("EC_CONFIGURATION", this.EcConfiguration);
+		context.setConfigProperty("LogLevel", 0);
 		
 		
 		E2ToAlfTransformationLog log = new E2ToAlfTransformationLog();
@@ -429,7 +437,7 @@ public class EcTransformer {
 				alfFilePath
 				);
 		
-		pb.directory(new File(alfPrjPath));
+		pb.directory(new File(alfPrjPath).getAbsoluteFile());
 		
 		Process process = pb.start();
 		
@@ -440,7 +448,7 @@ public class EcTransformer {
 
 		boolean alfCompilationIsSuccessful = false;
 		while ((line = br.readLine()) != null) {
-		  logger.info("alfc stdout: " + line);
+		  logger.debug("alfc stdout: " + line);
 		  
 		  if (line.contains("Mapped successfully."))
 		  {
@@ -482,7 +490,7 @@ public class EcTransformer {
 	 */
 	public void reformatFUmlConnectorBehaviorFile() throws IOException
 	{		
-		logger.info("Replacing fUML pathmaps");
+		logger.debug("Replacing fUML pathmaps");
 		String fileContents = new String(
 				Files.readAllBytes(Paths.get(ConnectorBehaviorFumlFilePath)));
 		
@@ -492,7 +500,6 @@ public class EcTransformer {
 		FileWriter writer = new FileWriter(ConnectorBehaviorFumlFilePath);
 		writer.write(fileContents);
 		writer.close();
-		printLogSeparator();
 	}
 	
 	
@@ -515,6 +522,7 @@ public class EcTransformer {
 		
 		ExecutionContextImpl context = new ExecutionContextImpl();
 		context.setConfigProperty("LogIndentLevel", 3);
+		context.setConfigProperty("LogLevel", 0);
 		context.setConfigProperty("CONNECTOR_CLS_MODEL_PATH", this.ConnectorClsModelPath);
 		context.setConfigProperty("OUTPORT_MULTIPLICITY", this.InOutportMultiplicity);
 		context.setConfigProperty("ALF_PKG_NAME", this.AlfPkgName); 
@@ -546,6 +554,7 @@ public class EcTransformer {
         }
         
         logger.info("E2toE3Transformation executed successfully");
+		logger.info("E3 model is saved to: " + e3ModelPath);
         printLogSeparator();
 	}
 
